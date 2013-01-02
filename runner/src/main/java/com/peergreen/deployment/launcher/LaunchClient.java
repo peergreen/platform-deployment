@@ -18,7 +18,7 @@ public class LaunchClient {
      //  Thread.sleep(15000L);
 
         // The usual configuration
-        String gogoVersion = "0.8.0";
+        String gogoVersion = "0.10.0";
         Option[] options = options(
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo").version("1.8.4"),
                 mavenBundle().groupId("org.apache.felix").artifactId("org.apache.felix.ipojo.arch.gogo").version("1.0.1"),
