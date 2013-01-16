@@ -29,6 +29,7 @@ import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
 import com.peergreen.tasks.context.ExecutionContext;
 import com.peergreen.tasks.execution.helper.ExecutorServiceBuilderManager;
 import com.peergreen.tasks.execution.helper.TaskExecutorService;
+import com.peergreen.tasks.execution.tracker.TrackerManager;
 import com.peergreen.tasks.model.State;
 import com.peergreen.tasks.model.Task;
 
@@ -66,8 +67,19 @@ public class BasicDeploymentService implements DeploymentService {
         TaskExecutionHolder holder = new TaskExecutionHolder();
         Task task = deploymentBuilder.buildTaskModel(artifacts, deploymentMode, holder, null);
 
+        // Create executor
+        ExecutorServiceBuilderManager executorServiceBuilderManager = new ExecutorServiceBuilderManager(holder.getTaskContextFactory(), executorService);
+        TaskExecutorService executor = new TaskExecutorService(executorServiceBuilderManager);
 
-        TaskExecutorService executor = new TaskExecutorService(new ExecutorServiceBuilderManager(holder.getTaskContextFactory(), executorService));
+        // Creates and register a tracker manager
+        TrackerManager trackerManager = new TrackerManager();
+        executorServiceBuilderManager.setTrackerManager(trackerManager);
+
+        // Adds the time tracker that can check the total time used for a given deployment context
+        TimeTaskTracker timeTracker = new TimeTaskTracker();
+        trackerManager.registerTracker(timeTracker);
+
+        // Gets the execution context
         ExecutionContext executionContext = executor.getExecutionContext();
 
         // Add report
@@ -97,9 +109,15 @@ public class BasicDeploymentService implements DeploymentService {
             InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
             ArtifactStatusReport artifactStatusReport = new ArtifactStatusReport(artifactModel.getFacetArtifact());
             deploymentStatusReport.addChild(artifactStatusReport);
+            if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
+                deploymentStatusReport.setFailure();
+            }
             // add children that have been created by our node
             for (InternalWire toWire : artifactModel.getInternalToWires(Created.class)) {
                 ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(toWire.getInternalTo().getFacetArtifact());
+                if (toWire.getInternalTo().getFacetArtifact().getExceptions().size() > 0) {
+                    deploymentStatusReport.setFailure();
+                }
                 artifactStatusReport.addChild(childArtifactStatusReport);
             }
         }
@@ -112,33 +130,7 @@ public class BasicDeploymentService implements DeploymentService {
         deploymentStatusReport.setElapsedTime(elapsedTime);
         LOGGER.info("Time elapsed ''{0}'' ms" , elapsedTime);
 
-
-        LOGGER.info("Report will be printed in 10seconds");
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        LOGGER.info("Report : ''{0}''" , deploymentStatusReport);
-
-
-
-/*
-        try {
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
-
-        TaskRenderingVisitor taskRenderingVisitor = new TaskRenderingVisitor(System.out);
-        taskRenderingVisitor.setGroups(holder.getGroups());
-        root.walk(taskRenderingVisitor);
-*/
-        return null;
-        //return new DefaultDeploymentStatusReport(null, null);
+        return deploymentStatusReport;
 
     }
 

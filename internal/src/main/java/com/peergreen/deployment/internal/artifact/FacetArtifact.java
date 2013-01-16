@@ -17,9 +17,11 @@
 package com.peergreen.deployment.internal.artifact;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,6 +42,8 @@ import com.peergreen.deployment.internal.resource.ProviderResource;
  */
 public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
+    private final List<Exception> exceptions;
+
     private static final Log LOGGER = LogFactory.getLog(FacetArtifact.class);
 
     private final Artifact wrappedArtifact;
@@ -52,7 +56,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     private final Map<Class<?>, FacetInfo> facetInfos;
     private final Set<ProcessorInfo> processorInfos;
 
-
+    private long totalTime = 0;
 
     public FacetArtifact(Artifact wrappedArtifact) {
         this.wrappedArtifact = wrappedArtifact;
@@ -61,6 +65,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         this.facets = new HashMap<Class<?>, Object>();
         this.facetInfos = new HashMap<Class<?>, FacetInfo>();
         this.processorInfos = new HashSet<ProcessorInfo>();
+        this.exceptions = new ArrayList<Exception>();
     }
 
     @Override
@@ -147,5 +152,24 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     @Override
     public Collection<ProcessorInfo> getProcessors() {
         return processorInfos;
+    }
+
+    @Override
+    public void addTime(long time) {
+        totalTime += time;
+    }
+
+    @Override
+    public long getTotalTime() {
+        return totalTime;
+    }
+
+    @Override
+    public void addException(Exception e) {
+        exceptions.add(e);
+    }
+
+    public List<Exception> getExceptions() {
+        return exceptions;
     }
 }

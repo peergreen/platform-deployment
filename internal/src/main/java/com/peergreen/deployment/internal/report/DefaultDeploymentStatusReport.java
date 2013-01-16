@@ -42,6 +42,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     private final String deploymentMode;
 
+    private boolean failure = false;
 
 
     public DefaultDeploymentStatusReport(DeploymentMode deploymentMode, List<Artifact> artifacts) {
@@ -64,6 +65,14 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
         this.state = state.name();
     }
 
+    public void setFailure() {
+        this.failure = true;
+    }
+
+    public boolean hasFailed() {
+        return failure;
+    }
+
     public String getState() {
         return state;
     }
@@ -72,8 +81,6 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     public void addChild(ArtifactStatusReport artifactStatusReport) {
         artifactsReport.add(artifactStatusReport);
     }
-
-
 
 
 
@@ -89,6 +96,10 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
             for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
                 sb.append(artifactStatusReport.toString("  "));
             }
+        }
+        sb.append("\n");
+        if (failure) {
+            sb.append("Failure in the deployment");
         }
         sb.append("\n");
         return sb.toString();

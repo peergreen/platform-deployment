@@ -13,14 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment;
+package com.peergreen.deployment.internal.service;
 
-import org.osgi.resource.Resource;
+public class TimeKeeper {
 
-public interface HandlerProcessor extends Resource {
+    private long startTime;
 
-    void handle(DeploymentContext deploymentContext) throws ProcessorException;
+    public long getStartTime() {
+        return startTime;
+    }
 
-    Class<?> getExpectedHandleType();
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
 
 }

@@ -52,4 +52,8 @@ public interface DeploymentContext {
 
         void setProperty(String name, Object value);
         Object getProperty(String name);
+
+
+        // Errors/Exceptions from the deployment
+        boolean hasFailed();
 }

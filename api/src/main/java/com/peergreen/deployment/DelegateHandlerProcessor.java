@@ -23,12 +23,6 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
-import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.DeploymentContext;
-import com.peergreen.deployment.HandlerProcessor;
-import com.peergreen.deployment.Processor;
-import com.peergreen.deployment.ProcessorContext;
-import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
 public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
@@ -104,37 +98,18 @@ public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
 
 
     @Override
-    public void handle(DeploymentContext deploymentContext) {
+    public void handle(DeploymentContext deploymentContext) throws ProcessorException {
         Class<T> toCast =  expectedHandleType;
         ProcessorContext processorContext = deploymentContext.get(ProcessorContext.class);
-
-
         if (DeploymentContext.class.equals(toCast) || toCast.isInstance(deploymentContext)) {
-            try {
-                wrappedProcessor.handle(toCast.cast(deploymentContext), processorContext);
-            } catch (ProcessorException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            wrappedProcessor.handle(toCast.cast(deploymentContext), processorContext);
         } else if (Artifact.class.equals(toCast)) {
-            try {
-                wrappedProcessor.handle(toCast.cast(deploymentContext.getArtifact()), processorContext);
-            } catch (ProcessorException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            wrappedProcessor.handle(toCast.cast(deploymentContext.getArtifact()), processorContext);
         } else {
             // It's contained in the artifact
             T object = deploymentContext.getArtifact().as(toCast);
-            try {
-                wrappedProcessor.handle(toCast.cast(object), processorContext);
-            } catch (ProcessorException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            wrappedProcessor.handle(toCast.cast(object), processorContext);
         }
-
-
     }
 
     @Override

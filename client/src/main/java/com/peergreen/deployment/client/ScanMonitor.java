@@ -17,6 +17,7 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
+import com.peergreen.deployment.DeploymentStatusReport;
 
 @Component
 @Provides
@@ -120,7 +121,16 @@ public class ScanMonitor {
         artifacts = getArtifacts();
 
         // deploy
-        deploymentService.process(artifacts, DeploymentMode.DEPLOY);
+        DeploymentStatusReport deploymentStatusReport = deploymentService.process(artifacts, DeploymentMode.DEPLOY);
+        System.out.println("Report will be printed in 10seconds");
+        try {
+            Thread.sleep(10000L);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Report : " + deploymentStatusReport);
+
 
 
         // Sleep
@@ -132,8 +142,16 @@ public class ScanMonitor {
         }
 
         //undeploy
-       // deploymentService.process(artifacts, DeploymentMode.UNDEPLOY);
+        //deploymentService.process(artifacts, DeploymentMode.UNDEPLOY);
 
+
+        // Sleep
+        /*try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        */
     }
 
 }

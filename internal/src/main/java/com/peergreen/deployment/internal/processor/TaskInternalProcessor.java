@@ -23,6 +23,7 @@ import org.osgi.resource.Requirement;
 
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.HandlerProcessor;
+import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.deployment.internal.phase.current.CurrentPhase;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
@@ -55,15 +56,24 @@ public class TaskInternalProcessor implements InternalProcessor {
 
         // Get internal deployment context
         BasicDeploymentContext deploymentContext = context.get(BasicDeploymentContext.class);
+        // bypass execution if there are errors.
+        if (deploymentContext.hasFailed()) {
+            return;
+        }
+
 
         InternalProcessor old = currentProcessor.getCurrent();
         currentProcessor.setCurrent(this);
         long tStart = System.currentTimeMillis();
         try {
             handlerProcessor.handle(deploymentContext);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw e;
+        } catch (ProcessorException | RuntimeException e) {
+            // Add the error on the artifact
+
+            deploymentContext.getFacetArtifact().addException(e);
+
+            // Flag deployment context as being in error
+            deploymentContext.setFailed();
         } finally {
             // increment statistics
             long delta = (System.currentTimeMillis() - tStart);
@@ -90,7 +100,7 @@ public class TaskInternalProcessor implements InternalProcessor {
 
     @Override
     public void handle(DeploymentContext deploymentContext) {
-        handlerProcessor.handle(deploymentContext);
+        throw new IllegalStateException("Never called");
     }
 
     @Override

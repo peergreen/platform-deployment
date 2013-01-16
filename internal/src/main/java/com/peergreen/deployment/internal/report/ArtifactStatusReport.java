@@ -17,6 +17,7 @@ package com.peergreen.deployment.internal.report;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
@@ -38,17 +39,13 @@ public class ArtifactStatusReport {
     private final String name;
     private final String uri;
     private final Collection<FacetInfo> facetInfos;
-    private Throwable exception;
+    private final List<Exception> exceptions;
     private final Collection<ProcessorInfo> processors;
     private final Collection<ArtifactStatusReport> artifactsReport;
+    private final long totalTime;
 
-
-    public Throwable getException() {
-        return exception;
-    }
-
-    public void setException(Throwable exception) {
-        this.exception = exception;
+    public List<Exception> getExceptions() {
+        return exceptions;
     }
 
     public Collection<ProcessorInfo> getProcessors() {
@@ -73,8 +70,8 @@ public class ArtifactStatusReport {
         this.facetInfos = facetArtifact.getFacets();
         this.artifactsReport = new HashSet<ArtifactStatusReport>();
         this.processors = facetArtifact.getProcessors();
-
-
+        this.totalTime = facetArtifact.getTotalTime();
+        this.exceptions = facetArtifact.getExceptions();
     }
 
     public void addChild(ArtifactStatusReport artifactStatusReport) {
@@ -101,6 +98,8 @@ public class ArtifactStatusReport {
         sb.append(name);
         sb.append(", uri=");
         sb.append(uri);
+        sb.append(", totalTime=");
+        sb.append(totalTime);
         sb.append("]");
         for (FacetInfo facetInfo : facetInfos) {
             sb.append("\n");
@@ -126,6 +125,18 @@ public class ArtifactStatusReport {
             sb.append(", duration=");
             sb.append(processorInfo.getTime());
             sb.append(" ms");
+            sb.append("]");
+        }
+        for (Exception exception : exceptions) {
+            sb.append("\n");
+            sb.append(indent);
+            sb.append("  |-");
+            sb.append("Exception[message=");
+            sb.append(exception.getMessage());
+            if (exception.getCause() != null) {
+                sb.append(", cause=");
+                sb.append(exception.getCause().getMessage());
+            }
             sb.append("]");
         }
         if (artifactsReport.size() > 0) {

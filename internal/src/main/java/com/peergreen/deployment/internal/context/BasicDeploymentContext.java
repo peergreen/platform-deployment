@@ -43,6 +43,8 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
     private final ArtifactBuilder artifactBuilder;
 
+    private boolean hasFailed = false;
+
     public BasicDeploymentContext(IFacetArtifact artifact, ExecutionContext executionContext) {
         super();
         this.currentArtifact = artifact;
@@ -162,7 +164,17 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
         capabilities.addAll(super.getCapabilities(namespace));
         capabilities.addAll(currentArtifact.getCapabilities(namespace));
         return capabilities;
-
     }
+
+
+    @Override
+    public boolean hasFailed() {
+        return hasFailed;
+    }
+
+    public void setFailed() {
+        this.hasFailed = true;
+    }
+
 
 }

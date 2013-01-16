@@ -16,6 +16,7 @@
 package com.peergreen.deployment.internal.artifact;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
@@ -38,9 +39,14 @@ public interface IFacetArtifact extends Artifact, Resource {
 
 
     void addProcessorTime(String phase, long totalTime, InternalProcessor processor);
-
+    void addTime(long time);
+    long getTotalTime();
 
     void addCapability(Capability capability);
+
+    void addException(Exception e);
+    List<Exception> getExceptions();
+
 
     Collection<FacetInfo> getFacets();
     Collection<ProcessorInfo> getProcessors();
