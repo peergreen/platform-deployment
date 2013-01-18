@@ -1,0 +1,2 @@
+# Allows to be used on a 1.6.0 framework even if we use Capabilities/Requirements from OSGi r5
+Import-Package org.osgi.framework.*;version=1.6,*

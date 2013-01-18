@@ -1,0 +1,5 @@
+# Import all that is used
+Import-Package *
+
+# Well we need to export org.osgi.resource Requirement/Capabilities as on a 1.6.0 framework, this is not available
+Export-Package com.peergreen.deployment.*,org.osgi.resource;version=1.0.0
