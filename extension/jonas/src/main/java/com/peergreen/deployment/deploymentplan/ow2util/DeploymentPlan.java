@@ -28,7 +28,7 @@ public class DeploymentPlan {
     }
 
     public void addArtifact(Artifact artifact) {
-
+        artifacts.add(artifact);
     }
 
 

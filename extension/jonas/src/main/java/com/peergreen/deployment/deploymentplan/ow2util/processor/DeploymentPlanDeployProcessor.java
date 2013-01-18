@@ -15,9 +15,6 @@
  */
 package com.peergreen.deployment.deploymentplan.ow2util.processor;
 
-import java.io.File;
-
-import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
@@ -33,12 +30,7 @@ public class DeploymentPlanDeployProcessor implements Processor<DeploymentPlan> 
     @Override
     public void handle(DeploymentPlan deploymentPlan, ProcessorContext processorContext) throws ProcessorException {
 
-        Artifact af = processorContext.build("florent", new File("/Users/benoitf/Documents/workspace/deployment/client/src/main/resources/bundle2.jar").toURI());
 
-        processorContext.addArtifact(af);
-
-        // add all artifacts
-        processorContext.addArtifact(deploymentPlan.getArtifacts());
     }
 
 }
