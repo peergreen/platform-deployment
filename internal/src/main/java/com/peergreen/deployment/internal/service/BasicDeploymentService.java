@@ -92,10 +92,7 @@ public class BasicDeploymentService implements DeploymentService {
         State state = null;
         try {
             state = future.get();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -113,14 +110,16 @@ public class BasicDeploymentService implements DeploymentService {
                 deploymentStatusReport.setFailure();
             }
             // add children that have been created by our node
-            for (InternalWire toWire : artifactModel.getInternalToWires(Created.class)) {
-                ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(toWire.getInternalTo().getFacetArtifact());
-                if (toWire.getInternalTo().getFacetArtifact().getExceptions().size() > 0) {
+            for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+                ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(fromWire.getInternalTo().getFacetArtifact());
+                if (fromWire.getInternalTo().getFacetArtifact().getExceptions().size() > 0) {
                     deploymentStatusReport.setFailure();
                 }
                 artifactStatusReport.addChild(childArtifactStatusReport);
             }
         }
+
+
 
 
 
