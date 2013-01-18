@@ -128,17 +128,16 @@ public class DeploymentBuilder {
             if (deploymentMode  == DeploymentMode.DEPLOY && rootArtifactModel != null) {
                 // we have a parent that want to use this artifact, add a link to this one
                 InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel, WireType.USE);
-
-                // first order
-                artifactModel.addWire(wire);
-
-                // and reverse order (bi-directional link)
-                artifactModel.addWire(wire);
-
                 // wire for creating node ? add created flag
                 if (createdArtifactModel) {
                     wire.addFlag(Created.class);
                 }
+                // Add wire
+                rootArtifactModel.addWire(wire);
+
+                // and reverse order (bi-directional link)
+                artifactModel.addWire(wire);
+
             }
 
 
@@ -212,10 +211,7 @@ public class DeploymentBuilder {
         // Create the task context factory
         allgroups.addAll(artifactGroups);
 
-
-        System.out.println("Builder : " + (System.currentTimeMillis() - tStart));
-
-        // return root task
+        // return phases
         return phases;
     }
 
