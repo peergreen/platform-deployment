@@ -31,14 +31,16 @@ public class ArtifactFacetAdapter implements FacetCapabilityAdapter<Artifact> {
         ArtifactCapability artifactCapability = new ArtifactCapabilityImpl(resource).setURIScheme(artifact.uri().getScheme());
 
         String name = artifact.uri().getPath();
-        String pathExtension = name;
-        int dot = name.lastIndexOf('.');
-        if (dot != -1) {
-            pathExtension = name.substring(dot + 1);
-        }
+        if (name != null) {
+            String pathExtension = name;
+            int dot = name.lastIndexOf('.');
+            if (dot != -1) {
+                pathExtension = name.substring(dot + 1);
+            }
 
-        // extension
-        artifactCapability.setPathExtension(pathExtension);
+            // extension
+            artifactCapability.setPathExtension(pathExtension);
+        }
 
         return artifactCapability;
     }
