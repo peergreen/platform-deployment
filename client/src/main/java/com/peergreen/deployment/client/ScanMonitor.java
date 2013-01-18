@@ -64,7 +64,7 @@ public class ScanMonitor {
         File[] children = directory.listFiles();
         if (children != null) {
             for (File child : children) {
-                if (child.isFile() && child.getPath().endsWith(".jar")) {
+                if (child.isFile() && (child.getPath().endsWith(".jar") || child.getPath().endsWith(".xml"))) {
                     artifacts.add(artifactBuilder.build(child.getName(), child.toURI()));
                 }
                 if (child.isDirectory()) {
@@ -122,9 +122,9 @@ public class ScanMonitor {
 
         // deploy
         DeploymentStatusReport deploymentStatusReport = deploymentService.process(artifacts, DeploymentMode.DEPLOY);
-        System.out.println("Report will be printed in 10seconds");
+        System.out.println("Report will be printed in 1 second");
         try {
-            Thread.sleep(10000L);
+            Thread.sleep(1000L);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
