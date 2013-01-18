@@ -65,22 +65,14 @@ public class ProcessorJob implements Job {
 
     @Override
     public void execute(DeploymentContext deploymentContext) {
-long tStart = System.nanoTime();
         // Set the current task object
         deploymentContext.setProperty(bindingPhase, parallelTask);
-
-        long t0 = System.nanoTime();
 
         // First, get the processor manager
         ProcessorManager processorManager = deploymentContext.get(ProcessorManager.class);
 
-        long t1 = System.nanoTime();
-
         // now we get current deployment context capabilities
         Collection<Capability> capabilities = deploymentContext.getCapabilities(null);
-
-        long t2 = System.nanoTime();
-
 
         // list of resources for the solver
         Set<Resource> resources = new HashSet<Resource>();
@@ -88,8 +80,6 @@ long tStart = System.nanoTime();
         // create the provider with the capabilities
         Resource provider = new ProcessorJobResource(capabilities, bindingPhase);
         resources.add(provider);
-
-        long t3 = System.nanoTime();
 
         // Prepare resources
         Iterable<InternalProcessor> processors = processorManager.getProcessors(bindingPhase);
@@ -107,7 +97,6 @@ long tStart = System.nanoTime();
 
         // No optional resources (as we want to execute only matching processors)
         List<Resource> optionalResources = Collections.emptyList();
-        long t3b = System.nanoTime();
 
         // Create wirings
         Map<Resource, Wiring> wirings = new HashMap<Resource, Wiring>();
@@ -118,22 +107,16 @@ long tStart = System.nanoTime();
         // Current Phase
         CurrentPhase currentPhase = deploymentContext.get(CurrentPhase.class);
 
-        long t4 = System.nanoTime();
-
         // Create the context
         ResolveContext resolveContext = new ResolveContextImpl(resources, wirings, mandatoryResources, optionalResources);
-
-        long t5 = System.nanoTime();
 
         Map<Resource, List<Wire>> wireMap = null;
         try {
             wireMap = resolver.resolve(resolveContext);
         } catch (ResolutionException e) {
-            // TODO Auto-generated catch block
+            // FIXME Auto-generated catch block
             e.printStackTrace();
         }
-
-        long t6 = System.nanoTime();
 
         // Gets processors that are matching the current capabilities
         Set<InternalProcessor> toRunProcessors = new HashSet<InternalProcessor>();
@@ -153,8 +136,6 @@ long tStart = System.nanoTime();
             }
         }
 
-        long t7 = System.nanoTime();
-
         // Now, for each processor that is matching, add it to the expected phase
         for (InternalProcessor processor : toRunProcessors) {
             UnitOfWork unitOfWork = new UnitOfWork(new JobPhase(processor, bindingPhase, currentPhase), processor.getName());
@@ -163,9 +144,6 @@ long tStart = System.nanoTime();
             }
             parallelTask.add(unitOfWork);
         }
-
-        long tEnd = System.nanoTime();
-       System.out.println("t=" + (tEnd - tStart) + "ns / t21 " + (t2-t1) + " /t32 " + (t3-t2) + " / t3b3 " + (t3b-t3) +  " / t43b " + (t4-t3b) + " /t54 " + (t5-t4) + " /t65 " + (t6-t5) + " /t76 "+ (t7-t6) + " /tend7 " + (tEnd-t7) + " / ");
 
     }
 
