@@ -16,18 +16,15 @@
 package com.peergreen.deployment.internal.processor.dependencyartifacts;
 
 import org.apache.felix.ipojo.annotations.Bind;
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
-import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.DelegateHandlerProcessor;
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
-@Component
-@Provides
-@Instantiate(name="Add dependency artifacts found in deployment context")
+//@Component
+//@Provides
+//@Instantiate(name="Add dependency artifacts found in deployment context")
 public class DependencyArtifactsProcessorDelegateInternalProcessor extends DelegateHandlerProcessor<BasicDeploymentContext> {
 
     public DependencyArtifactsProcessorDelegateInternalProcessor() {

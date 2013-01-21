@@ -46,4 +46,9 @@ public class DiscoveryPhase {
         return innerPipeline;
     }
 
+    public Pipeline getPostConfigurationTask() {
+        return postConfiguration;
+    }
+
+
 }

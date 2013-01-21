@@ -16,14 +16,12 @@
 
 package com.peergreen.deployment.internal.phase.builder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.ProcessorContext;
@@ -43,10 +41,12 @@ import com.peergreen.deployment.internal.phase.DiscoveryPhase;
 import com.peergreen.deployment.internal.phase.Phases;
 import com.peergreen.deployment.internal.phase.ProcessorJobPhase;
 import com.peergreen.deployment.internal.phase.job.DeployerCreationJob;
+import com.peergreen.deployment.internal.phase.job.NewArtifactsDiscoveryCreationJob;
 import com.peergreen.deployment.internal.service.InjectionContext;
 import com.peergreen.deployment.model.WireType;
 import com.peergreen.deployment.resource.artifact.ArtifactCapability;
 import com.peergreen.deployment.resource.deploymentmode.DeploymentModeCapability;
+import com.peergreen.tasks.model.Parallel;
 import com.peergreen.tasks.model.Pipeline;
 import com.peergreen.tasks.model.Task;
 import com.peergreen.tasks.model.UnitOfWork;
@@ -84,7 +84,7 @@ public class DeploymentBuilder {
         // One provider for switching the DeploymentContext for selected
         // group/job
         Set<Group> artifactGroups = new HashSet<Group>();
-        List<DeploymentContext> deploymentContexts = new ArrayList<DeploymentContext>();
+        List<BasicDeploymentContext> deploymentContexts = taskExecutionHolder.getDeploymentContexts();
 
         // For each artifact, build a deployment context and the associated group
         for (Artifact artifact : artifacts) {
@@ -137,7 +137,6 @@ public class DeploymentBuilder {
 
                 // and reverse order (bi-directional link)
                 artifactModel.addWire(wire);
-
             }
 
 
@@ -184,29 +183,58 @@ public class DeploymentBuilder {
 
         // Add discovery phase only for deploy mode
         if (deploymentMode == DeploymentMode.DEPLOY) {
-            phases.add(getDiscoveryPhase(artifactGroups));
+            DiscoveryPhase discoveryPhase = getDiscoveryPhase(artifactGroups);
+            phases.add(discoveryPhase.getTask());
+
+            // Add job for analysing new artifacts found on discovery phase
+            Pipeline newArtifactsPipeline = new Pipeline("analysing_new_artifacts");
+            Parallel discoveryPostNewArtifacts = new Parallel("analysing_new_artifacts");
+
+            MutableExecutionContext artifactsDeployerExecutionContext = new MutableExecutionContext();
+            // inject OSGi services into the mutableExecutionContext
+            injectionContext.addInjection(artifactsDeployerExecutionContext);
+            artifactsDeployerExecutionContext.add(deploymentMode);
+            artifactsDeployerExecutionContext.add(taskExecutionHolder);
+
+            // Add ourself
+            artifactsDeployerExecutionContext.add(this);
+
+            Group newArtifactsFinderGroup = new Group("new_artifacts_finders");
+            allgroups.add(newArtifactsFinderGroup);
+            taskExecutionHolder.getSubstituteExecutionContextProvider().addGroup(newArtifactsFinderGroup, artifactsDeployerExecutionContext);
+            UnitOfWork newArtifactsDiscoveryUnitOfWork = new UnitOfWork(new NewArtifactsDiscoveryCreationJob(discoveryPostNewArtifacts),
+                    "Artifacts Disovery Creation Job");
+            newArtifactsFinderGroup.addTask(newArtifactsDiscoveryUnitOfWork);
+            newArtifactsPipeline.add(newArtifactsDiscoveryUnitOfWork);
+            discoveryPhase.getPostConfigurationTask().add(newArtifactsPipeline);
+
+            // add task where // stuff will be executed
+            newArtifactsPipeline.add(discoveryPostNewArtifacts);
+
         }
 
-        // It will send the artifacts to the registered deployer (with the associated lifecycle)
-        Pipeline deployers = new Pipeline("deployers");
+        if (!taskExecutionHolder.isOnlyDiscoveryPhases()) {
+            // It will send the artifacts to the registered deployer (with the associated lifecycle)
+            Pipeline deployers = new Pipeline("deployers");
 
-        MutableExecutionContext deployerExecutionContext = new MutableExecutionContext();
-        // inject OSGi services into the mutableExecutionContext
-        injectionContext.addInjection(deployerExecutionContext);
-        deployerExecutionContext.setProperty("deploymentContexts", deploymentContexts);
-        deployerExecutionContext.add(deploymentMode);
-        // Add ourself
-        deployerExecutionContext.add(this);
+            MutableExecutionContext deployerExecutionContext = new MutableExecutionContext();
+            // inject OSGi services into the mutableExecutionContext
+            injectionContext.addInjection(deployerExecutionContext);
+            deployerExecutionContext.setProperty("deploymentContexts", deploymentContexts);
+            deployerExecutionContext.add(deploymentMode);
+            // Add ourself
+            deployerExecutionContext.add(this);
 
-        Group deployerGroup = new Group("deployer");
-        allgroups.add(deployerGroup);
-        taskExecutionHolder.getSubstituteExecutionContextProvider().addGroup(deployerGroup, deployerExecutionContext);
-        UnitOfWork deployerUnitOfWork = new UnitOfWork(new DeployerCreationJob(deployers),
-                "Deployer Creation Job");
-        deployerGroup.addTask(deployerUnitOfWork);
-        phases.add(deployerUnitOfWork);
+            Group deployerGroup = new Group("deployer");
+            allgroups.add(deployerGroup);
+            taskExecutionHolder.getSubstituteExecutionContextProvider().addGroup(deployerGroup, deployerExecutionContext);
+            UnitOfWork deployerUnitOfWork = new UnitOfWork(new DeployerCreationJob(deployers),
+                    "Deployer Creation Job");
+            deployerGroup.addTask(deployerUnitOfWork);
+            phases.add(deployerUnitOfWork);
 
-        phases.add(deployers);
+            phases.add(deployers);
+        }
 
         // Create the task context factory
         allgroups.addAll(artifactGroups);
@@ -215,13 +243,13 @@ public class DeploymentBuilder {
         return phases;
     }
 
-    protected Task getDiscoveryPhase(Iterable<Group> groups) {
+    protected DiscoveryPhase getDiscoveryPhase(Iterable<Group> groups) {
         // Needs to prepare a pipeline for the deployment
         DiscoveryPhase discoveryPhase = new DiscoveryPhase();
         for (Group group : groups) {
             discoveryPhase.addPhaseForEachGroup(group);
         }
-        return discoveryPhase.getTask();
+        return discoveryPhase;
 
     }
 

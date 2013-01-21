@@ -15,9 +15,12 @@
  */
 package com.peergreen.deployment.internal.phase.builder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
+import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.tasks.execution.TaskContextFactory;
 import com.peergreen.tasks.model.group.Group;
 import com.peergreen.tasks.model.group.GroupTaskContextFactory;
@@ -25,17 +28,45 @@ import com.peergreen.tasks.model.group.SubstituteExecutionContextProvider;
 
 public class TaskExecutionHolder {
 
-    private final Collection<Group> groups;
+    private Collection<Group> groups;
 
-    private final SubstituteExecutionContextProvider substituteExecutionContextProvider;
+    private SubstituteExecutionContextProvider substituteExecutionContextProvider;
 
-    private final GroupTaskContextFactory groupTaskContextFactory;
+    private TaskContextFactory groupTaskContextFactory;
+
+
+    private boolean onlyDiscoveryPhases = false;
+
+    private List<BasicDeploymentContext> deploymentContexts;
+
 
     public TaskExecutionHolder() {
         this.groups = new HashSet<Group>();
         this.substituteExecutionContextProvider = new SubstituteExecutionContextProvider();
         this.groupTaskContextFactory = new GroupTaskContextFactory(groups, substituteExecutionContextProvider);
+        this.deploymentContexts = new ArrayList<BasicDeploymentContext>();
 
+    }
+
+    public boolean isOnlyDiscoveryPhases() {
+        return onlyDiscoveryPhases;
+    }
+
+    public void setTaskContextFactory(TaskContextFactory groupTaskContextFactory) {
+        this.groupTaskContextFactory = groupTaskContextFactory;
+    }
+
+    public void setGroups(Collection<Group> groups) {
+        this.groups = groups;
+    }
+
+    public void setSubstituteExecutionContextProvider(SubstituteExecutionContextProvider substituteExecutionContextProvider) {
+        this.substituteExecutionContextProvider = substituteExecutionContextProvider;
+    }
+
+
+    public void setOnlyDiscoveryPhases(boolean onlyDiscoveryPhases) {
+        this.onlyDiscoveryPhases = onlyDiscoveryPhases;
     }
 
     public Collection<Group> getGroups() {
@@ -48,6 +79,14 @@ public class TaskExecutionHolder {
 
    public TaskContextFactory getTaskContextFactory() {
        return groupTaskContextFactory;
+   }
+
+   public List<BasicDeploymentContext> getDeploymentContexts() {
+       return deploymentContexts;
+   }
+
+   public void setDeploymentContexts(List<BasicDeploymentContext> deploymentContexts) {
+       this.deploymentContexts = deploymentContexts;
    }
 
 }

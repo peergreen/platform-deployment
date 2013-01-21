@@ -18,6 +18,7 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.DeploymentStatusReport;
+import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.ArtifactModelManager;
 import com.peergreen.deployment.internal.model.Created;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
@@ -32,6 +33,9 @@ import com.peergreen.tasks.execution.helper.TaskExecutorService;
 import com.peergreen.tasks.execution.tracker.TrackerManager;
 import com.peergreen.tasks.model.State;
 import com.peergreen.tasks.model.Task;
+import com.peergreen.tasks.tree.Node;
+import com.peergreen.tasks.tree.task.TaskNodeAdapter;
+import com.peergreen.tasks.tree.task.TaskRenderingVisitor;
 
 
 @Component
@@ -110,28 +114,39 @@ public class BasicDeploymentService implements DeploymentService {
                 deploymentStatusReport.setFailure();
             }
             // add children that have been created by our node
-            for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
-                ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(fromWire.getInternalTo().getFacetArtifact());
-                if (fromWire.getInternalTo().getFacetArtifact().getExceptions().size() > 0) {
-                    deploymentStatusReport.setFailure();
-                }
-                artifactStatusReport.addChild(childArtifactStatusReport);
-            }
+            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModelManager, artifactModel);
         }
-
-
-
-
-
 
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setState(state);
         deploymentStatusReport.setElapsedTime(elapsedTime);
         LOGGER.info("Time elapsed ''{0}'' ms" , elapsedTime);
 
+
+        Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
+        TaskRenderingVisitor taskRenderingVisitor = new TaskRenderingVisitor(System.out);
+        taskRenderingVisitor.setGroups(holder.getGroups());
+        root.walk(taskRenderingVisitor);
         return deploymentStatusReport;
 
     }
+
+    protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, ArtifactStatusReport artifactStatusReport, ArtifactModelManager artifactModelManager, InternalArtifactModel artifactModel) {
+        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+            IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
+            ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(facetArtifact);
+            if (facetArtifact.getExceptions().size() > 0) {
+                deploymentStatusReport.setFailure();
+            }
+            artifactStatusReport.addChild(childArtifactStatusReport);
+            // proceed this new node
+            InternalArtifactModel childArtifactModel = artifactModelManager.getArtifactModel(facetArtifact.uri());
+            addCreatedNode(deploymentStatusReport, childArtifactStatusReport, artifactModelManager, childArtifactModel);
+        }
+    }
+
+
+
 
     @Override
     public DeploymentStatusReport process(Artifact artifact, DeploymentMode mode) {
