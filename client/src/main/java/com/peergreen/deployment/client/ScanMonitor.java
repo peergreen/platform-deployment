@@ -64,7 +64,7 @@ public class ScanMonitor {
         File[] children = directory.listFiles();
         if (children != null) {
             for (File child : children) {
-                if (child.isFile() && (child.getPath().endsWith(".jar") || child.getPath().endsWith(".xml"))) {
+                if (child.isFile() && (child.getPath().endsWith(".jar") || child.getPath().endsWith(".xml") || child.getPath().endsWith(".properties"))) {
                     artifacts.add(artifactBuilder.build(child.getName(), child.toURI()));
                 }
                 if (child.isDirectory()) {
