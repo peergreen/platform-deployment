@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2012-2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,12 +17,29 @@ package com.peergreen.deployment;
 
 public enum DiscoveryPhasesLifecycle  {
 
+    /**
+     * Manage to download/fetch artifacts. For example it can download/fetch maven2 resources.
+     */
     URI_FETCHER ,
 
+    /**
+     * URI resolver is in general applied on a local resource (file, bundle) on which the type can be detected (Archive or Content).
+     */
     URI_RESOLVER,
 
+    /**
+     * Scanners are called on the selected artifact. It will flag the archive or content with expected facets.
+     */
     FACET_SCANNER,
 
-    FACET_CONFLICTS
+    /**
+     * Try to Remove or add facets on artifacts if some of the facets are not compliant together.
+     */
+    FACET_CONFLICTS,
+
+    /**
+     * Dependency finder : It tries to find all dependencies of a selected artifact. (for example a deployment plan can reference several other artifacts)
+     */
+    DEPENDENCY_FINDER,
 
 }
