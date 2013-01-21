@@ -30,11 +30,11 @@ public class DeploymentPlanLifeCyclePhaseProvider implements FacetLifeCyclePhase
     public DeploymentPlanLifeCyclePhaseProvider() {
         this.deployPhases = new ArrayList<String>();
         deployPhases.add("DEPLOY");
-        deployPhases.add("DEPENDENCY_ARTIFACTS");
+        //deployPhases.add("DEPENDENCY_ARTIFACTS");
 
         this.undeployPhases = new ArrayList<String>();
         undeployPhases.add("UNDEPLOY");
-        undeployPhases.add("DEPENDENCY_ARTIFACTS");
+        //undeployPhases.add("DEPENDENCY_ARTIFACTS");
 
     }
 

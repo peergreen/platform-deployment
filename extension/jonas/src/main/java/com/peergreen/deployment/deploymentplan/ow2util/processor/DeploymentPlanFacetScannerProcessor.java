@@ -155,6 +155,11 @@ public class DeploymentPlanFacetScannerProcessor implements Processor<Content> {
                                         continue;
                                     }
 
+                                    if ("classifier".equals(key)) {
+                                        maven2.setClassifier(value);
+                                        continue;
+                                    }
+
                                     System.out.println("found not yet analyzed key/Value = " + key + "/" + value);
                                 }
                             }

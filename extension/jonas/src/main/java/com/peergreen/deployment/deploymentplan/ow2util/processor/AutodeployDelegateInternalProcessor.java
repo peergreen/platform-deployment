@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
 @Component
 @Provides
-@Instantiate(name="OW2 deployment plan facet scanner")
-public class DeploymentPlanFacetScannerDelegateInternalProcessor extends DelegateHandlerProcessor<Content> {
+@Instantiate(name="OW2 autodeploy properties processor")
+public class AutodeployDelegateInternalProcessor extends DelegateHandlerProcessor<Content> {
 
-    public DeploymentPlanFacetScannerDelegateInternalProcessor() throws ProcessorException {
-        super(new DeploymentPlanFacetScannerProcessor(), Content.class);
+    public AutodeployDelegateInternalProcessor() throws ProcessorException {
+        super(new AutodeployProcessor(), Content.class);
     }
 
 
@@ -46,11 +46,11 @@ public class DeploymentPlanFacetScannerDelegateInternalProcessor extends Delegat
     @Validate
     protected void addRequirements() {
 
-        // Execute only on artifacts with XML path extension
-        addRequirement(getRequirementBuilder().buildArtifactRequirement(this).setPathExtension("xml"));
+        // Execute only on artifacts with .properties path extension
+        addRequirement(getRequirementBuilder().buildArtifactRequirement(this).setPathExtension("properties"));
 
-        // Execute only on a specific XML namespace
-        addRequirement(getRequirementBuilder().buildXMLContentRequirement(this).setNamespace("http://jonas.ow2.org/ns/deployment-plan/1.0"));
+        // Execute only on artifacts with .properties path extension
+        addRequirement(getRequirementBuilder().buildContentRequirement(this));
 
         // Execute at the DEPENDENCY_FINDER lifecycle
         addRequirement(getRequirementBuilder().buildPhaseRequirement(this, DiscoveryPhasesLifecycle.DEPENDENCY_FINDER.toString()));

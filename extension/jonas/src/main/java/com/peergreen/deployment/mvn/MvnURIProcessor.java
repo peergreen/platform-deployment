@@ -56,7 +56,7 @@ public class MvnURIProcessor implements Processor<Artifact> {
 
             // It's a mvn URI from requirements, so get the resource
             try (InputStream is = artifact.uri().toURL().openStream(); FileOutputStream fos = new FileOutputStream(dumpedFile)) {
-
+System.out.println("Fetching uri " + artifact.uri() + "...");
 
             int len;
             byte[] b = new byte[4096];
