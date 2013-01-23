@@ -18,6 +18,7 @@ package com.peergreen.deployment.internal.context;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.osgi.resource.Capability;
 
@@ -49,7 +50,7 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
         super();
         this.currentArtifact = artifact;
         this.executionContext = executionContext;
-        this.newArtifacts = new ArrayList<Artifact>();
+        this.newArtifacts = new CopyOnWriteArrayList<Artifact>();
         this.currentProcessor = executionContext.get(CurrentProcessor.class);
         this.artifactBuilder = executionContext.get(ArtifactBuilder.class);
     }
