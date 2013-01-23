@@ -16,6 +16,7 @@
 
 package com.peergreen.deployment.internal.phase.builder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -72,7 +73,23 @@ public class DeploymentBuilder {
     }
 
 
-    public Task buildTaskModel(List<Artifact> artifacts, DeploymentMode deploymentMode, TaskExecutionHolder taskExecutionHolder, InternalArtifactModel rootArtifactModel) {
+    protected void addInnerArtifacts(List<Artifact> artifacts, Artifact artifact, ArtifactModelManager artifactModelManager) {
+        // First, add ourself
+        if (!artifacts.contains(artifact)) {
+            artifacts.add(artifact);
+        }
+
+        // Then add all new dependencies
+        DefaultArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
+        for (InternalWire wire : artifactModel.getInternalFromWires()) {
+            InternalArtifactModel child = wire.getInternalTo();
+            addInnerArtifacts(artifacts, child.getFacetArtifact(), artifactModelManager);
+        }
+
+    }
+
+
+    public Task buildTaskModel(List<Artifact> taskArtifacts, DeploymentMode deploymentMode, TaskExecutionHolder taskExecutionHolder, InternalArtifactModel rootArtifactModel) {
         long tStart = System.currentTimeMillis();
 
         // Build a new deployment named Phases
@@ -80,6 +97,22 @@ public class DeploymentBuilder {
 
         // List of groups for the taskcontext factory
         Collection<Group> allgroups = taskExecutionHolder.getGroups();
+
+
+        // In UNDEPLOY mode, needs to find all dependencies of the given artifacts
+        List<Artifact> artifacts;
+
+        if (DeploymentMode.UNDEPLOY == deploymentMode) {
+            artifacts = new ArrayList<Artifact>();
+            for (Artifact artifact : taskArtifacts) {
+                addInnerArtifacts(artifacts, artifact, artifactModelManager);
+            }
+        } else {
+            artifacts = taskArtifacts;
+        }
+
+
+
 
         // One provider for switching the DeploymentContext for selected
         // group/job
@@ -181,7 +214,7 @@ public class DeploymentBuilder {
 
         }
 
-        // Add discovery phase only for deploy mode
+        // Add New artifacts phase only for deploy mode
         if (deploymentMode == DeploymentMode.DEPLOY) {
             DiscoveryPhase discoveryPhase = getDiscoveryPhase(artifactGroups);
             phases.add(discoveryPhase.getTask());
@@ -210,7 +243,6 @@ public class DeploymentBuilder {
 
             // add task where // stuff will be executed
             newArtifactsPipeline.add(discoveryPostNewArtifacts);
-
         }
 
         if (!taskExecutionHolder.isOnlyDiscoveryPhases()) {
