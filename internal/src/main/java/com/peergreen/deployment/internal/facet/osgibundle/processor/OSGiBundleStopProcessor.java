@@ -35,14 +35,14 @@ public class OSGiBundleStopProcessor implements Processor<Bundle> {
     @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
 
-        LOGGER.info("Stopping bundle ''{0}''", bundle.getLocation());
+        LOGGER.debug("Stopping bundle ''{0}''", bundle.getLocation());
         // stop bundle
         try {
             bundle.stop();
         } catch (BundleException e) {
             throw new ProcessorException("Unable to stop the bundle", e);
         }
-        LOGGER.info("Bundle ''{0}'' stopped", bundle.getLocation());
+        LOGGER.debug("Bundle ''{0}'' stopped", bundle.getLocation());
 
     }
 
