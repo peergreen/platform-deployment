@@ -66,15 +66,12 @@ public class NewArtifactsDiscoveryCreationJob implements Job {
         // Now, for each deployment contexts, try to see if there are new artifacts on them.
         // If we have new artifacts, we've to add a new discovery phase with the new artifacts
         for (BasicDeploymentContext deploymentContext : deploymentContexts) {
-            List<Artifact> newArtifacts = new ArrayList<Artifact>();
-            newArtifacts.addAll(deploymentContext.getNewArtifacts());
-            deploymentContext.clearNewArtifacts();
+            List<Artifact> newArtifacts = deploymentContext.getNewArtifacts();
             if (newArtifacts.size() > 0) {
                 Task discoveryTask = deploymentBuilder.buildTaskModel(newArtifacts, deploymentMode, holderDeployment, deploymentContext.get(InternalArtifactModel.class));
                 finders.add(discoveryTask);
             }
-
-
+            deploymentContext.clearNewArtifacts();
         }
 
 
