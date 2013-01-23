@@ -32,19 +32,20 @@ import com.peergreen.deployment.ProcessorException;
  */
 public class MvnURIProcessor implements Processor<Artifact> {
 
+    private final File cacheDir;
+
     public MvnURIProcessor() {
+        String userDir = System.getProperty("user.dir");
+        cacheDir = new File(userDir + File.separator + "mvn-cache");
+
+        if (!cacheDir.exists()) {
+            cacheDir.mkdirs();
+        }
     }
 
 
     @Override
     public void handle(Artifact artifact, ProcessorContext processorContext) throws ProcessorException {
-
-        String userDir = System.getProperty("user.dir");
-        File cacheDir = new File(userDir + File.separator + "mvn-cache");
-
-        if (!cacheDir.exists()) {
-            cacheDir.mkdirs();
-        }
 
         // Dump inputstream if not exists
         File dumpedFile = new File(cacheDir, artifact.name());
@@ -52,22 +53,22 @@ public class MvnURIProcessor implements Processor<Artifact> {
         // File doesn't exists
         if (!dumpedFile.exists()) {
 
+            synchronized (this) {
 
+                // It's a mvn URI from requirements, so get the resource
+                try (InputStream is = artifact.uri().toURL().openStream(); FileOutputStream fos = new FileOutputStream(dumpedFile)) {
+                    System.out.println("Fetching uri " + artifact.uri() + "...");
 
-            // It's a mvn URI from requirements, so get the resource
-            try (InputStream is = artifact.uri().toURL().openStream(); FileOutputStream fos = new FileOutputStream(dumpedFile)) {
-System.out.println("Fetching uri " + artifact.uri() + "...");
-
-            int len;
-            byte[] b = new byte[4096];
-            // dump stream
-            while ((len = is.read(b, 0, b.length)) != -1) {
-                    fos.write(b, 0, len);
+                    int len;
+                    byte[] b = new byte[4096];
+                    // dump stream
+                    while ((len = is.read(b, 0, b.length)) != -1) {
+                        fos.write(b, 0, len);
+                    }
+                } catch (IOException e) {
+                    throw new ProcessorException("Unable to read inputstream from '" + artifact.uri() + "'", e);
                 }
-            } catch (IOException e) {
-                throw new ProcessorException("Unable to read inputstream from '" + artifact.uri() + "'", e);
             }
-
         }
 
         // Now, add the dumped artifact
