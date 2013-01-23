@@ -44,7 +44,6 @@ public class AutodeployProcessor  implements Processor<Content> {
                     if (line.contains("\\")) {
                         continue;
                     }
-                    System.out.println("line = "  + line);
 
                     // remove trailing spaces
                     line = line.replaceAll(",", "");
