@@ -15,10 +15,10 @@
  */
 package com.peergreen.deployment.internal.phase.builder;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.tasks.execution.TaskContextFactory;
@@ -44,7 +44,7 @@ public class TaskExecutionHolder {
         this.groups = new HashSet<Group>();
         this.substituteExecutionContextProvider = new SubstituteExecutionContextProvider();
         this.groupTaskContextFactory = new GroupTaskContextFactory(groups, substituteExecutionContextProvider);
-        this.deploymentContexts = new ArrayList<BasicDeploymentContext>();
+        this.deploymentContexts = new CopyOnWriteArrayList<BasicDeploymentContext>();
 
     }
 

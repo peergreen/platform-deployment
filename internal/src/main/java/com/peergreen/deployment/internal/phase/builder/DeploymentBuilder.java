@@ -253,7 +253,7 @@ public class DeploymentBuilder {
 
     }
 
-    public Task getDeploymentPhases(String deploymentName, List<String> phases, List<Group> groups) {
+    public Task getDeploymentPhases(String deploymentName, List<String> phases, List<Group> groups, boolean inParallel) {
 
         // Create root pipeline
         Pipeline pipeline = new Pipeline(deploymentName);
@@ -265,7 +265,7 @@ public class DeploymentBuilder {
 
         // In a deployment, all phases are parallel
         for (String phaseName : phases) {
-            new ProcessorJobPhase(phaseName, pipeline, groups);
+            new ProcessorJobPhase(phaseName, pipeline, groups, inParallel);
         }
 
         return pipeline;

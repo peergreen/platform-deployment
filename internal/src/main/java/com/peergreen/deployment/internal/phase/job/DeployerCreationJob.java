@@ -70,7 +70,7 @@ public class DeployerCreationJob implements Job {
 
             // We have something to deploy ?
             if (facetGroup.size() > 0) {
-                deployers.add(deploymentBuilder.getDeploymentPhases(type.getName(), phases , facetGroup));
+                deployers.add(deploymentBuilder.getDeploymentPhases(type.getName(), phases , facetGroup, false));
             }
 
         }

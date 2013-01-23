@@ -33,9 +33,6 @@ import com.peergreen.tasks.execution.helper.TaskExecutorService;
 import com.peergreen.tasks.execution.tracker.TrackerManager;
 import com.peergreen.tasks.model.State;
 import com.peergreen.tasks.model.Task;
-import com.peergreen.tasks.tree.Node;
-import com.peergreen.tasks.tree.task.TaskNodeAdapter;
-import com.peergreen.tasks.tree.task.TaskRenderingVisitor;
 
 
 @Component
@@ -123,10 +120,10 @@ public class BasicDeploymentService implements DeploymentService {
         LOGGER.info("Time elapsed ''{0}'' ms" , elapsedTime);
 
 
-        Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
+        /*Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
         TaskRenderingVisitor taskRenderingVisitor = new TaskRenderingVisitor(System.out);
         taskRenderingVisitor.setGroups(holder.getGroups());
-        root.walk(taskRenderingVisitor);
+        root.walk(taskRenderingVisitor);*/
         return deploymentStatusReport;
 
     }

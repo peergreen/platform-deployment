@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2012-2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ import org.osgi.service.resolver.Resolver;
 
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.internal.context.Job;
+import com.peergreen.deployment.internal.phase.ContainerTask;
+import com.peergreen.deployment.internal.phase.ParallelContainerTask;
 import com.peergreen.deployment.internal.phase.current.CurrentPhase;
 import com.peergreen.deployment.internal.processor.resource.ProcessorJobResource;
 import com.peergreen.deployment.internal.solver.MissingCapability;
@@ -49,24 +51,29 @@ public class ProcessorJob implements Job {
      */
     private final String bindingPhase;
 
-    private final Parallel parallelTask;
+    private final ContainerTask containerTask;
 
     private final Group group;
 
-    public ProcessorJob(String bindingPhase, Parallel parallelTask) {
-        this(bindingPhase, parallelTask, null);
+    public ProcessorJob(String bindingPhase, Parallel parallel) {
+        this(bindingPhase, new ParallelContainerTask(parallel));
     }
 
-    public ProcessorJob(String bindingPhase, Parallel parallelTask, Group group) {
+    public ProcessorJob(String bindingPhase, ContainerTask containerTask) {
+        this(bindingPhase, containerTask, null);
+    }
+
+
+    public ProcessorJob(String bindingPhase, ContainerTask containerTask, Group group) {
         this.bindingPhase = bindingPhase;
-        this.parallelTask = parallelTask;
+        this.containerTask = containerTask;
         this.group = group;
     }
 
     @Override
     public void execute(DeploymentContext deploymentContext) {
         // Set the current task object
-        deploymentContext.setProperty(bindingPhase, parallelTask);
+        deploymentContext.setProperty(bindingPhase, containerTask);
 
         // First, get the processor manager
         ProcessorManager processorManager = deploymentContext.get(ProcessorManager.class);
@@ -142,7 +149,7 @@ public class ProcessorJob implements Job {
             if (group != null) {
                 group.addTask(unitOfWork);
             }
-            parallelTask.add(unitOfWork);
+            containerTask.addTask(unitOfWork);
         }
 
     }

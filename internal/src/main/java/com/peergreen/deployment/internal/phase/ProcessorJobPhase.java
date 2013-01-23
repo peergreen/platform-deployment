@@ -18,14 +18,14 @@ public class ProcessorJobPhase {
     private final List<Group> groups;
 
     public ProcessorJobPhase(String phase, Pipeline pipeline) {
-        this(phase, pipeline, null);
+        this(phase, pipeline, null, true);
     }
 
-    public ProcessorJobPhase(String phase, Pipeline pipeline, List<Group> groups) {
+    public ProcessorJobPhase(String phase, Pipeline pipeline, List<Group> groups, boolean parallel) {
         this.phase = phase;
         this.pipeline = pipeline;
         this.groups = groups;
-        addProcessors();
+        addProcessors(parallel);
     }
 
     public ProcessorJobPhase(String phase) {
@@ -35,24 +35,35 @@ public class ProcessorJobPhase {
     /**
      * Needs to add each unit of work in a group.
      */
-    public void addProcessors() {
-        Parallel preparePhases = new Parallel("PREPARE".concat(phase));
-        this.pipeline.add(preparePhases);
+    public void addProcessors(boolean parallel) {
+        ContainerTask prepareTask;
+        if (!parallel) {
+            prepareTask = new PipelineContainerTask(new Pipeline("PREPARE".concat(phase)));
+        } else {
+            prepareTask = new ParallelContainerTask(new Parallel("PREPARE".concat(phase)));
+        }
+        this.pipeline.add(prepareTask.getInnerTask());
 
         String[] PHASES = new String[] {"PRE_".concat(phase), phase, "POST_".concat(phase)};
         for (String subphase : PHASES) {
-            Parallel parallelSubPhase = new Parallel(subphase);
+            ContainerTask containerTask = null;
+            if (!parallel) {
+                containerTask = new PipelineContainerTask(new Pipeline(subphase));
+            } else {
+                containerTask = new ParallelContainerTask(new Parallel(subphase));
+            }
+
             if (groups != null) {
                 for (Group group : groups) {
-                    UnitOfWork unitOfWork = new UnitOfWork(new WrapDeploymentContextJob(new ProcessorJob(subphase, parallelSubPhase, group)), "PREPARE_".concat(subphase));
-                    preparePhases.add(unitOfWork);
+                    UnitOfWork unitOfWork = new UnitOfWork(new WrapDeploymentContextJob(new ProcessorJob(subphase, containerTask, group)), "PREPARE_".concat(subphase));
+                    prepareTask.addTask(unitOfWork);
                     group.addTask(unitOfWork);
                 }
             } else {
-                UnitOfWork unitOfWork = new UnitOfWork(new WrapDeploymentContextJob(new ProcessorJob(subphase, parallelSubPhase)), "PREPARE_".concat(subphase));
-                preparePhases.add(unitOfWork);
+                UnitOfWork unitOfWork = new UnitOfWork(new WrapDeploymentContextJob(new ProcessorJob(subphase, containerTask)), "PREPARE_".concat(subphase));
+                prepareTask.addTask(unitOfWork);
             }
-            this.pipeline.add(parallelSubPhase);
+            this.pipeline.add(containerTask.getInnerTask());
         }
     }
 
