@@ -122,9 +122,9 @@ public class ScanMonitor {
 
         // deploy
         DeploymentStatusReport deploymentStatusReport = deploymentService.process(artifacts, DeploymentMode.DEPLOY);
-        System.out.println("Report will be printed in 1 second");
+        System.out.println("Report will be printed in 30 second");
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(30000L);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
