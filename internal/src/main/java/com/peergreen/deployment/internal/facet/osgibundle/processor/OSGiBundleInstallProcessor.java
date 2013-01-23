@@ -44,10 +44,14 @@ public class OSGiBundleInstallProcessor implements Processor<OSGiBundle> {
         Bundle bundle;
         try {
             bundle = bundleContext.installBundle("reference:" + osgiBundle.location());
+            processorContext.addFacet(Bundle.class, bundle);
         } catch (BundleException e) {
+            // Already exists on the platform, skip it
+            if (BundleException.DUPLICATE_BUNDLE_ERROR == e.getType()) {
+                return;
+            }
             throw new ProcessorException("Unable to install the bundle", e);
         }
-       processorContext.addFacet(Bundle.class, bundle);
 
     }
 
