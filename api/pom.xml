@@ -32,6 +32,14 @@
       <version>5.0.0</version>
       <scope>provided</scope>
     </dependency>
-    
+    <!-- TODO Create (in platform project) a bundle
+         dedicated to export the org.osgi.service.repository package -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.enterprise</artifactId>
+      <version>5.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 </project>
