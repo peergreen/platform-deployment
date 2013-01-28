@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,21 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.peergreen.deployment.report;
 
-package com.peergreen.deployment;
-
-import java.util.List;
-
-import com.peergreen.deployment.report.ArtifactStatusReport;
-import com.peergreen.deployment.report.ArtifactStatusReportException;
-import com.peergreen.deployment.report.DeploymentStatusReport;
-
-public interface DeploymentService {
-
-    DeploymentStatusReport process(Artifact artifact, DeploymentMode mode);
-
-    DeploymentStatusReport process(List<Artifact> artifact, DeploymentMode mode);
-
-    ArtifactStatusReport getReport(String uriPath) throws ArtifactStatusReportException;
+public interface ArtifactStatusReport {
 
 }

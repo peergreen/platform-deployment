@@ -1,5 +1,7 @@
 package com.peergreen.deployment.internal.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -17,16 +19,19 @@ import org.ow2.util.log.LogFactory;
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
-import com.peergreen.deployment.DeploymentStatusReport;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.ArtifactModelManager;
 import com.peergreen.deployment.internal.model.Created;
+import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
-import com.peergreen.deployment.internal.report.ArtifactStatusReport;
+import com.peergreen.deployment.internal.report.DefaultArtifactStatusReport;
 import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
+import com.peergreen.deployment.report.ArtifactStatusReport;
+import com.peergreen.deployment.report.ArtifactStatusReportException;
+import com.peergreen.deployment.report.DeploymentStatusReport;
 import com.peergreen.tasks.context.ExecutionContext;
 import com.peergreen.tasks.execution.helper.ExecutorServiceBuilderManager;
 import com.peergreen.tasks.execution.helper.TaskExecutorService;
@@ -105,13 +110,13 @@ public class BasicDeploymentService implements DeploymentService {
         for (Artifact artifact : artifacts) {
             // Get model
             InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
-            ArtifactStatusReport artifactStatusReport = new ArtifactStatusReport(artifactModel.getFacetArtifact());
+            DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(artifactModel.getFacetArtifact());
             deploymentStatusReport.addChild(artifactStatusReport);
             if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
                 deploymentStatusReport.setFailure();
             }
             // add children that have been created by our node
-            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModelManager, artifactModel);
+            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
         }
 
         long elapsedTime = tEnd - tStart;
@@ -128,21 +133,35 @@ public class BasicDeploymentService implements DeploymentService {
 
     }
 
-    protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, ArtifactStatusReport artifactStatusReport, ArtifactModelManager artifactModelManager, InternalArtifactModel artifactModel) {
+    protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
         for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
-            ArtifactStatusReport childArtifactStatusReport = new ArtifactStatusReport(facetArtifact);
             if (facetArtifact.getExceptions().size() > 0) {
                 deploymentStatusReport.setFailure();
             }
+            DefaultArtifactStatusReport childArtifactStatusReport = new DefaultArtifactStatusReport(facetArtifact);
             artifactStatusReport.addChild(childArtifactStatusReport);
             // proceed this new node
             InternalArtifactModel childArtifactModel = artifactModelManager.getArtifactModel(facetArtifact.uri());
-            addCreatedNode(deploymentStatusReport, childArtifactStatusReport, artifactModelManager, childArtifactModel);
+            addCreatedNode(deploymentStatusReport, childArtifactStatusReport, childArtifactModel);
         }
     }
 
-
+   /**
+    * Add the artifacts for the given artifact status report.
+    * @param artifactStatusReport
+    * @param artifactModel
+    */
+    protected void addChildArtifactStatusReport(DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
+        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+            IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
+            DefaultArtifactStatusReport childArtifactStatusReport = new DefaultArtifactStatusReport(facetArtifact);
+            artifactStatusReport.addChild(childArtifactStatusReport);
+            // proceed this new node
+            InternalArtifactModel childArtifactModel = artifactModelManager.getArtifactModel(facetArtifact.uri());
+            addChildArtifactStatusReport(childArtifactStatusReport, childArtifactModel);
+        }
+    }
 
 
     @Override
@@ -151,5 +170,25 @@ public class BasicDeploymentService implements DeploymentService {
         artifacts.add(artifact);
         return process(artifacts, mode);
     }
+
+
+    public ArtifactStatusReport getReport(String uriPath) throws ArtifactStatusReportException {
+        URI uri;
+        try {
+            uri = new URI(uriPath);
+        } catch (URISyntaxException e) {
+            throw new ArtifactStatusReportException("Unable to get a report for an invalid URI", e);
+        }
+        DefaultArtifactModel artifactModel = artifactModelManager.getArtifactModel(uri);
+        if (artifactModel == null) {
+            throw new ArtifactStatusReportException("No artifact model found for the given URI'");
+        }
+        IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
+        DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(facetArtifact);
+        addChildArtifactStatusReport(artifactStatusReport, artifactModel);
+
+        return artifactStatusReport;
+    }
+
 
 }

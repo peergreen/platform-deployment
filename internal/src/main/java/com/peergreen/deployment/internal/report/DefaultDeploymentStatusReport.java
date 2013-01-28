@@ -21,7 +21,7 @@ import java.util.List;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DeploymentMode;
-import com.peergreen.deployment.DeploymentStatusReport;
+import com.peergreen.deployment.report.DeploymentStatusReport;
 import com.peergreen.tasks.model.State;
 
 public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
@@ -38,7 +38,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     private long elapsedTime;
 
-    private final Collection<ArtifactStatusReport> artifactsReport;
+    private final Collection<DefaultArtifactStatusReport> artifactsReport;
 
     private final String deploymentMode;
 
@@ -47,7 +47,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     public DefaultDeploymentStatusReport(DeploymentMode deploymentMode, List<Artifact> artifacts) {
         this.deploymentMode = deploymentMode.name();
-        this.artifactsReport = new HashSet<ArtifactStatusReport>();
+        this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
 
 
     }
@@ -78,7 +78,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     }
 
 
-    public void addChild(ArtifactStatusReport artifactStatusReport) {
+    public void addChild(DefaultArtifactStatusReport artifactStatusReport) {
         artifactsReport.add(artifactStatusReport);
     }
 
@@ -89,11 +89,13 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     public String toString() {
         StringBuilder sb = new StringBuilder("\nDeploymentStatus[mode=");
         sb.append(deploymentMode);
-        sb.append(", elapsedTime=");
+        sb.append(", elapsedTime='");
         sb.append(elapsedTime);
+        sb.append("' ms.");
+
         sb.append("\nArtifacts");
         if (artifactsReport != null) {
-            for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
+            for (DefaultArtifactStatusReport artifactStatusReport : artifactsReport) {
                 sb.append(artifactStatusReport.toString("  "));
             }
         }

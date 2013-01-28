@@ -22,8 +22,9 @@ import java.util.List;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.report.ArtifactStatusReport;
 
-public class ArtifactStatusReport {
+public class DefaultArtifactStatusReport implements ArtifactStatusReport {
 
     /**
     ArtifactReport
@@ -41,7 +42,7 @@ public class ArtifactStatusReport {
     private final Collection<FacetInfo> facetInfos;
     private final List<Exception> exceptions;
     private final Collection<ProcessorInfo> processors;
-    private final Collection<ArtifactStatusReport> artifactsReport;
+    private final Collection<DefaultArtifactStatusReport> artifactsReport;
     private final long totalTime;
 
     public List<Exception> getExceptions() {
@@ -64,17 +65,17 @@ public class ArtifactStatusReport {
         return facetInfos;
     }
 
-    public ArtifactStatusReport(IFacetArtifact facetArtifact) {
+    public DefaultArtifactStatusReport(IFacetArtifact facetArtifact) {
         this.name = facetArtifact.name();
         this.uri = facetArtifact.uri().toString();
         this.facetInfos = facetArtifact.getFacets();
-        this.artifactsReport = new HashSet<ArtifactStatusReport>();
+        this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
         this.processors = facetArtifact.getProcessors();
         this.totalTime = facetArtifact.getTotalTime();
         this.exceptions = facetArtifact.getExceptions();
     }
 
-    public void addChild(ArtifactStatusReport artifactStatusReport) {
+    public void addChild(DefaultArtifactStatusReport artifactStatusReport) {
         artifactsReport.add(artifactStatusReport);
     }
 
@@ -98,8 +99,9 @@ public class ArtifactStatusReport {
         sb.append(name);
         sb.append(", uri=");
         sb.append(uri);
-        sb.append(", totalTime=");
+        sb.append(", totalTime='");
         sb.append(totalTime);
+        sb.append("' ms");
         sb.append("]");
         for (FacetInfo facetInfo : facetInfos) {
             sb.append("\n");
@@ -109,9 +111,9 @@ public class ArtifactStatusReport {
             sb.append(facetInfo.getName());
             sb.append(", addedBy=");
             sb.append(facetInfo.getProcessor());
-            sb.append(", duration=");
+            sb.append(", duration='");
             sb.append(facetInfo.getTime());
-            sb.append(" ms");
+            sb.append("' ms");
             sb.append("]");
         }
         for (ProcessorInfo processorInfo : processors) {
@@ -122,9 +124,9 @@ public class ArtifactStatusReport {
             sb.append(processorInfo.getName());
             sb.append(", phase=");
             sb.append(processorInfo.getPhase());
-            sb.append(", duration=");
+            sb.append(", duration='");
             sb.append(processorInfo.getTime());
-            sb.append(" ms");
+            sb.append("' ms");
             sb.append("]");
         }
         for (Exception exception : exceptions) {
@@ -137,10 +139,12 @@ public class ArtifactStatusReport {
                 sb.append(", cause=");
                 sb.append(exception.getCause().getMessage());
             }
+            printStackTrace(exception, sb, indent);
             sb.append("]");
+
         }
         if (artifactsReport.size() > 0) {
-            for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
+            for (DefaultArtifactStatusReport artifactStatusReport : artifactsReport) {
                 sb.append(artifactStatusReport.toString(indent + "  "));
             }
         }
@@ -148,6 +152,35 @@ public class ArtifactStatusReport {
 
         return sb.toString();
 
+    }
+
+    protected void printStackTrace(Throwable exception, StringBuilder sb, String indent) {
+        StackTraceElement[] stackTrace = exception.getStackTrace();
+        if (stackTrace != null) {
+            sb.append("\n");
+            sb.append(indent);
+            sb.append("  ");
+            sb.append(exception.getClass().getName());
+            sb.append("/");
+            sb.append(exception.getMessage());
+            for (StackTraceElement stackTraceElement : stackTrace) {
+                sb.append("\n");
+                sb.append(indent);
+                sb.append("  ");
+                sb.append("  |-");
+                sb.append(stackTraceElement.getClassName());
+                sb.append("/");
+                sb.append(stackTraceElement.getMethodName());
+                sb.append(":");
+                sb.append(stackTraceElement.getLineNumber());
+                sb.append("(fileName=");
+                sb.append(stackTraceElement.getFileName());
+                sb.append(")");
+            }
+            if (exception.getCause() != null) {
+                printStackTrace(exception.getCause(), sb, indent.concat("  "));
+            }
+        }
     }
 
 
