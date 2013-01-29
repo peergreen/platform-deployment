@@ -8,11 +8,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
+import com.sun.istack.internal.NotNull;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -49,21 +53,34 @@ public class BasicDeploymentService implements DeploymentService {
 
     private ExecutorService executorService = null;
 
-    private final DeploymentBuilder deploymentBuilder;
+    private DeploymentBuilder deploymentBuilder;
 
     @Requires
     private final InjectionContext injectionContext = null;
 
 
-    private final ArtifactModelManager artifactModelManager;
+    private ArtifactModelManager artifactModelManager = new ArtifactModelManager();
 
+    @Validate
+    public void start() {
+        final ThreadFactory threadFactory = Executors.defaultThreadFactory();
+       this.executorService = Executors.newFixedThreadPool(10, new ThreadFactory() {
+           @Override
+           public Thread newThread(Runnable r) {
+               Thread thread = threadFactory.newThread(r);
+               thread.setName("[Peergreen] " + thread.getName());
+               return thread;
+           }
+       });
 
-    public BasicDeploymentService() {
-       this.executorService = Executors.newFixedThreadPool(10);
-       this.artifactModelManager = new ArtifactModelManager();
        // this.executorService = Executors.newCachedThreadPool();
         //this.executorService = Executors.newScheduledThreadPool(200);
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
+    }
+
+    @Invalidate
+    public void stop() {
+        executorService.shutdown();
     }
 
     @Override
