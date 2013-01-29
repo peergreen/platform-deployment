@@ -2,4 +2,4 @@
 Import-Package org.osgi.framework.*;version=1.6,*
 
 # These libraries are not exposed through OSGi as they're only for internal use
-Embed-Dependency osgi-toolkit-filter;inline=true,peergreen-tasks;inline=true
+Embed-Dependency osgi-toolkit-filter;inline=true,peergreen-tasks;inline=true,peergreen-tree;inline=true
