@@ -88,7 +88,9 @@ public class ScanMonitor {
         };
 
         System.out.println("before RUN");
-        new Thread(runnable).start();
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        thread.start();
         System.out.println("RUN done");
 
     }
