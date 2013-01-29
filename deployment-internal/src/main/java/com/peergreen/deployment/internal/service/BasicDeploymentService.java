@@ -1,3 +1,19 @@
+/**
+ * Copyright 2012-2013 Peergreen S.A.S.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.peergreen.deployment.internal.service;
 
 import java.net.URI;
@@ -10,7 +26,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
-import com.sun.istack.internal.NotNull;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -59,7 +74,7 @@ public class BasicDeploymentService implements DeploymentService {
     private final InjectionContext injectionContext = null;
 
 
-    private ArtifactModelManager artifactModelManager = new ArtifactModelManager();
+    private final ArtifactModelManager artifactModelManager = new ArtifactModelManager();
 
     @Validate
     public void start() {
@@ -189,6 +204,7 @@ public class BasicDeploymentService implements DeploymentService {
     }
 
 
+    @Override
     public ArtifactStatusReport getReport(String uriPath) throws ArtifactStatusReportException {
         URI uri;
         try {
