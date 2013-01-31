@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2012-2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.ow2.util.log.Log;
-import org.ow2.util.log.LogFactory;
+import org.osgi.framework.Constants;
 
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
@@ -30,19 +29,27 @@ import com.peergreen.deployment.ProcessorException;
  */
 public class OSGiBundleStartProcessor implements Processor<Bundle> {
 
-    private static final Log LOGGER = LogFactory.getLog(OSGiBundleStartProcessor.class);
-
 
     @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
-        //LOGGER.info("Bundle found is : " + bundle + " ID '" + bundle.getBundleId());
 
-        // Start the bundle
-        try {
-            bundle.start();
-        } catch (BundleException e) {
-            throw new ProcessorException("Unable to start the bundle", e);
+        // Start the bundle if it is not a fragment
+        if (!isFragment(bundle)) {
+            try {
+                bundle.start();
+            } catch (BundleException e) {
+                throw new ProcessorException("Unable to start the bundle", e);
+            }
         }
+    }
+
+    /**
+     * Checks if the given bundle is a fragment
+     * @param bundle the bundle to check
+     * @return true if the bundle is a fragment.
+     */
+    protected boolean isFragment(final Bundle bundle) {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
     }
 
 }
