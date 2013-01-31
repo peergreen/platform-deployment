@@ -49,6 +49,7 @@ import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
 import com.peergreen.deployment.internal.report.DefaultArtifactStatusReport;
 import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
+import com.peergreen.deployment.internal.thread.PeergreenThreadFactory;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.ArtifactStatusReportException;
 import com.peergreen.deployment.report.DeploymentStatusReport;
@@ -82,23 +83,19 @@ public class BasicDeploymentService implements DeploymentService {
 
     private final DeploymentServiceMonitor deploymentServiceTracker;
 
+    private final ThreadFactory threadFactory;
+
+
     public BasicDeploymentService() {
         this.artifactModelManager = new ArtifactModelManager();
         this.deploymentServiceTracker = new DeploymentServiceMonitor(this, artifactBuilder, artifactModelManager);
+        this.threadFactory = new PeergreenThreadFactory(Executors.defaultThreadFactory(), "Deployment Executor");
     }
 
 
     @Validate
     public void start() {
-        final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        this.executorService = Executors.newFixedThreadPool(10, new ThreadFactory() {
-           @Override
-           public Thread newThread(Runnable r) {
-               Thread thread = threadFactory.newThread(r);
-               thread.setName("[Peergreen] " + thread.getName());
-               return thread;
-           }
-       });
+        this.executorService = Executors.newFixedThreadPool(10, threadFactory);
 
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
 

@@ -47,6 +47,7 @@ public class DeploymentServiceMonitor extends Thread {
         this.deploymentService = deploymentService;
         this.artifactBuilder = artifactBuilder;
         this.artifactModelManager = artifactModelManager;
+        this.setName("Peergreen Deployment artifact monitor");
     }
 
 
