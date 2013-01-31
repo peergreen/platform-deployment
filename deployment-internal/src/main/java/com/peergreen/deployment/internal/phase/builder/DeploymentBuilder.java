@@ -172,6 +172,10 @@ public class DeploymentBuilder {
                 artifactModel.addWire(wire);
             }
 
+            if (DeploymentMode.UNDEPLOY == deploymentMode) {
+                artifactModel.setUndeployed(true);
+            }
+
 
             // Artifact is retrieved from the model
             IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();

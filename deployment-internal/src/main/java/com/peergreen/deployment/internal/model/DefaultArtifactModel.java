@@ -29,6 +29,7 @@ public class DefaultArtifactModel implements InternalArtifactModel {
     private final Set<InternalWire> fromWires;
     private final Set<InternalWire> toWires;
 
+    private boolean undeployed = false;
 
     public DefaultArtifactModel(IFacetArtifact facetArtifact) {
         this.facetArtifact = facetArtifact;
@@ -38,6 +39,13 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
     }
 
+    public void setUndeployed(boolean undeployed) {
+        this.undeployed = undeployed;
+    }
+
+    public boolean isUndeployed() {
+        return undeployed;
+    }
 
     @Override
     public void addWire(InternalWire wire) {

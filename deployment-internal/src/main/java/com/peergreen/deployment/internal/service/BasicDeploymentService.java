@@ -36,6 +36,7 @@ import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
 import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
@@ -66,20 +67,31 @@ public class BasicDeploymentService implements DeploymentService {
 
     private static final Log LOGGER = LogFactory.getLog(BasicDeploymentService.class);
 
-    private ExecutorService executorService = null;
+    private ExecutorService executorService;
 
     private DeploymentBuilder deploymentBuilder;
 
     @Requires
-    private final InjectionContext injectionContext = null;
+    private InjectionContext injectionContext;
+
+    @Requires
+    private ArtifactBuilder artifactBuilder;
 
 
-    private final ArtifactModelManager artifactModelManager = new ArtifactModelManager();
+    private final ArtifactModelManager artifactModelManager;
+
+    private final DeploymentServiceMonitor deploymentServiceTracker;
+
+    public BasicDeploymentService() {
+        this.artifactModelManager = new ArtifactModelManager();
+        this.deploymentServiceTracker = new DeploymentServiceMonitor(this, artifactBuilder, artifactModelManager);
+    }
+
 
     @Validate
     public void start() {
         final ThreadFactory threadFactory = Executors.defaultThreadFactory();
-       this.executorService = Executors.newFixedThreadPool(10, new ThreadFactory() {
+        this.executorService = Executors.newFixedThreadPool(10, new ThreadFactory() {
            @Override
            public Thread newThread(Runnable r) {
                Thread thread = threadFactory.newThread(r);
@@ -88,13 +100,15 @@ public class BasicDeploymentService implements DeploymentService {
            }
        });
 
-       // this.executorService = Executors.newCachedThreadPool();
-        //this.executorService = Executors.newScheduledThreadPool(200);
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
+
+        // Start thread
+        deploymentServiceTracker.start();
     }
 
     @Invalidate
     public void stop() {
+        deploymentServiceTracker.stopTracking();
         executorService.shutdown();
     }
 
@@ -154,7 +168,7 @@ public class BasicDeploymentService implements DeploymentService {
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setState(state);
         deploymentStatusReport.setElapsedTime(elapsedTime);
-        LOGGER.info("Time elapsed ''{0}'' ms" , elapsedTime);
+        LOGGER.info("Time elapsed ''{0}'' ms for processing artifacts ''{1}''" , elapsedTime, artifacts);
 
 
         /*Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);

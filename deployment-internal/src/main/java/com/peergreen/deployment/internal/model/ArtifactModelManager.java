@@ -16,8 +16,14 @@
 package com.peergreen.deployment.internal.model;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class ArtifactModelManager {
 
@@ -41,6 +47,23 @@ public class ArtifactModelManager {
 
     public InternalArtifactModel getView(URI uri) {
         return artifactsByURI.get(uri);
+    }
+
+    public Collection<URI> getDeployedRootURIs() {
+        List<URI> uris = new ArrayList<URI>();
+        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries = artifactsByURI.entrySet();
+        Iterator<Entry<URI, DefaultArtifactModel>> iterator = artifactsEntries.iterator();
+        while (iterator.hasNext()) {
+            Entry<URI, DefaultArtifactModel> entry = iterator.next();
+            DefaultArtifactModel artifactModel = entry.getValue();
+            if (artifactModel.isUndeployed()) {
+                continue;
+            }
+            uris.add(entry.getKey());
+
+        }
+
+        return uris;
     }
 
 }

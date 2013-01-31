@@ -17,4 +17,5 @@ package com.peergreen.deployment.report;
 
 public interface DeploymentStatusReport {
 
+    boolean hasFailed();
 }
