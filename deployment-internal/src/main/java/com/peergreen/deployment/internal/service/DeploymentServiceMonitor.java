@@ -91,6 +91,14 @@ public class DeploymentServiceMonitor extends Thread {
                 deploymentService.process(toUndeploy, DeploymentMode.UNDEPLOY);
             }
 
+            // Do not actively scan all deployed artifacts
+            // TODO make sleep time configurable
+            try {
+                Thread.sleep(500l);
+            } catch (InterruptedException e) {
+                // Thread has been externally interrupted during sleep, stop the thread
+                stopTracking();
+            }
 
         }
     }

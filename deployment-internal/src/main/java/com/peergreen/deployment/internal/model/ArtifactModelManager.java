@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,18 +50,19 @@ public class ArtifactModelManager {
         return artifactsByURI.get(uri);
     }
 
+    /**
+     * @return a snapshot view of the deployed URIs
+     */
     public Collection<URI> getDeployedRootURIs() {
         List<URI> uris = new ArrayList<URI>();
-        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries = artifactsByURI.entrySet();
-        Iterator<Entry<URI, DefaultArtifactModel>> iterator = artifactsEntries.iterator();
-        while (iterator.hasNext()) {
-            Entry<URI, DefaultArtifactModel> entry = iterator.next();
-            DefaultArtifactModel artifactModel = entry.getValue();
-            if (artifactModel.isUndeployed()) {
+        // Make a copy
+        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries = new HashSet<>(artifactsByURI.entrySet());
+        for (Entry<URI, DefaultArtifactModel> entry : artifactsEntries) {
+            // Exclude artifacts being un-deployed
+            if (entry.getValue().isUndeployed()) {
                 continue;
             }
             uris.add(entry.getKey());
-
         }
 
         return uris;
