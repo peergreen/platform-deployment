@@ -18,6 +18,7 @@ package com.peergreen.deployment.internal.model;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,7 +35,7 @@ public class ArtifactModelManager {
     private final Map<URI, DefaultArtifactModel> artifactsByURI;
 
     public ArtifactModelManager() {
-        this.artifactsByURI = new HashMap<URI, DefaultArtifactModel>();
+        this.artifactsByURI = Collections.synchronizedMap(new HashMap<URI, DefaultArtifactModel>());
     }
 
     public void addArtifactModel(URI uri, DefaultArtifactModel artifactModel) {
@@ -55,8 +56,11 @@ public class ArtifactModelManager {
      */
     public Collection<URI> getDeployedRootURIs() {
         List<URI> uris = new ArrayList<URI>();
-        // Make a copy
-        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries = new HashSet<>(artifactsByURI.entrySet());
+        // Make a copy in a synchronized block to avoid concurrent modification exceptions
+        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries;
+        synchronized (artifactsByURI) {
+            artifactsEntries = new HashSet<>(artifactsByURI.entrySet());
+        }
         for (Entry<URI, DefaultArtifactModel> entry : artifactsEntries) {
             // Exclude artifacts being un-deployed
             if (entry.getValue().isUndeployed()) {
