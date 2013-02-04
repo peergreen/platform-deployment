@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,20 +15,18 @@
  */
 package com.peergreen.deployment.internal.model;
 
-import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.model.ArtifactModel;
+import java.net.URI;
 
-public interface InternalArtifactModel extends ArtifactModel {
+import com.peergreen.deployment.model.ArtifactModelManager;
 
-    IFacetArtifact getFacetArtifact();
+/**
+ * Interface used internally by the deployment component.
+ * @author Florent Benoit
+ */
+public interface InternalArtifactModelManager extends ArtifactModelManager {
 
-    Iterable<InternalWire> getInternalWires(Class<?>... flags);
-    Iterable<InternalWire> getInternalToWires(Class<?>... flags);
-    Iterable<InternalWire> getInternalFromWires(Class<?>... flags);
 
-    void addWire(InternalWire wire);
+    InternalArtifactModel getArtifactModel(URI uri);
 
-    //FIXME : add flags ??
-    void setUndeployed(boolean undeployed);
-    boolean isUndeployed();
+    void addArtifactModel(URI uri, InternalArtifactModel artifactModel);
 }

@@ -21,29 +21,39 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class ArtifactModelManager {
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
+
+import com.peergreen.deployment.model.ArtifactModelManager;
+
+@Component
+@Provides
+@Instantiate(name="Default Artifact Model Manager")
+public class DefaultArtifactModelManager implements ArtifactModelManager, InternalArtifactModelManager {
 
     /**
      * Map between the root artifact URI and the associated artifact model.
      */
-    private final Map<URI, DefaultArtifactModel> artifactsByURI;
+    private final Map<URI, InternalArtifactModel> artifactsByURI;
 
-    public ArtifactModelManager() {
-        this.artifactsByURI = Collections.synchronizedMap(new HashMap<URI, DefaultArtifactModel>());
+    public DefaultArtifactModelManager() {
+        this.artifactsByURI = Collections.synchronizedMap(new HashMap<URI, InternalArtifactModel>());
     }
 
-    public void addArtifactModel(URI uri, DefaultArtifactModel artifactModel) {
+    @Override
+    public void addArtifactModel(URI uri, InternalArtifactModel artifactModel) {
         artifactsByURI.put(uri, artifactModel);
     }
 
 
-    public DefaultArtifactModel getArtifactModel(URI uri) {
+    @Override
+    public InternalArtifactModel getArtifactModel(URI uri) {
         return artifactsByURI.get(uri);
     }
 
@@ -54,14 +64,15 @@ public class ArtifactModelManager {
     /**
      * @return a snapshot view of the deployed URIs
      */
+    @Override
     public Collection<URI> getDeployedRootURIs() {
         List<URI> uris = new ArrayList<URI>();
         // Make a copy in a synchronized block to avoid concurrent modification exceptions
-        Set<Entry<URI, DefaultArtifactModel>> artifactsEntries;
+        Set<Entry<URI, InternalArtifactModel>> artifactsEntries;
         synchronized (artifactsByURI) {
             artifactsEntries = new HashSet<>(artifactsByURI.entrySet());
         }
-        for (Entry<URI, DefaultArtifactModel> entry : artifactsEntries) {
+        for (Entry<URI, InternalArtifactModel> entry : artifactsEntries) {
             // Exclude artifacts being un-deployed
             if (entry.getValue().isUndeployed()) {
                 continue;

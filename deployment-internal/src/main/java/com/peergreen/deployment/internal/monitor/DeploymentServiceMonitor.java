@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.service;
+package com.peergreen.deployment.internal.monitor;
 
 import java.io.File;
 import java.net.URI;
@@ -21,11 +21,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Invalidate;
+import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.Validate;
+
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
-import com.peergreen.deployment.internal.model.ArtifactModelManager;
+import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 
 /**
  * This tracker will check for update/deleted artifacts
@@ -33,24 +40,33 @@ import com.peergreen.deployment.internal.model.ArtifactModelManager;
  * if an artifact is deleted, it will send the UNDEPLOY order
  * @author Florent Benoit
  */
+@Component
+@Provides
+@Instantiate(name="Deployment Service artifact monitor tracker")
 public class DeploymentServiceMonitor extends Thread {
 
-    private final DeploymentService deploymentService;
+    @Requires
+    private DeploymentService deploymentService;
 
-    private final ArtifactModelManager artifactModelManager;
+    @Requires
+    private InternalArtifactModelManager artifactModelManager;
 
-    private final ArtifactBuilder artifactBuilder;
+    @Requires
+    private ArtifactBuilder artifactBuilder;
 
     private boolean stopThread = false;
 
-    public DeploymentServiceMonitor(DeploymentService deploymentService, ArtifactBuilder artifactBuilder, ArtifactModelManager artifactModelManager) {
-        this.deploymentService = deploymentService;
-        this.artifactBuilder = artifactBuilder;
-        this.artifactModelManager = artifactModelManager;
+    public DeploymentServiceMonitor() {
         this.setName("Peergreen Deployment artifact monitor");
     }
 
+    @Validate
+    public void startTracking() {
+        this.stopThread = false;
+        start();
+    }
 
+    @Invalidate
     public void stopTracking() {
         this.stopThread = true;
     }

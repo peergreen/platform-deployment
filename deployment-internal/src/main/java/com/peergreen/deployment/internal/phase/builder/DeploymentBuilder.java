@@ -32,11 +32,11 @@ import com.peergreen.deployment.internal.artifact.adapter.ArtifactFacetAdapter;
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.deployment.internal.context.BasicProcessorContext;
 import com.peergreen.deployment.internal.deploymentmode.adapter.DeploymentModeFacetAdapter;
-import com.peergreen.deployment.internal.model.ArtifactModelManager;
 import com.peergreen.deployment.internal.model.Created;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultWire;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.DiscoveryPhase;
 import com.peergreen.deployment.internal.phase.Phases;
@@ -59,13 +59,13 @@ public class DeploymentBuilder {
 
     private final InjectionContext injectionContext;
 
-    private final ArtifactModelManager artifactModelManager;
+    private final InternalArtifactModelManager artifactModelManager;
 
     private final FacetCapabilityAdapter<Artifact> artifactFacetAdapter;
 
     private final FacetCapabilityAdapter<DeploymentMode> deploymentModeFacetCapabilityAdapter;
 
-    public DeploymentBuilder(ArtifactModelManager artifactModelManager, InjectionContext injectionContext) {
+    public DeploymentBuilder(InternalArtifactModelManager artifactModelManager, InjectionContext injectionContext) {
         this.artifactModelManager = artifactModelManager;
         this.injectionContext = injectionContext;
         this.artifactFacetAdapter = new ArtifactFacetAdapter();
@@ -73,14 +73,14 @@ public class DeploymentBuilder {
     }
 
 
-    protected void addInnerArtifacts(List<Artifact> artifacts, Artifact artifact, ArtifactModelManager artifactModelManager) {
+    protected void addInnerArtifacts(List<Artifact> artifacts, Artifact artifact, InternalArtifactModelManager artifactModelManager) {
         // First, add ourself
         if (!artifacts.contains(artifact)) {
             artifacts.add(artifact);
         }
 
         // Then add all new dependencies
-        DefaultArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
+        InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
         for (InternalWire wire : artifactModel.getInternalFromWires()) {
             InternalArtifactModel child = wire.getInternalTo();
             addInnerArtifacts(artifacts, child.getFacetArtifact(), artifactModelManager);
@@ -90,8 +90,6 @@ public class DeploymentBuilder {
 
 
     public Task buildTaskModel(List<Artifact> taskArtifacts, DeploymentMode deploymentMode, TaskExecutionHolder taskExecutionHolder, InternalArtifactModel rootArtifactModel) {
-        long tStart = System.currentTimeMillis();
-
         // Build a new deployment named Phases
         Phases phases = new Phases("Phases");
 
@@ -136,7 +134,7 @@ public class DeploymentBuilder {
             taskExecutionHolder.getSubstituteExecutionContextProvider().addGroup(artifactGroup, mutableExecutionContext);
 
             // Existing Artifact model
-            DefaultArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
+            InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
 
 
             boolean createdArtifactModel = false;

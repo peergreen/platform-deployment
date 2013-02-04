@@ -40,10 +40,9 @@ import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.model.ArtifactModelManager;
 import com.peergreen.deployment.internal.model.Created;
-import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
@@ -78,17 +77,13 @@ public class BasicDeploymentService implements DeploymentService {
     @Requires
     private ArtifactBuilder artifactBuilder;
 
-
-    private final ArtifactModelManager artifactModelManager;
-
-    private final DeploymentServiceMonitor deploymentServiceTracker;
+    @Requires
+    private InternalArtifactModelManager artifactModelManager;
 
     private final ThreadFactory threadFactory;
 
 
     public BasicDeploymentService() {
-        this.artifactModelManager = new ArtifactModelManager();
-        this.deploymentServiceTracker = new DeploymentServiceMonitor(this, artifactBuilder, artifactModelManager);
         this.threadFactory = new PeergreenThreadFactory(Executors.defaultThreadFactory(), "Deployment Executor");
     }
 
@@ -96,16 +91,11 @@ public class BasicDeploymentService implements DeploymentService {
     @Validate
     public void start() {
         this.executorService = Executors.newFixedThreadPool(10, threadFactory);
-
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
-
-        // Start thread
-        deploymentServiceTracker.start();
     }
 
     @Invalidate
     public void stop() {
-        deploymentServiceTracker.stopTracking();
         executorService.shutdown();
     }
 
@@ -223,7 +213,7 @@ public class BasicDeploymentService implements DeploymentService {
         } catch (URISyntaxException e) {
             throw new ArtifactStatusReportException("Unable to get a report for an invalid URI", e);
         }
-        DefaultArtifactModel artifactModel = artifactModelManager.getArtifactModel(uri);
+        InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(uri);
         if (artifactModel == null) {
             throw new ArtifactStatusReportException("No artifact model found for the given URI'");
         }
