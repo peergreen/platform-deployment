@@ -13,25 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.model;
+package com.peergreen.deployment.tracker;
 
-import java.net.URI;
-import java.util.Collection;
-
-import com.peergreen.deployment.model.ArtifactModelManager;
+import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.DeploymentMode;
 
 /**
- * Interface used internally by the deployment component.
+ * Notification by the deployment service that an artifact is being handled or untracked.
  * @author Florent Benoit
  */
-public interface InternalArtifactModelManager extends ArtifactModelManager {
+public interface DeploymentServiceTracker {
 
-
-    InternalArtifactModel getArtifactModel(URI uri);
-
-    void addArtifactModel(URI uri, InternalArtifactModel artifactModel);
-
-    Collection<InternalArtifactModel> getDeployedRootArtifacts();
-
-    void updateLengthLastModified(InternalArtifactModel artifactModel);
+    void onChange(Artifact artifact, DeploymentMode deploymentMode);
 }

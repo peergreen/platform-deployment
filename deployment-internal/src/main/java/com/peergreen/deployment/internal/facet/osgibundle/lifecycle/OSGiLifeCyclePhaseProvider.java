@@ -26,25 +26,29 @@ public class OSGiLifeCyclePhaseProvider implements FacetLifeCyclePhaseProvider<O
 
     private final List<String> deployPhases;
     private final List<String> undeployPhases;
+    private final List<String> updatePhases;
 
     public OSGiLifeCyclePhaseProvider() {
         this.deployPhases = new ArrayList<String>();
         deployPhases.add("INSTALL");
         deployPhases.add("START");
 
-
         this.undeployPhases = new ArrayList<String>();
         undeployPhases.add("STOP");
         undeployPhases.add("UNINSTALL");
 
+        this.updatePhases = new ArrayList<String>();
+        updatePhases.add("UPDATE");
+        updatePhases.add("START");
     }
 
     @Override
     public List<String> getLifeCyclePhases(DeploymentMode deploymentMode) {
         switch (deploymentMode) {
             case DEPLOY:
-            case UPDATE:
                 return deployPhases;
+            case UPDATE:
+                return updatePhases;
             case UNDEPLOY:
                 return undeployPhases;
                 default : throw new IllegalStateException("Deployment mode '" + deploymentMode + "' not supported");

@@ -26,4 +26,9 @@ public interface ArtifactModel {
 
     boolean isLeaf();
 
+
+    long getLastModified();
+    long getArtifactLength();
+
+
 }

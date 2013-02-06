@@ -13,25 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.model;
+package com.peergreen.deployment.monitor;
 
-import java.net.URI;
-import java.util.Collection;
+public interface URITrackerManager extends URITracker {
 
-import com.peergreen.deployment.model.ArtifactModelManager;
-
-/**
- * Interface used internally by the deployment component.
- * @author Florent Benoit
- */
-public interface InternalArtifactModelManager extends ArtifactModelManager {
-
-
-    InternalArtifactModel getArtifactModel(URI uri);
-
-    void addArtifactModel(URI uri, InternalArtifactModel artifactModel);
-
-    Collection<InternalArtifactModel> getDeployedRootArtifacts();
-
-    void updateLengthLastModified(InternalArtifactModel artifactModel);
 }

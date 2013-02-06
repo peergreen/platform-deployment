@@ -29,8 +29,11 @@ import java.util.Set;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
 
 import com.peergreen.deployment.model.ArtifactModelManager;
+import com.peergreen.deployment.monitor.URITrackerException;
+import com.peergreen.deployment.monitor.URITrackerManager;
 
 @Component
 @Provides
@@ -42,6 +45,12 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
      */
     private final Map<URI, InternalArtifactModel> artifactsByURI;
 
+    /**
+     * URI tracker.
+     */
+    @Requires
+    private URITrackerManager uriTrackerManager;
+
     public DefaultArtifactModelManager() {
         this.artifactsByURI = Collections.synchronizedMap(new HashMap<URI, InternalArtifactModel>());
     }
@@ -50,7 +59,6 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     public void addArtifactModel(URI uri, InternalArtifactModel artifactModel) {
         artifactsByURI.put(uri, artifactModel);
     }
-
 
     @Override
     public InternalArtifactModel getArtifactModel(URI uri) {
@@ -82,5 +90,46 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
 
         return uris;
     }
+
+    @Override
+    public Collection<InternalArtifactModel> getDeployedRootArtifacts() {
+        List<InternalArtifactModel> artifactModels = new ArrayList<InternalArtifactModel>();
+        // Make a copy in a synchronized block to avoid concurrent modification exceptions
+        Set<InternalArtifactModel> artifactModelsSet;
+        synchronized (artifactsByURI) {
+            artifactModelsSet = new HashSet<>(artifactsByURI.values());
+        }
+        for (InternalArtifactModel artifactModel : artifactModelsSet) {
+            // Exclude artifacts being un-deployed
+            if (artifactModel.isUndeployed()) {
+                continue;
+            }
+            artifactModels.add(artifactModel);
+        }
+
+        return artifactModels;
+    }
+
+    @Override
+    public void updateLengthLastModified(InternalArtifactModel artifactModel) {
+        URI uri = artifactModel.getFacetArtifact().uri();
+        try {
+            artifactModel.setLastModified(uriTrackerManager.getLastModified(uri));
+        } catch (URITrackerException e) {
+            // Unable to read
+            artifactModel.setLastModified(-1);
+        }
+
+        try {
+            artifactModel.setArtifactLength(uriTrackerManager.getLength(uri));
+        } catch (URITrackerException e) {
+            // Unable to read
+            artifactModel.setArtifactLength(-1);
+        }
+
+    }
+
+
+
 
 }

@@ -31,18 +31,24 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
     private boolean undeployed = false;
 
+    private long lastModified = Long.MIN_VALUE;
+    private long artifactLength = Long.MIN_VALUE;
+    private long checkingArtifactLength = Long.MIN_VALUE;
+
+
     public DefaultArtifactModel(IFacetArtifact facetArtifact) {
         this.facetArtifact = facetArtifact;
         this.wires = new HashSet<InternalWire>();
         this.fromWires = new HashSet<InternalWire>();
         this.toWires = new HashSet<InternalWire>();
-
     }
 
+    @Override
     public void setUndeployed(boolean undeployed) {
         this.undeployed = undeployed;
     }
 
+    @Override
     public boolean isUndeployed() {
         return undeployed;
     }
@@ -121,6 +127,36 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
         return flagsWire;
 
+    }
+
+    @Override
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    @Override
+    public long getArtifactLength() {
+        return artifactLength;
+    }
+
+    @Override
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    @Override
+    public void setArtifactLength(long artifactLength) {
+        this.artifactLength = artifactLength;
+    }
+
+    @Override
+    public void setCheckingArtifactLength(long checkingArtifactLength) {
+        this.checkingArtifactLength = checkingArtifactLength;
+    }
+
+    @Override
+    public long getCheckingArtifactLength() {
+        return checkingArtifactLength;
     }
 
 

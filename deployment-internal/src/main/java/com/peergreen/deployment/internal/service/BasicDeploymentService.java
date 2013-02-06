@@ -96,6 +96,7 @@ public class BasicDeploymentService implements DeploymentService {
 
     @Invalidate
     public void stop() {
+        // stop the threads
         executorService.shutdown();
     }
 
@@ -155,7 +156,7 @@ public class BasicDeploymentService implements DeploymentService {
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setState(state);
         deploymentStatusReport.setElapsedTime(elapsedTime);
-        LOGGER.info("Time elapsed ''{0}'' ms for processing artifacts ''{1}''" , elapsedTime, artifacts);
+        LOGGER.info("[{0}] Artifacts ''{1}'' in ''{2}'' ms." , deploymentMode, artifacts, elapsedTime);
 
 
         /*Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);

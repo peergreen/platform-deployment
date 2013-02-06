@@ -28,7 +28,13 @@ public interface InternalArtifactModel extends ArtifactModel {
 
     void addWire(InternalWire wire);
 
+    void setLastModified(long lastModified);
+    void setArtifactLength(long length);
+    void setCheckingArtifactLength(long length);
+    long getCheckingArtifactLength();
+
     //FIXME : add flags ??
     void setUndeployed(boolean undeployed);
     boolean isUndeployed();
+
 }

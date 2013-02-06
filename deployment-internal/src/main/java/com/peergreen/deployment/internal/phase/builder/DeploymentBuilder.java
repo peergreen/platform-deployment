@@ -54,8 +54,11 @@ import com.peergreen.tasks.model.UnitOfWork;
 import com.peergreen.tasks.model.group.Group;
 import com.peergreen.tasks.model.group.MutableExecutionContext;
 
+/**
+ * Deployments Builder creates the task model that will be executed in order to deploy/update/undeploy a given set of artifacts.
+ * @author Florent Benoit
+ */
 public class DeploymentBuilder {
-
 
     private final InjectionContext injectionContext;
 
@@ -174,6 +177,11 @@ public class DeploymentBuilder {
                 artifactModel.setUndeployed(true);
             }
 
+            // Needs to update the lastModified/Length
+            if (DeploymentMode.UPDATE == deploymentMode || DeploymentMode.DEPLOY == deploymentMode) {
+                // Ask the manager to update this artifact model
+                artifactModelManager.updateLengthLastModified(artifactModel);
+            }
 
             // Artifact is retrieved from the model
             IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();

@@ -24,4 +24,5 @@ public interface ArtifactModelManager {
      * @return root artifacts URIs.
      */
     Collection<URI> getDeployedRootURIs();
+
 }
