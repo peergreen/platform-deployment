@@ -31,4 +31,7 @@ public interface ArtifactModel {
     long getArtifactLength();
 
 
+    boolean isDeploymentRoot();
+    boolean isPersistent();
+
 }

@@ -36,5 +36,6 @@ public interface InternalArtifactModel extends ArtifactModel {
     //FIXME : add flags ??
     void setUndeployed(boolean undeployed);
     boolean isUndeployed();
+    void setDeploymentRoot(boolean value);
 
 }

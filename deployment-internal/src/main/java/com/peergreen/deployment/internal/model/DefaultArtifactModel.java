@@ -24,6 +24,8 @@ import com.peergreen.deployment.model.Wire;
 public class DefaultArtifactModel implements InternalArtifactModel {
 
     private final IFacetArtifact facetArtifact;
+    private boolean deploymentRoot = false;
+    private boolean persistent = false;
 
     private final Set<InternalWire> wires;
     private final Set<InternalWire> fromWires;
@@ -97,6 +99,11 @@ public class DefaultArtifactModel implements InternalArtifactModel {
     }
 
     @Override
+    public boolean isDeploymentRoot() {
+        return deploymentRoot;
+    }
+
+    @Override
     public Iterable<InternalWire> getInternalWires(Class<?>... flags) {
         return getFlags(wires, flags);
     }
@@ -159,5 +166,15 @@ public class DefaultArtifactModel implements InternalArtifactModel {
         return checkingArtifactLength;
     }
 
+    public void setDeploymentRoot(boolean rootDeployment) {
+        deploymentRoot = rootDeployment;
+    }
 
+    public boolean isPersistent() {
+        return persistent;
+    }
+
+    public void setPersistent(boolean persistent) {
+        this.persistent = persistent;
+    }
 }

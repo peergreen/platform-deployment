@@ -159,18 +159,26 @@ public class DeploymentBuilder {
             // model already exists, update it
 
             // do we have a parent ?
-            if (deploymentMode  == DeploymentMode.DEPLOY && rootArtifactModel != null) {
-                // we have a parent that want to use this artifact, add a link to this one
-                InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel, WireType.USE);
-                // wire for creating node ? add created flag
-                if (createdArtifactModel) {
-                    wire.addFlag(Created.class);
-                }
-                // Add wire
-                rootArtifactModel.addWire(wire);
+            if ((deploymentMode == DeploymentMode.DEPLOY)) {
+                if ((rootArtifactModel != null)) {
+                    // we have a parent that want to use this artifact, add a link to this one
+                    InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel, WireType.USE);
 
-                // and reverse order (bi-directional link)
-                artifactModel.addWire(wire);
+                    // first order
+                    rootArtifactModel.addWire(wire);
+
+                    // and reverse order (bi-directional link)
+                    artifactModel.addWire(wire);
+
+                    // wire for creating node ? add created flag
+                    if (createdArtifactModel) {
+                        wire.addFlag(Created.class);
+                    }
+                } else {
+                    // no parent, this is a root artifact (explicitly deployed)
+                    // Mark the model as a deployment-root
+                    artifactModel.setDeploymentRoot(true);
+                }
             }
 
             if (DeploymentMode.UNDEPLOY == deploymentMode) {
