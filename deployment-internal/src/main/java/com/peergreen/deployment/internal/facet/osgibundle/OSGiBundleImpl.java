@@ -17,6 +17,8 @@ package com.peergreen.deployment.internal.facet.osgibundle;
 
 import java.net.MalformedURLException;
 
+import org.osgi.framework.Constants;
+
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
@@ -29,7 +31,7 @@ public class OSGiBundleImpl implements OSGiBundle {
     private final String location;
 
     public OSGiBundleImpl(Archive archive) throws ArchiveException {
-        this.symbolicName = archive.getManifestEntries().get("Symbolic-Name");
+        this.symbolicName = archive.getManifestEntries().get(Constants.BUNDLE_SYMBOLICNAME);
         try {
             this.location = archive.getURI().toURL().toString();
         } catch (MalformedURLException e) {
