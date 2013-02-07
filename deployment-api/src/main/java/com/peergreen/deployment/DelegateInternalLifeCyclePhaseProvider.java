@@ -17,10 +17,6 @@ package com.peergreen.deployment;
 
 import java.util.List;
 
-import com.peergreen.deployment.DeploymentMode;
-import com.peergreen.deployment.FacetLifeCyclePhaseProvider;
-import com.peergreen.deployment.InternalFacetLifeCyclePhaseProvider;
-
 public class DelegateInternalLifeCyclePhaseProvider<T> implements InternalFacetLifeCyclePhaseProvider {
 
     private final Class<T> facetType;

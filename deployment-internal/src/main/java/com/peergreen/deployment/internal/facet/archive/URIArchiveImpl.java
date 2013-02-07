@@ -32,9 +32,12 @@ import java.util.zip.ZipEntry;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import com.peergreen.deployment.facet.Facet;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
+import com.peergreen.deployment.internal.facet.archive.builder.UriArchiveFacetBuilder;
 
+@Facet(UriArchiveFacetBuilder.ID)
 public class URIArchiveImpl implements Archive {
 
     /**

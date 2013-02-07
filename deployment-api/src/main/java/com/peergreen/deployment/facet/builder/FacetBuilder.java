@@ -1,5 +1,5 @@
-/**
- * Copyright 2012 Peergreen S.A.S.
+/*
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,12 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.processor;
 
-import com.peergreen.deployment.HandlerProcessor;
-import com.peergreen.deployment.StatisticsProcessor;
-import com.peergreen.tasks.model.Job;
+package com.peergreen.deployment.facet.builder;
 
-public interface InternalProcessor extends Job, HandlerProcessor, StatisticsProcessor, NamedProcessor {
-
+/**
+ * Created with IntelliJ IDEA.
+ * User: guillaume
+ * Date: 17/01/13
+ * Time: 15:40
+ * To change this template use File | Settings | File Templates.
+ */
+public interface FacetBuilder {
+    void build(BuilderContext context) throws FacetBuilderException;
 }

@@ -23,6 +23,7 @@ import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
+import com.peergreen.deployment.internal.facet.osgibundle.builder.BundleFacetBuilder;
 
 /**
  * Install the OSGi bundles on the gateway.
@@ -52,6 +53,7 @@ public class OSGiBundleInstallProcessor implements Processor<OSGiBundle> {
             }
             throw new ProcessorException("Unable to install the bundle", e);
         }
+       processorContext.addFacet(Bundle.class, bundle, BundleFacetBuilder.ID);
 
     }
 

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 Peergreen S.A.S.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.peergreen.deployment.internal.model.persistence.read;
 
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
@@ -11,7 +27,6 @@ import javax.xml.stream.XMLStreamReader;
 import com.peergreen.deployment.internal.artifact.FacetArtifact;
 import com.peergreen.deployment.internal.artifact.ImmutableArtifact;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
-import com.peergreen.deployment.internal.model.persistence.IncompleteArtifactModel;
 
 /**
  * Created with IntelliJ IDEA.
@@ -22,7 +37,7 @@ import com.peergreen.deployment.internal.model.persistence.IncompleteArtifactMod
  */
 public class ArtifactParser implements Parser {
 
-    private IncompleteArtifactModel incomplete = new IncompleteArtifactModel();
+    private DefaultArtifactModel model;
 
     @Override
     public void build(XMLStreamReader reader) throws XMLStreamException {
@@ -37,9 +52,9 @@ public class ArtifactParser implements Parser {
                             boolean persistent = reader.getAttributeValue(null, "persistent") != null;
                             // TODO Complement with type and persistent attributes
                             try {
-                                incomplete.setModel(new DefaultArtifactModel(new FacetArtifact(new ImmutableArtifact(name, new URI(uri)))));
-                                incomplete.getModel().setDeploymentRoot(root);
-                                incomplete.getModel().setPersistent(persistent);
+                                model = new DefaultArtifactModel(new FacetArtifact(new ImmutableArtifact(name, new URI(uri))));
+                                model.setDeploymentRoot(root);
+                                model.setPersistent(persistent);
                             } catch (URISyntaxException e) {
                                 throw new XMLStreamException(e);
                             }
@@ -47,7 +62,7 @@ public class ArtifactParser implements Parser {
                         if ("facet-builder".equals(reader.getLocalName())) {
                             FacetBuilderParser parser = new FacetBuilderParser();
                             parser.build(reader);
-                            incomplete.getReferences().add(parser.getReference());
+                            model.getFacetArtifact().getFacetBuilders().add(parser.getReference());
                         }
                     }
                     break;
@@ -61,7 +76,7 @@ public class ArtifactParser implements Parser {
                 "artifact".equals(reader.getLocalName());
     }
 
-    public IncompleteArtifactModel getIncompleteArtifact() {
-        return incomplete;
+    public DefaultArtifactModel getIncompleteArtifact() {
+        return model;
     }
 }

@@ -38,12 +38,22 @@ public class BasicProcessorContext implements ProcessorContext {
 
     @Override
     public <Facet> void addFacet(Class<Facet> facetClass, Facet facet) {
-        addFacet(facetClass, facet, null);
+        addFacet(facetClass, facet, null, null);
     }
 
     @Override
     public <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter) {
-        deploymentContext.addFacet(facetClass, facet, facetAdapter);
+        addFacet(facetClass, facet, facetAdapter, null);
+    }
+
+    @Override
+    public <F> void addFacet(Class<F> facetClass, F facet, String facetBuilderId) {
+        addFacet(facetClass, facet, null, facetBuilderId);
+    }
+
+    @Override
+    public <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId) {
+        deploymentContext.addFacet(facetClass, facet, facetAdapter, facetBuilderId);
     }
 
     @Override

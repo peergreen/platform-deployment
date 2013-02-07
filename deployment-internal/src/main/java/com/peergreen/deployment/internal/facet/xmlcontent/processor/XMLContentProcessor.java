@@ -17,7 +17,6 @@ package com.peergreen.deployment.internal.facet.xmlcontent.processor;
 
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.xml.stream.StreamFilter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;

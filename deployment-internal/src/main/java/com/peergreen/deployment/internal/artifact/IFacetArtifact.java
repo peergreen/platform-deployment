@@ -24,7 +24,7 @@ import org.osgi.resource.Resource;
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
-import com.peergreen.deployment.internal.processor.InternalProcessor;
+import com.peergreen.deployment.internal.processor.NamedProcessor;
 
 /**
  * Allows to modify the artifact
@@ -34,11 +34,11 @@ import com.peergreen.deployment.internal.processor.InternalProcessor;
 public interface IFacetArtifact extends Artifact, Resource {
 
     <Facet> Facet removeFacet(Class<Facet> facetClass);
-    <Facet> void addFacet(Class<Facet> facetClass, Facet facet, InternalProcessor processor);
-    <Facet> void addFacet(Facet facet, InternalProcessor processor);
+    <Facet> void addFacet(Class<Facet> facetClass, Facet facet, NamedProcessor processor);
+    <Facet> void addFacet(Facet facet, NamedProcessor processor);
 
 
-    void addProcessorTime(String phase, long totalTime, InternalProcessor processor);
+    void addProcessorTime(String phase, long totalTime, NamedProcessor processor);
     void addTime(long time);
     long getTotalTime();
 
@@ -50,5 +50,6 @@ public interface IFacetArtifact extends Artifact, Resource {
 
     Collection<FacetInfo> getFacets();
     Collection<ProcessorInfo> getProcessors();
+    List<FacetBuilderReference> getFacetBuilders();
 
 }

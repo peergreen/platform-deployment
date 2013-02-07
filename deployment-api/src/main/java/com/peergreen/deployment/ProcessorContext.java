@@ -27,6 +27,8 @@ public interface ProcessorContext {
     <Facet> Facet removeFacet(Class<Facet> facetClass);
     <Facet> void addFacet(Class<Facet> facetClass, Facet facet);
     <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter);
+    <F> void addFacet(Class<F> facetClass, F facet, String facetBuilderId);
+    <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId);
 
     /**
      * New artifacts to deploy

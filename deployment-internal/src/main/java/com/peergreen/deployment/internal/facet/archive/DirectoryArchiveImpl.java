@@ -31,9 +31,12 @@ import java.util.jar.Manifest;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import com.peergreen.deployment.facet.Facet;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
+import com.peergreen.deployment.internal.facet.archive.builder.DirectoryArchiveFacetBuilder;
 
+@Facet(DirectoryArchiveFacetBuilder.ID)
 public class DirectoryArchiveImpl implements Archive {
 
     /**

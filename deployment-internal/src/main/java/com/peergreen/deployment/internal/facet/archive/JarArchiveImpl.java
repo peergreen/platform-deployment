@@ -16,7 +16,6 @@
 package com.peergreen.deployment.internal.facet.archive;
 
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -34,14 +33,17 @@ import java.util.zip.ZipEntry;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import com.peergreen.deployment.facet.Facet;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
+import com.peergreen.deployment.internal.facet.archive.builder.JarArchiveFacetBuilder;
 
 /**
  * Creates wrapper around jar file.
  * @author Florent Benoit
  */
-public class JarArchiveImpl  implements Archive {
+@Facet(JarArchiveFacetBuilder.ID)
+public class JarArchiveImpl implements Archive {
 
     /**
      * Logger.

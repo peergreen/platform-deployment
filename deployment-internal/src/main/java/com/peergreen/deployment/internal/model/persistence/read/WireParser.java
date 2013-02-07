@@ -1,3 +1,19 @@
+/*
+ * Copyright 2013 Peergreen S.A.S.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.peergreen.deployment.internal.model.persistence.read;
 
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
@@ -9,7 +25,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultWire;
-import com.peergreen.deployment.internal.model.persistence.IncompleteArtifactModel;
 import com.peergreen.deployment.model.WireType;
 
 /**
@@ -21,9 +36,9 @@ import com.peergreen.deployment.model.WireType;
  */
 public class WireParser implements Parser {
 
-    private Map<String, IncompleteArtifactModel> models;
+    private Map<String, DefaultArtifactModel> models;
 
-    public WireParser(Map<String, IncompleteArtifactModel> models) {
+    public WireParser(Map<String, DefaultArtifactModel> models) {
         this.models = models;
     }
 
@@ -50,11 +65,11 @@ public class WireParser implements Parser {
     }
 
     private DefaultArtifactModel find(String uri) throws XMLStreamException {
-        IncompleteArtifactModel model = models.get(uri);
+        DefaultArtifactModel model = models.get(uri);
         if (model == null) {
             throw new XMLStreamException("Cannot find model for URI " + uri);
         }
-        return model.getModel();
+        return model;
     }
 
     private boolean endingElement(XMLStreamReader reader) {

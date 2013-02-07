@@ -26,6 +26,8 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.FacetCapabilityAdapter;
+import com.peergreen.deployment.facet.Facet;
+import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
@@ -98,7 +100,11 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
     @Override
     public <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter) {
+        addFacet(facetClass, facet, facetAdapter, null);
+    }
 
+    @Override
+    public <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId) {
         // Try to build capability based on the facet
         if (facetAdapter != null) {
             Capability capability = facetAdapter.getCapability(currentArtifact, facet);
@@ -110,11 +116,27 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
         // Add the facet capability in all cases
         currentArtifact.addCapability(new FacetCapabilityImpl(currentArtifact, facetClass));
 
+        // Store the facetBuilderId
+        // Id provided as a direct method parameter is preferred over the ones found in the annotations
+        String builderId = facetBuilderId;
+        if (facetBuilderId == null) {
+            Facet annotation = facet.getClass().getAnnotation(Facet.class);
+            if (annotation != null) {
+                builderId = annotation.value();
+            }
+        }
+
+        if (builderId != null) {
+            FacetBuilderReference ref = new FacetBuilderReference(builderId);
+            if (!currentArtifact.getFacetBuilders().contains(ref)) {
+                currentArtifact.getFacetBuilders().add(ref);
+            }
+        }
 
         // Add the facet
         currentArtifact.addFacet(facetClass, facet, currentProcessor.getCurrent());
-    }
 
+    }
 
     @Override
     public ArtifactBuilder getArtifactBuilder() {
