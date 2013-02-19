@@ -16,13 +16,16 @@
 package com.peergreen.deployment.internal.model;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -230,8 +233,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     public void store() {
 
         // First, we write on the temporary file
-
-        try (Writer writer = new FileWriter(persistenceFileTmp)) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(persistenceFile); Writer writer = new OutputStreamWriter(fileOutputStream, Charset.defaultCharset())) {
             try {
             // store the model
             artifactModelPersistence.store(this, writer);
@@ -263,7 +265,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
 
         Reader reader;
         try {
-            reader = new FileReader(persistenceFile);
+            reader = new InputStreamReader(new FileInputStream(persistenceFile), Charset.defaultCharset());
             artifactModelPersistence.load(this, reader);
         } catch (FileNotFoundException | PersistenceException e) {
             // TODO Auto-generated catch block

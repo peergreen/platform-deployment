@@ -86,13 +86,12 @@ public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
             }
 
             reader.close();
-
-            for (DefaultArtifactModel model : models.values()) {
-
-
-                if (model.isDeploymentRoot()) {
-                    URI uri = model.getFacetArtifact().uri();
-                    artifactModelManager.addArtifactModel(uri, model);
+            if (models != null) {
+                for (DefaultArtifactModel model : models.values()) {
+                    if (model.isDeploymentRoot()) {
+                        URI uri = model.getFacetArtifact().uri();
+                        artifactModelManager.addArtifactModel(uri, model);
+                    }
                 }
             }
 
