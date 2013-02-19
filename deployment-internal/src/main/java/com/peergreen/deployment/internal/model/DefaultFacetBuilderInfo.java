@@ -15,27 +15,41 @@
  */
 package com.peergreen.deployment.internal.model;
 
-import com.peergreen.deployment.FacetBuilderInfo;
+import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 
 /**
  * Defines a basic facet builder data.
  * @author Florent Benoit
  */
-public class DefaultFacetBuilderInfo implements FacetBuilderInfo {
+public class DefaultFacetBuilderInfo implements InternalFacetBuilderInfo {
 
     private String name;
 
     private String provides;
+
+    private Throwable throwable;
+
+    @Override
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    @Override
+    public void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
+    }
 
     @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public void setProvides(String provides) {
         this.provides = provides;
     }

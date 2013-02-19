@@ -28,12 +28,12 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.builder.BuilderContext;
 import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
 import com.peergreen.tasks.context.ExecutionContext;
@@ -56,7 +56,7 @@ public class BasicDeploymentContextTestCase {
     @Mock
     private CurrentProcessor currentProcessor;
 
-    private List<FacetBuilderInfo> facetBuilderInfos;
+    private List<InternalFacetBuilderInfo> facetBuilderInfos;
 
     @BeforeMethod
     public void setUp() throws Exception {

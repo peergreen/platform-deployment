@@ -13,14 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment;
+package com.peergreen.deployment.internal.artifact;
 
-public interface FacetBuilderInfo {
+import com.peergreen.deployment.FacetBuilderInfo;
 
-    String getName();
+/**
+ * Allows to modify the facet builder info
+ * @author Florent Benoit
+ */
+public interface InternalFacetBuilderInfo extends FacetBuilderInfo {
 
-    String getProvides();
-
-    Throwable getThrowable();
-
+    void setThrowable(Throwable throwable);
+    void setName(String name);
+    void setProvides(String provides);
 }

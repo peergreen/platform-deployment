@@ -35,11 +35,11 @@ import org.osgi.framework.BundleContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.facet.builder.BuilderContext;
 import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultArtifactModelManager;
 import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
@@ -79,7 +79,7 @@ public class StAXArtifactModelPersistenceTestCase {
         URI uri = new URI("test:mock");
         when(artifact.uri()).thenReturn(uri);
         when(artifact.name()).thenReturn("mock");
-        List<FacetBuilderInfo> facetBuilderInfos = new ArrayList<>();
+        List<InternalFacetBuilderInfo> facetBuilderInfos = new ArrayList<>();
         DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();
         facetBuilderInfo.setName("hello.builder");
         facetBuilderInfo.setProvides("hello.Facet");

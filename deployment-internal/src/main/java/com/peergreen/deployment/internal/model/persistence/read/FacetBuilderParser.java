@@ -22,7 +22,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import com.peergreen.deployment.FacetBuilderInfo;
+import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 
 /**
@@ -30,7 +30,7 @@ import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
  */
 public class FacetBuilderParser implements Parser {
 
-    private DefaultFacetBuilderInfo facetBuilderInfo;
+    private InternalFacetBuilderInfo facetBuilderInfo;
 
     @Override
     public void build(XMLStreamReader reader) throws XMLStreamException {
@@ -58,7 +58,7 @@ public class FacetBuilderParser implements Parser {
                 "facet-builder".equals(reader.getLocalName());
     }
 
-    public FacetBuilderInfo getBuilder() {
+    public InternalFacetBuilderInfo getBuilder() {
         return facetBuilderInfo;
     }
 }

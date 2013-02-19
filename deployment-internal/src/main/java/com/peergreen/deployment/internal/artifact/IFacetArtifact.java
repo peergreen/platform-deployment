@@ -22,7 +22,6 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 
 import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 import com.peergreen.deployment.internal.processor.NamedProcessor;
@@ -51,6 +50,6 @@ public interface IFacetArtifact extends Artifact, Resource {
 
     Collection<FacetInfo> getFacets();
     Collection<ProcessorInfo> getProcessors();
-    List<FacetBuilderInfo> getFacetBuilders();
+    List<InternalFacetBuilderInfo> getFacetBuilders();
 
 }

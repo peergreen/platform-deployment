@@ -59,8 +59,8 @@ import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.InternalFacetBuilder;
 import com.peergreen.deployment.InternalPersistenceArtifactManager;
 import com.peergreen.deployment.facet.builder.BuilderContext;
-import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.persistence.ArtifactModelPersistence;
 import com.peergreen.deployment.internal.model.persistence.BuilderContextFactory;
 import com.peergreen.deployment.internal.model.persistence.PersistenceException;
@@ -442,7 +442,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
 
         // add all builders required and bound for the given artifact
         IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
-        List<FacetBuilderInfo> facetBuilderInfos = facetArtifact.getFacetBuilders();
+        List<InternalFacetBuilderInfo> facetBuilderInfos = facetArtifact.getFacetBuilders();
         for (FacetBuilderInfo facetBuilderInfo : facetBuilderInfos) {
             InternalFacetBuilder<?> foundFacetBuilder = getFacetBuilder(facetBuilderInfo.getName());
             // not yet found, continue
@@ -560,6 +560,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
      * Apply all the matching builders in a correct oder for the given artifact model.
      * @param artifactModel the model on which we needs to recover the facets.
      */
+    @SuppressWarnings("unchecked")
     protected void applyArtifactFacetBuilder(InternalArtifactModel artifactModel) {
 
         // Facet Artifact ?
@@ -568,29 +569,34 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         List<InternalFacetBuilder<?>> builders = getBuildersWithSatistiedRequirements(artifactModel);
         for (InternalFacetBuilder<?> facetBuilder: builders) {
 
+            String facetBuilderName = facetBuilder.getName();
+
             Class<?> clazz = facetBuilder.getFacetClass();
             @SuppressWarnings("rawtypes")
-            BuilderContext builderContext = builderContextFactory.build(clazz, facetArtifact, facetBuilder.getName());
+            BuilderContext builderContext = builderContextFactory.build(clazz, facetArtifact, facetBuilderName);
 
             // call the builder
             try {
                 facetBuilder.build(builderContext);
-            } catch (FacetBuilderException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (Throwable e) {
+                // We get the root cause and store it in the builder info
+                InternalFacetBuilderInfo facetBuilderInfo = getFacetBuilder(facetArtifact, facetBuilderName);
+                if (facetBuilderInfo != null) {
+                    facetBuilderInfo.setThrowable(e);
+                }
             }
         }
     }
 
 
-    protected boolean referenceFacetBuilder(IFacetArtifact facetArtifact, String facetBuilderName) {
-        List<FacetBuilderInfo> facetBuilderInfos = facetArtifact.getFacetBuilders();
-        for (FacetBuilderInfo facetBuilderInfo :facetBuilderInfos) {
+    protected InternalFacetBuilderInfo getFacetBuilder(IFacetArtifact facetArtifact, String facetBuilderName) {
+        List<InternalFacetBuilderInfo> facetBuilderInfos = facetArtifact.getFacetBuilders();
+        for (InternalFacetBuilderInfo facetBuilderInfo : facetBuilderInfos) {
             if (facetBuilderInfo.getName().equals(facetBuilderName)) {
-                return true;
+                return facetBuilderInfo;
             }
         }
-        return false;
+        return null;
     }
 
 

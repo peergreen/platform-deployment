@@ -29,7 +29,6 @@ import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
 import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 import com.peergreen.deployment.internal.processor.DefaultProcessorInfo;
@@ -56,7 +55,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
     private final Map<Class<?>, FacetInfo> facetInfos;
     private final Set<ProcessorInfo> processorInfos;
-    private final List<FacetBuilderInfo> facetBuildersInfo;
+    private final List<InternalFacetBuilderInfo> facetBuildersInfo;
     private long totalTime = 0;
 
     public FacetArtifact(Artifact wrappedArtifact) {
@@ -179,7 +178,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     }
 
     @Override
-    public List<FacetBuilderInfo> getFacetBuilders() {
+    public List<InternalFacetBuilderInfo> getFacetBuilders() {
         return facetBuildersInfo;
     }
 }
