@@ -26,10 +26,10 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.FacetCapabilityAdapter;
-import com.peergreen.deployment.facet.Facet;
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
+import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
 import com.peergreen.deployment.internal.resource.ProviderResource;
 import com.peergreen.tasks.context.ExecutionContext;
@@ -104,7 +104,7 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
     }
 
     @Override
-    public <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId) {
+    public <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderName) {
         // Try to build capability based on the facet
         if (facetAdapter != null) {
             Capability capability = facetAdapter.getCapability(currentArtifact, facet);
@@ -118,18 +118,22 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
         // Store the facetBuilderId
         // Id provided as a direct method parameter is preferred over the ones found in the annotations
-        String builderId = facetBuilderId;
-        if (facetBuilderId == null) {
-            Facet annotation = facet.getClass().getAnnotation(Facet.class);
+        String builderName = facetBuilderName;
+        if (facetBuilderName == null) {
+            FacetBuilderReference annotation = facet.getClass().getAnnotation(FacetBuilderReference.class);
             if (annotation != null) {
-                builderId = annotation.value();
+                builderName = annotation.value().getName();
             }
         }
 
-        if (builderId != null) {
-            FacetBuilderReference ref = new FacetBuilderReference(builderId);
-            if (!currentArtifact.getFacetBuilders().contains(ref)) {
-                currentArtifact.getFacetBuilders().add(ref);
+        if (builderName != null) {
+            // Build a facet builder with the given facet that is provided by this builder
+            DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();
+            facetBuilderInfo.setName(builderName);
+            facetBuilderInfo.setProvides(facetClass.getName());
+
+            if (!currentArtifact.getFacetBuilders().contains(facetBuilderInfo)) {
+                currentArtifact.getFacetBuilders().add(facetBuilderInfo);
             }
         }
 

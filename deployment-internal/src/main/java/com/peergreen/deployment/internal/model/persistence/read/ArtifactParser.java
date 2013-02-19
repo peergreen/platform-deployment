@@ -21,6 +21,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -46,15 +47,25 @@ public class ArtifactParser implements Parser {
                 case START_ELEMENT:
                     if (PG_NAMESPACE_URI.equals(reader.getNamespaceURI())) {
                         if ("artifact".equals(reader.getLocalName())) {
+                            //FIXME : add constants for all these attributes
                             String uri = reader.getAttributeValue(null, "uri");
                             String name = reader.getAttributeValue(null, "name");
                             boolean root = reader.getAttributeValue(null, "root") != null;
                             boolean persistent = reader.getAttributeValue(null, "persistent") != null;
+                            String lastModifiedStr = reader.getAttributeValue(null, "lastModified");
+                            String artifactLengthStr = reader.getAttributeValue(null, "artifactLength");
+
                             // TODO Complement with type and persistent attributes
                             try {
                                 model = new DefaultArtifactModel(new FacetArtifact(new ImmutableArtifact(name, new URI(uri))));
                                 model.setDeploymentRoot(root);
                                 model.setPersistent(persistent);
+                                if (lastModifiedStr != null) {
+                                    model.setLastModified(Long.parseLong(lastModifiedStr));
+                                }
+                                if (artifactLengthStr != null) {
+                                    model.setArtifactLength(Long.parseLong(artifactLengthStr));
+                                }
                             } catch (URISyntaxException e) {
                                 throw new XMLStreamException(e);
                             }
@@ -62,7 +73,7 @@ public class ArtifactParser implements Parser {
                         if ("facet-builder".equals(reader.getLocalName())) {
                             FacetBuilderParser parser = new FacetBuilderParser();
                             parser.build(reader);
-                            model.getFacetArtifact().getFacetBuilders().add(parser.getReference());
+                            model.getFacetArtifact().getFacetBuilders().add(parser.getBuilder());
                         }
                     }
                     break;

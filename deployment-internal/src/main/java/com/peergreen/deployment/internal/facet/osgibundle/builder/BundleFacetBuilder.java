@@ -25,23 +25,19 @@ import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.builder.FacetBuilderException;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:51
- * To change this template use File | Settings | File Templates.
+ * Defines builder for Bundle facet
+ * @author Guillaume Sauthier
  */
-public class BundleFacetBuilder implements FacetBuilder {
+public class BundleFacetBuilder implements FacetBuilder<Bundle> {
 
-    public static final String ID = "com.peergreen.deployment.internal.facet.osgibundle.builder.bundle";
-    private BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
     public BundleFacetBuilder(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
     }
 
     @Override
-    public void build(BuilderContext context) throws FacetBuilderException {
+    public void build(BuilderContext<Bundle> context) throws FacetBuilderException {
 
         // Lookup the expected OSGiBundle facet (should have been build before)
         OSGiBundle facet = context.getArtifact().as(OSGiBundle.class);
@@ -53,13 +49,16 @@ public class BundleFacetBuilder implements FacetBuilder {
         }
 
         // Rebuild the Bundle facet
-        context.addFacet(Bundle.class,
-                         findBundle(facet),
+        context.addFacet(findBundle(facet),
                          null);
     }
 
     private Bundle findBundle(OSGiBundle facet) throws FacetBuilderException {
         Bundle found = bundleContext.getBundle(facet.location());
+        if (found == null) {
+            // try with reference:
+            found = bundleContext.getBundle("reference:".concat(facet.location()));
+        }
         if (found == null) {
             throw new FacetBuilderException(String.format(
                     "Bundle %s (%s) is missing",

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,15 @@ import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.facet.osgibundle.OSGiBundleImpl;
 
-/**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:51
- * To change this template use File | Settings | File Templates.
- */
-public class OsgiBundleFacetBuilder implements FacetBuilder {
 
-    public static final String ID = "com.peergreen.deployment.internal.facet.osgibundle.builder.osgi";
+/**
+ * Defines builder for OSGi Bundle
+ * @author Florent Benoit
+ */
+public class OsgiBundleFacetBuilder implements FacetBuilder<OSGiBundle> {
 
     @Override
-    public void build(BuilderContext context) throws FacetBuilderException {
+    public void build(BuilderContext<OSGiBundle> context) throws FacetBuilderException {
 
         // Lookup the expected Archive facet (should have been build before)
         Archive archive = context.getArtifact().as(Archive.class);
@@ -49,8 +45,7 @@ public class OsgiBundleFacetBuilder implements FacetBuilder {
 
         // Rebuild the OSGiBundle facet
         try {
-            context.addFacet(OSGiBundle.class,
-                             new OSGiBundleImpl(archive),
+            context.addFacet(new OSGiBundleImpl(archive),
                              null);
         } catch (ArchiveException e) {
             throw new FacetBuilderException(String.format(

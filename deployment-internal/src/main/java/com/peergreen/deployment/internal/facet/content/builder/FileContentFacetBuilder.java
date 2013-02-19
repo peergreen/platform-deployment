@@ -25,26 +25,22 @@ import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.internal.facet.content.FileContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
 
-/**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:51
- * To change this template use File | Settings | File Templates.
- */
-public class FileContentFacetBuilder implements FacetBuilder {
 
-    public static final String ID = "com.peergreen.deployment.internal.facet.content.builder.file";
+/**
+ * Defines builder for File content
+ * @author Guillaume Sauthier
+ */
+public class FileContentFacetBuilder implements FacetBuilder<Content> {
 
     @Override
-    public void build(BuilderContext context) {
-        context.addFacet(Content.class,
-                         new FileContentImpl(getFile(context.getArtifact())),
+    public void build(BuilderContext<Content> context) {
+        context.addFacet(new FileContentImpl(getFile(context.getArtifact())),
                          new ContentFacetAdapter());
     }
 
     protected File getFile(Artifact artifact) {
         return new File(artifact.uri().getPath());
     }
+
 
 }

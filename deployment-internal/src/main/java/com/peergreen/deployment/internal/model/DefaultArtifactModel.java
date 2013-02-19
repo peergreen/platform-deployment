@@ -34,8 +34,8 @@ public class DefaultArtifactModel implements InternalArtifactModel {
     private boolean undeployed = false;
 
     private long lastModified = Long.MIN_VALUE;
-    private long artifactLength = Long.MIN_VALUE;
-    private long checkingArtifactLength = Long.MIN_VALUE;
+    private long artifactLength = 0;
+    private long checkingArtifactLength = 0;
 
 
     public DefaultArtifactModel(IFacetArtifact facetArtifact) {
@@ -166,10 +166,12 @@ public class DefaultArtifactModel implements InternalArtifactModel {
         return checkingArtifactLength;
     }
 
+    @Override
     public void setDeploymentRoot(boolean rootDeployment) {
         deploymentRoot = rootDeployment;
     }
 
+    @Override
     public boolean isPersistent() {
         return persistent;
     }

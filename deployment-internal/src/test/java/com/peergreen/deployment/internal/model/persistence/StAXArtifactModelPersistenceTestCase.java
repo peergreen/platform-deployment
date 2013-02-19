@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,16 +31,18 @@ import java.util.List;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.osgi.framework.BundleContext;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.facet.builder.BuilderContext;
 import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.builder.FacetBuilderException;
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultArtifactModelManager;
+import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.DefaultWire;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.model.ArtifactModel;
@@ -61,12 +63,15 @@ public class StAXArtifactModelPersistenceTestCase {
     @Mock
     private IFacetArtifact artifact2;
 
+    @Mock
+    private BundleContext bundleContext;
+
     private DefaultArtifactModelManager manager;
 
     @BeforeMethod
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        manager = new DefaultArtifactModelManager();
+        manager = new DefaultArtifactModelManager(bundleContext);
     }
 
     @Test
@@ -74,21 +79,31 @@ public class StAXArtifactModelPersistenceTestCase {
         URI uri = new URI("test:mock");
         when(artifact.uri()).thenReturn(uri);
         when(artifact.name()).thenReturn("mock");
-        List<FacetBuilderReference> references = new ArrayList<>();
-        references.add(new FacetBuilderReference("hello.builder"));
-        when(artifact.getFacetBuilders()).thenReturn(references);
+        List<FacetBuilderInfo> facetBuilderInfos = new ArrayList<>();
+        DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();
+        facetBuilderInfo.setName("hello.builder");
+        facetBuilderInfo.setProvides("hello.Facet");
+
+        facetBuilderInfos.add(facetBuilderInfo);
+        when(artifact.getFacetBuilders()).thenReturn(facetBuilderInfos);
         DefaultArtifactModel model = new DefaultArtifactModel(artifact);
+
+        long lastModified = System.currentTimeMillis();
+        long length = 2503L;
+        model.setArtifactLength(length);
+        model.setLastModified(lastModified);
+
 
         manager.addArtifactModel(uri, model);
         StringWriter writer = new StringWriter();
         // -----------------------
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.persist(writer);
+        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
+        persistence.store(manager, writer);
 
         assertEquals(writer.toString(), "<?xml version=\"1.0\" ?>" +
                 "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
-                "<artifact uri=\"test:mock\" name=\"mock\">" +
-                "<facet-builder name=\"hello.builder\"/>" +
+                "<artifact uri=\"test:mock\" name=\"mock\" lastModified=\"" + lastModified + "\" artifactLength=\"" + length + "\">" +
+                "<facet-builder name=\"hello.builder\" provides=\"hello.Facet\"/>" +
                 "</artifact>" +
                 "</deployed-artifacts>");
     }
@@ -102,7 +117,16 @@ public class StAXArtifactModelPersistenceTestCase {
         when(artifact2.uri()).thenReturn(uri2);
         when(artifact2.name()).thenReturn("mock2");
         DefaultArtifactModel model = new DefaultArtifactModel(artifact);
+        long lastModified = System.currentTimeMillis();
+        long length = 2503L;
+        model.setArtifactLength(length);
+        model.setLastModified(lastModified);
+
         DefaultArtifactModel model2 = new DefaultArtifactModel(artifact2);
+        long lastModified2 = System.currentTimeMillis() + 25;
+        long length2 = 9791L;
+        model2.setArtifactLength(length2);
+        model2.setLastModified(lastModified2);
 
         DefaultWire wire = new DefaultWire(model, model2, WireType.USE);
         model.addWire(wire);
@@ -111,15 +135,15 @@ public class StAXArtifactModelPersistenceTestCase {
         manager.addArtifactModel(uri, model);
         StringWriter writer = new StringWriter();
         // -----------------------
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.persist(writer);
+        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
+        persistence.store(manager, writer);
 
         // As artifacts are not sorted, I have to test elements individually
         String actual = writer.toString();
         assertTrue(actual.contains("<?xml version=\"1.0\" ?>"));
         assertTrue(actual.contains("<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">"));
-        assertTrue(actual.contains("<artifact uri=\"test:mock\" name=\"mock\"/>"));
-        assertTrue(actual.contains("<artifact uri=\"test:mock2\" name=\"mock2\"/>"));
+        assertTrue(actual.contains("<artifact uri=\"test:mock\" name=\"mock\" lastModified=\"" + lastModified + "\" artifactLength=\"" + length + "\"/>"));
+        assertTrue(actual.contains("<artifact uri=\"test:mock2\" name=\"mock2\" lastModified=\"" + lastModified2+ "\" artifactLength=\"" + length2 + "\"/>"));
         assertTrue(actual.contains("<wire from=\"test:mock\" to=\"test:mock2\"/>"));
         assertTrue(actual.contains("</deployed-artifacts>"));
 
@@ -129,15 +153,13 @@ public class StAXArtifactModelPersistenceTestCase {
     public void testOneArtifactReload() throws Exception {
         StringReader reader = new StringReader("<?xml version=\"1.0\" ?>" +
                 "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
-                "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\">" +
-                "<facet-builder name=\"hello.builder\"/>" +
+                "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\" lastModified=\"9791\" artifactLength=\"25\">" +
+                "<facet-builder name=\"" + HelloFacetBuilder.class.getName() + "\" provides=\"" + Hello.class.getName() + "\"/>" +
                 "</artifact>" +
                 "</deployed-artifacts>");
 
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.getBuilders().put(new FacetBuilderReference("hello.builder"),
-                new HelloFacetBuilder());
-        persistence.load(reader);
+        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
+        persistence.load(manager, reader);
 
         URI uri = new URI("test:mock");
         InternalArtifactModel model = manager.getArtifactModel(uri);
@@ -146,7 +168,14 @@ public class StAXArtifactModelPersistenceTestCase {
         assertEquals(model.getFacetArtifact().name(), "mock");
         assertFalse(model.isPersistent());
         assertTrue(model.isDeploymentRoot());
-        assertNotNull(model.getFacetArtifact().as(Hello.class));
+        assertEquals(model.getLastModified(), 9791);
+        assertEquals(model.getArtifactLength(), 25);
+        assertEquals(model.getFacetArtifact().getFacetBuilders().size(), 1);
+
+        DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();
+        facetBuilderInfo.setName(HelloFacetBuilder.class.getName());
+        facetBuilderInfo.setProvides(Hello.class.getName());
+        assertTrue(model.getFacetArtifact().getFacetBuilders().contains(facetBuilderInfo));
     }
 
     @Test
@@ -154,17 +183,13 @@ public class StAXArtifactModelPersistenceTestCase {
         StringReader reader = new StringReader("<?xml version=\"1.0\" ?>" +
                 "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
                 "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\">" +
-                "<facet-builder name=\"hello.builder\"/>" +
-                "<facet-builder name=\"world.builder\"/>" +
+                "<facet-builder name=\"" + HelloFacetBuilder.class.getName() + "\" provides=\"" + Hello.class.getName() + "\"/>" +
+                "<facet-builder name=\"" + WorldFacetBuilder.class.getName() + "\" provides=\"" + World.class.getName() + "\"/>" +
                 "</artifact>" +
                 "</deployed-artifacts>");
 
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.getBuilders().put(new FacetBuilderReference("hello.builder"),
-                new HelloFacetBuilder());
-        persistence.getBuilders().put(new FacetBuilderReference("world.builder"),
-                new WorldFacetBuilder());
-        persistence.load(reader);
+        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
+        persistence.load(manager, reader);
 
         URI uri = new URI("test:mock");
         InternalArtifactModel model = manager.getArtifactModel(uri);
@@ -173,25 +198,20 @@ public class StAXArtifactModelPersistenceTestCase {
         assertEquals(model.getFacetArtifact().name(), "mock");
         assertFalse(model.isPersistent());
         assertTrue(model.isDeploymentRoot());
-        assertNotNull(model.getFacetArtifact().as(Hello.class));
-        assertNotNull(model.getFacetArtifact().as(World.class));
+
+        DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();
+        facetBuilderInfo.setName(HelloFacetBuilder.class.getName());
+        facetBuilderInfo.setProvides(Hello.class.getName());
+        assertTrue(model.getFacetArtifact().getFacetBuilders().contains(facetBuilderInfo));
+
+        DefaultFacetBuilderInfo worldBuilderInfo = new DefaultFacetBuilderInfo();
+        worldBuilderInfo.setName(WorldFacetBuilder.class.getName());
+        worldBuilderInfo.setProvides(World.class.getName());
+        assertTrue(model.getFacetArtifact().getFacetBuilders().contains(worldBuilderInfo));
+
+
     }
 
-    @Test(expectedExceptions = PersistenceException.class)
-    public void testOneArtifactReloadWithMissingFacetBuilders() throws Exception {
-        StringReader reader = new StringReader("<?xml version=\"1.0\" ?>" +
-                "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
-                "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\">" +
-                "<facet-builder name=\"hello.builder\"/>" +
-                "<facet-builder name=\"world.builder\"/>" +
-                "</artifact>" +
-                "</deployed-artifacts>");
-
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.getBuilders().put(new FacetBuilderReference("world.builder"),
-                                      new WorldFacetBuilder());
-        persistence.load(reader);
-    }
 
     @Test
     public void testWiredArtifactsReload() throws Exception {
@@ -202,8 +222,8 @@ public class StAXArtifactModelPersistenceTestCase {
                 "<wire from=\"test:mock\" to=\"test:mock2\"/>" +
                 "</deployed-artifacts>");
 
-        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence(manager);
-        persistence.load(reader);
+        StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
+        persistence.load(manager, reader);
 
         URI uri = new URI("test:mock");
         InternalArtifactModel model = manager.getArtifactModel(uri);
@@ -227,24 +247,19 @@ public class StAXArtifactModelPersistenceTestCase {
 
     private interface Hello {}
 
-    private class HelloFacetBuilder implements FacetBuilder {
+    private class HelloFacetBuilder implements FacetBuilder<Hello> {
 
         @Override
-        public void build(BuilderContext context) throws FacetBuilderException {
-            context.addFacet(Hello.class, new Hello() {});
+        public void build(BuilderContext<Hello> context) throws FacetBuilderException {
         }
     }
 
     private interface World {}
 
-    private class WorldFacetBuilder implements FacetBuilder {
+    private class WorldFacetBuilder implements FacetBuilder<World> {
 
         @Override
-        public void build(BuilderContext context) throws FacetBuilderException {
-            if (context.getArtifact().as(Hello.class) == null) {
-                throw new FacetBuilderException("Missing facet");
-            }
-            context.addFacet(World.class, new World() {});
+        public void build(BuilderContext<World> context) throws FacetBuilderException {
         }
     }
 }

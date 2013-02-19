@@ -30,4 +30,9 @@ public class FacetCapabilityImpl extends AbsDeploymentCapability implements Face
     public FacetCapabilityImpl(Resource resource, Class<?> facetClass) {
         super(resource, FacetNamespace.FACET_NAMESPACE, facetClass.getName());
     }
+
+    public FacetCapabilityImpl(Resource resource, String facetClassName) {
+        super(resource, FacetNamespace.FACET_NAMESPACE, facetClassName);
+    }
+
 }

@@ -33,7 +33,7 @@ import java.util.zip.ZipEntry;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import com.peergreen.deployment.facet.Facet;
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
 import com.peergreen.deployment.internal.facet.archive.builder.JarArchiveFacetBuilder;
@@ -42,7 +42,7 @@ import com.peergreen.deployment.internal.facet.archive.builder.JarArchiveFacetBu
  * Creates wrapper around jar file.
  * @author Florent Benoit
  */
-@Facet(JarArchiveFacetBuilder.ID)
+@FacetBuilderReference(JarArchiveFacetBuilder.class)
 public class JarArchiveImpl implements Archive {
 
     /**

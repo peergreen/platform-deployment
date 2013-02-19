@@ -16,18 +16,22 @@
 
 package com.peergreen.deployment.facet.builder;
 
+import javax.xml.stream.XMLStreamReader;
+
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 17:26
- * To change this template use File | Settings | File Templates.
+ * @author Guillaume Sauthier
  */
-public interface BuilderContext {
+public interface BuilderContext<Facet> {
     Artifact getArtifact();
-    <F> void addFacet(Class<F> facetType, F facet);
-    <F> void addFacet(Class<F> facetType, F facet, FacetCapabilityAdapter<F> adapter);
+    void addFacet(Facet facet);
+    void addFacet(Facet facet, FacetCapabilityAdapter<Facet> adapter);
+
+    /**
+     * Gets the Stream reader in order to have hint to build the facet.
+     * @return the stream reader.
+     */
+    XMLStreamReader getXMLStreamReader();
 }

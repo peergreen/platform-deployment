@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,20 +26,13 @@ import com.peergreen.deployment.internal.facet.archive.DirectoryArchiveImpl;
 import com.peergreen.deployment.internal.facet.archive.adapter.ArchiveFacetAdapter;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:51
- * To change this template use File | Settings | File Templates.
+ * Builder for Directory Archive.
  */
-public class DirectoryArchiveFacetBuilder implements FacetBuilder {
-
-    public static final String ID = "com.peergreen.deployment.internal.facet.archive.builder.directory";
+public class DirectoryArchiveFacetBuilder implements FacetBuilder<Archive> {
 
     @Override
-    public void build(BuilderContext context) {
-        context.addFacet(Archive.class,
-                         new DirectoryArchiveImpl(getFile(context.getArtifact())),
+    public void build(BuilderContext<Archive> context) {
+        context.addFacet(new DirectoryArchiveImpl(getFile(context.getArtifact())),
                          new ArchiveFacetAdapter());
     }
 

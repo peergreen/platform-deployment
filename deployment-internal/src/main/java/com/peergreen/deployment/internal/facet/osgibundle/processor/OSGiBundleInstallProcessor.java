@@ -53,7 +53,7 @@ public class OSGiBundleInstallProcessor implements Processor<OSGiBundle> {
             }
             throw new ProcessorException("Unable to install the bundle", e);
         }
-       processorContext.addFacet(Bundle.class, bundle, BundleFacetBuilder.ID);
+       processorContext.addFacet(Bundle.class, bundle, BundleFacetBuilder.class.getName());
 
     }
 

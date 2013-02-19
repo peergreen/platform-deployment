@@ -20,12 +20,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import com.peergreen.deployment.facet.Facet;
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.facet.content.ContentException;
 import com.peergreen.deployment.internal.facet.content.builder.FileContentFacetBuilder;
 
-@Facet(FileContentFacetBuilder.ID)
+@FacetBuilderReference(FileContentFacetBuilder.class)
 public class FileContentImpl implements Content {
 
     private final File file;

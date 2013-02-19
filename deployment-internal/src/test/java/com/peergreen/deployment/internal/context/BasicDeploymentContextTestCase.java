@@ -28,9 +28,13 @@ import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.peergreen.deployment.facet.Facet;
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
+import com.peergreen.deployment.FacetBuilderInfo;
+import com.peergreen.deployment.facet.FacetBuilderReference;
+import com.peergreen.deployment.facet.builder.BuilderContext;
+import com.peergreen.deployment.facet.builder.FacetBuilder;
+import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
 import com.peergreen.tasks.context.ExecutionContext;
 
@@ -45,52 +49,76 @@ public class BasicDeploymentContextTestCase {
 
     @Mock
     private ExecutionContext executionContext;
+
     @Mock
     private IFacetArtifact facetArtifact;
+
     @Mock
     private CurrentProcessor currentProcessor;
-    private List<FacetBuilderReference> references;
+
+    private List<FacetBuilderInfo> facetBuilderInfos;
 
     @BeforeMethod
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        references = new ArrayList<>();
+        facetBuilderInfos = new ArrayList<>();
         when(executionContext.get(CurrentProcessor.class)).thenReturn(currentProcessor);
-        when(facetArtifact.getFacetBuilders()).thenReturn(references);
+        when(facetArtifact.getFacetBuilders()).thenReturn(facetBuilderInfos);
     }
 
     @Test
     public void testBuilderIdFoundFromAnnotation() throws Exception {
         BasicDeploymentContext context = new BasicDeploymentContext(facetArtifact, executionContext);
         context.addFacet(Hello.class, new HelloImpl());
-        assertTrue(references.contains(new FacetBuilderReference("hello.builder")));
-        assertEquals(references.size(), 1);
+        DefaultFacetBuilderInfo helloBuilderInfo = new DefaultFacetBuilderInfo();
+        helloBuilderInfo.setName(HelloBuilder.class.getName());
+        helloBuilderInfo.setProvides(Hello.class.getName());
+
+        assertTrue(facetBuilderInfos.contains(helloBuilderInfo));
+        assertEquals(facetBuilderInfos.size(), 1);
     }
 
     @Test
     public void testBuilderIdFoundFromParameters() throws Exception {
         BasicDeploymentContext context = new BasicDeploymentContext(facetArtifact, executionContext);
         context.addFacet(Hello.class, new Hello2Impl(), null, "hello.builder");
-        assertTrue(references.contains(new FacetBuilderReference("hello.builder")));
-        assertEquals(references.size(), 1);
+        DefaultFacetBuilderInfo helloBuilderInfo = new DefaultFacetBuilderInfo();
+        helloBuilderInfo.setProvides(Hello.class.getName());
+        helloBuilderInfo.setName("hello.builder");
+        assertTrue(facetBuilderInfos.contains(helloBuilderInfo));
+        assertEquals(facetBuilderInfos.size(), 1);
     }
 
     @Test
     public void testBuilderIdOverriddenByParameters() throws Exception {
         BasicDeploymentContext context = new BasicDeploymentContext(facetArtifact, executionContext);
         context.addFacet(Hello.class, new HelloImpl(), null, "hello.builder.2");
-        assertTrue(references.contains(new FacetBuilderReference("hello.builder.2")));
-        assertEquals(references.size(), 1);
+        DefaultFacetBuilderInfo helloBuilderInfo = new DefaultFacetBuilderInfo();
+        helloBuilderInfo.setName("hello.builder.2");
+        helloBuilderInfo.setProvides(Hello.class.getName());
+        assertTrue(facetBuilderInfos.contains(helloBuilderInfo));
+        assertEquals(facetBuilderInfos.size(), 1);
     }
 
     // Represents the facet
     private interface Hello {}
 
-    @Facet("hello.builder")
+    @FacetBuilderReference(HelloBuilder.class)
     private class HelloImpl implements Hello {
 
     }
 
     // No @Facet annotation, that's normal
     private class Hello2Impl implements Hello {}
+
+    private class HelloBuilder implements FacetBuilder<Void> {
+
+        @Override
+        public void build(BuilderContext<Void> context) throws FacetBuilderException {
+
+        }
+
+
+    }
+
 }

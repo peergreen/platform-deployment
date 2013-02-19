@@ -21,6 +21,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -35,7 +36,7 @@ import com.peergreen.deployment.internal.model.DefaultArtifactModel;
  */
 public class DeployedArtifactsParser implements Parser {
 
-    private Map<String, DefaultArtifactModel> m_models = new HashMap<String, DefaultArtifactModel>();
+    private final Map<String, DefaultArtifactModel> models = new HashMap<String, DefaultArtifactModel>();
 
     @Override
     public void build(XMLStreamReader reader) throws XMLStreamException {
@@ -48,10 +49,10 @@ public class DeployedArtifactsParser implements Parser {
                             parser.build(reader);
                             DefaultArtifactModel model = parser.getIncompleteArtifact();
                             String uri = model.getFacetArtifact().uri().toString();
-                            m_models.put(uri, model);
+                            models.put(uri, model);
                         }
                         if ("wire".equals(reader.getLocalName())) {
-                            WireParser parser = new WireParser(m_models);
+                            WireParser parser = new WireParser(models);
                             parser.build(reader);
                         }
                     }
@@ -70,6 +71,6 @@ public class DeployedArtifactsParser implements Parser {
     }
 
     public Map<String, DefaultArtifactModel> getModels() {
-        return m_models;
+        return models;
     }
 }

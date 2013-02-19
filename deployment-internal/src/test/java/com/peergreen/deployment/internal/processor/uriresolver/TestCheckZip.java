@@ -18,6 +18,8 @@ package com.peergreen.deployment.internal.processor.uriresolver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.peergreen.deployment.internal.processor.uriresolver.CheckZip;
+
 public class TestCheckZip {
 
     @Test

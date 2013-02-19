@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,11 @@
 package com.peergreen.deployment.facet.builder;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:40
- * To change this template use File | Settings | File Templates.
+ * Defines a facet builder for the given facet.
+ * @author Florent Benoit
  */
-public interface FacetBuilder {
-    void build(BuilderContext context) throws FacetBuilderException;
+public interface FacetBuilder<Facet> {
+
+    void build(BuilderContext<Facet> context) throws FacetBuilderException;
+
 }

@@ -18,11 +18,12 @@ package com.peergreen.deployment.internal.model.persistence.write;
 
 import java.io.Writer;
 import java.util.Set;
+
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
+import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalWire;
@@ -30,11 +31,7 @@ import com.peergreen.deployment.internal.model.persistence.PersistenceException;
 import com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 14:01
- * To change this template use File | Settings | File Templates.
+ * @author Guillaume Sauthier
  */
 public class ModelWriter {
     public void writeDocument(Writer out, Set<InternalArtifactModel> artifacts, Set<InternalWire> wires) throws PersistenceException {
@@ -62,8 +59,8 @@ public class ModelWriter {
 
     private void writeWire(XMLStreamWriter writer, InternalWire wire) throws XMLStreamException {
         writer.writeEmptyElement("wire");
-        writer.writeAttribute("from", wire.getInternalFrom().getFacetArtifact().uri().toString());
-        writer.writeAttribute("to", wire.getInternalTo().getFacetArtifact().uri().toString());
+        writeAttribute(writer, "from", wire.getInternalFrom().getFacetArtifact().uri().toString());
+        writeAttribute(writer, "to", wire.getInternalTo().getFacetArtifact().uri().toString());
         // TODO Complete with wire attributes (when ready)
         //writer.writeEndElement();
     }
@@ -85,22 +82,34 @@ public class ModelWriter {
 
     private void writeArtifactAttributes(XMLStreamWriter writer, InternalArtifactModel artifact) throws XMLStreamException {
         IFacetArtifact facetArtifact = artifact.getFacetArtifact();
-        writer.writeAttribute("uri", facetArtifact.uri().toString());
-        writer.writeAttribute("name", facetArtifact.name());
+        writeAttribute(writer, "uri", facetArtifact.uri().toString());
+        writeAttribute(writer, "name", facetArtifact.name());
         if (artifact.isDeploymentRoot()) {
-            writer.writeAttribute("root", "true");
+            writeAttribute(writer, "root", "true");
         }
         if (artifact.isPersistent()) {
-            writer.writeAttribute("persistent", "true");
+            writeAttribute(writer, "persistent", "true");
         }
+        writeAttribute(writer, "lastModified", String.valueOf(artifact.getLastModified()));
+        writeAttribute(writer, "artifactLength", String.valueOf(artifact.getArtifactLength()));
     }
 
     private void writeFacets(XMLStreamWriter writer, IFacetArtifact artifact) throws XMLStreamException {
-        for (FacetBuilderReference reference : artifact.getFacetBuilders()) {
+        for (FacetBuilderInfo facetBuilderInfo : artifact.getFacetBuilders()) {
             writer.writeEmptyElement("facet-builder");
-            writer.writeAttribute("name", reference.getName());
+            writeAttribute(writer, "name", facetBuilderInfo.getName());
+            writeAttribute(writer, "provides", facetBuilderInfo.getProvides());
         }
     }
+
+    private void writeAttribute(XMLStreamWriter writer, String attributeName, String value) throws XMLStreamException {
+        String val = value;
+        if (val == null) {
+            val = "";
+        }
+        writer.writeAttribute(attributeName, val);
+    }
+
 
 
 }

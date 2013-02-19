@@ -17,6 +17,11 @@ package com.peergreen.deployment.internal.processor.uriresolver;
 
 public class CheckZipException extends Exception {
 
+    /**
+     * Serial Version UID.
+     */
+    private static final long serialVersionUID = -963043912195468028L;
+
     public CheckZipException(String message, Exception e) {
         super(message, e);
     }

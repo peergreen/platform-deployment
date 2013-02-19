@@ -22,21 +22,16 @@ import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.internal.facet.content.URIContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
 
-/**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 17/01/13
- * Time: 15:51
- * To change this template use File | Settings | File Templates.
- */
-public class UriContentFacetBuilder implements FacetBuilder {
 
-    public static final String ID = "com.peergreen.deployment.internal.facet.content.builder.uri";
+/**
+ * Defines builder for URI content
+ * @author Guillaume Sauthier
+ */
+public class UriContentFacetBuilder implements FacetBuilder<Content> {
 
     @Override
-    public void build(BuilderContext context) {
-        context.addFacet(Content.class,
-                         new URIContentImpl(context.getArtifact().uri()),
+    public void build(BuilderContext<Content> context) {
+        context.addFacet(new URIContentImpl(context.getArtifact().uri()),
                          new ContentFacetAdapter());
     }
 

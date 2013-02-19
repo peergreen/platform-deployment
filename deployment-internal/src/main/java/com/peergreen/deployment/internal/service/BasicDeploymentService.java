@@ -153,6 +153,9 @@ public class BasicDeploymentService implements DeploymentService {
             addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
         }
 
+        // save state after a deployment
+        artifactModelManager.save();
+
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setState(state);
         deploymentStatusReport.setElapsedTime(elapsedTime);

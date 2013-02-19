@@ -22,28 +22,28 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
+import com.peergreen.deployment.FacetBuilderInfo;
+import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 16/01/13
- * Time: 12:31
- * To change this template use File | Settings | File Templates.
+ * @author Guillaume
  */
 public class FacetBuilderParser implements Parser {
 
-    private FacetBuilderReference reference;
+    private DefaultFacetBuilderInfo facetBuilderInfo;
 
     @Override
     public void build(XMLStreamReader reader) throws XMLStreamException {
         do {
             switch (reader.getEventType()) {
                 case START_ELEMENT:
+                    facetBuilderInfo = new DefaultFacetBuilderInfo();
                     if (PG_NAMESPACE_URI.equals(reader.getNamespaceURI())) {
                         if ("facet-builder".equals(reader.getLocalName())) {
                             String name = reader.getAttributeValue(null, "name");
-                            reference = new FacetBuilderReference(name);
+                            String provides = reader.getAttributeValue(null, "provides");
+                            facetBuilderInfo.setName(name);
+                            facetBuilderInfo.setProvides(provides);
                         }
                     }
                     break;
@@ -58,7 +58,7 @@ public class FacetBuilderParser implements Parser {
                 "facet-builder".equals(reader.getLocalName());
     }
 
-    public FacetBuilderReference getReference() {
-        return reference;
+    public FacetBuilderInfo getBuilder() {
+        return facetBuilderInfo;
     }
 }

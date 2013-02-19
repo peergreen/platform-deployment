@@ -156,7 +156,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
 
     protected void printStackTrace(Throwable exception, StringBuilder sb, String indent) {
         StackTraceElement[] stackTrace = exception.getStackTrace();
-        if (stackTrace != null) {
+        if (stackTrace.length > 0) {
             sb.append("\n");
             sb.append(indent);
             sb.append("  ");

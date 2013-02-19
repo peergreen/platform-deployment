@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,63 +20,53 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.osgi.resource.Capability;
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
 
-import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.FacetCapabilityAdapter;
-import com.peergreen.deployment.facet.builder.BuilderContext;
-import com.peergreen.deployment.facet.builder.FacetBuilder;
-import com.peergreen.deployment.facet.builder.FacetBuilderException;
-import com.peergreen.deployment.internal.artifact.FacetBuilderReference;
-import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
-import com.peergreen.deployment.internal.model.DefaultArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.model.persistence.read.DeployedArtifactsParser;
 import com.peergreen.deployment.internal.model.persistence.write.ModelWriter;
-import com.peergreen.deployment.internal.processor.NamedProcessor;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 14/01/13
- * Time: 13:49
- * To change this template use File | Settings | File Templates.
+ * Allows to load or store the persistence model.
  */
-public class StAXArtifactModelPersistence {
+@Component
+@Provides
+@Instantiate
+public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
     public static final String PG_NAMESPACE_URI = "http://www.peergreen.com/xmlns/deployment/1.0";
-    private Map<FacetBuilderReference, FacetBuilder> builders = new HashMap<>();
-    private DefaultArtifactModelManager manager;
 
-    public StAXArtifactModelPersistence(DefaultArtifactModelManager manager) {
-        this.manager = manager;
-    }
 
-    public Map<FacetBuilderReference, FacetBuilder> getBuilders() {
-        return builders;
-    }
-
-    public void persist(Writer writer) throws PersistenceException {
+    @Override
+    public void store(InternalArtifactModelManager artifactModelManager, Writer writer) throws PersistenceException {
         Set<InternalArtifactModel> artifacts = new HashSet<>();
         Set<InternalWire> wires = new HashSet<>();
 
-        collect(artifacts, wires);
+        Collection<? extends InternalArtifactModel> registered = artifactModelManager.getDeployedRootArtifacts();
+
+        // Traverse all artifacts
+        for (InternalArtifactModel model : registered) {
+            traverseArtifact(artifacts, wires, model);
+        }
 
         new ModelWriter().writeDocument(writer, artifacts, wires);
     }
 
-    public void load(Reader in) throws PersistenceException {
+    @Override
+    public void load(InternalArtifactModelManager artifactModelManager, Reader in) throws PersistenceException {
         try {
             Map<String,DefaultArtifactModel> models = null;
             XMLStreamReader reader = XMLInputFactory.newFactory().createXMLStreamReader(in);
@@ -97,84 +87,27 @@ public class StAXArtifactModelPersistence {
 
             reader.close();
 
-            // TODO Artifact's facets should be created at this point
             for (DefaultArtifactModel model : models.values()) {
 
-                // complete the artifact creation with facet-builders
-                completeArtifact(model.getFacetArtifact());
 
                 if (model.isDeploymentRoot()) {
                     URI uri = model.getFacetArtifact().uri();
-                    manager.addArtifactModel(uri, model);
+                    artifactModelManager.addArtifactModel(uri, model);
                 }
             }
 
         } catch (XMLStreamException e) {
             throw new PersistenceException("Cannot un-marshall", e);
-        } catch (FacetBuilderException e) {
-            throw new PersistenceException("Cannot un-marshall", e);
         }
     }
 
-    private void completeArtifact(final IFacetArtifact facetArtifact) throws FacetBuilderException {
-        for (final FacetBuilderReference reference : facetArtifact.getFacetBuilders()) {
-            FacetBuilder builder = builders.get(reference);
-            if (builder != null) {
-                builder.build(new BuilderContext() {
-                    @Override
-                    public Artifact getArtifact() {
-                        return facetArtifact;
-                    }
 
-                    @Override
-                    public <F> void addFacet(Class<F> facetType, F facet) {
-                        addFacet(facetType, facet, null);
-                    }
-
-                    @Override
-                    public <F> void addFacet(Class<F> facetType, F facet, FacetCapabilityAdapter<F> adapter) {
-                        // Try to build capability based on the facet
-                        if (adapter != null) {
-                            Capability capability = adapter.getCapability(facetArtifact, facet);
-                            if (capability != null) {
-                                facetArtifact.addCapability(capability);
-                            }
-                        }
-
-                        // Add the facet capability in all cases
-                        facetArtifact.addCapability(new FacetCapabilityImpl(facetArtifact, facetType));
-
-                        // Add facet
-                        facetArtifact.addFacet(facetType, facet, new NamedProcessor() {
-                            @Override
-                            public String getName() {
-                                return reference.getName();
-                            }
-                        });
-                    }
-                });
-            } else {
-                throw new FacetBuilderException("Missing FacetBuilder : " + reference.getName());
-            }
-        }
-    }
-
-    private void collect(Set<InternalArtifactModel> artifacts, Set<InternalWire> wires) {
-        Collection<? extends InternalArtifactModel> registered = manager.getDeployedRootArtifacts();
-
-        // Traverse all artifacts
-        for (InternalArtifactModel model : registered) {
-            traverseArtifact(artifacts, wires, model);
-        }
-
-    }
-
-    private void traverseArtifact(Set<InternalArtifactModel> artifacts, Set<InternalWire> wires, InternalArtifactModel model) {
+    protected void traverseArtifact(Set<InternalArtifactModel> artifacts, Set<InternalWire> wires, InternalArtifactModel model) {
         if (!artifacts.contains(model)) {
             artifacts.add(model);
             // Retrieve all its connections
             for (InternalWire wire : model.getInternalWires()) {
-                // Collect wires
+                // KKKK wires
                 if (!wires.contains(wire)) {
                     wires.add(wire);
                 }
@@ -182,5 +115,8 @@ public class StAXArtifactModelPersistence {
             }
         }
     }
+
+
+
 
 }
