@@ -16,6 +16,8 @@
 
 package com.peergreen.deployment.internal.model.persistence;
 
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.ATTRIBUTE_KEY;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.LONG_VALUETYPE;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -50,11 +52,9 @@ import com.peergreen.deployment.model.Wire;
 import com.peergreen.deployment.model.WireType;
 
 /**
- * Created with IntelliJ IDEA.
  * User: guillaume
  * Date: 14/01/13
  * Time: 14:42
- * To change this template use File | Settings | File Templates.
  */
 public class StAXArtifactModelPersistenceTestCase {
 
@@ -102,7 +102,7 @@ public class StAXArtifactModelPersistenceTestCase {
 
         assertEquals(writer.toString(), "<?xml version=\"1.0\" ?>" +
                 "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
-                "<artifact uri=\"test:mock\" name=\"mock\" lastModified=\"" + lastModified + "\" artifactLength=\"" + length + "\">" +
+                "<artifact uri=\"test:mock\" name=\"mock\" " + ATTRIBUTE_KEY + "lastModified=\"" + LONG_VALUETYPE + lastModified + "\" " + ATTRIBUTE_KEY + "artifactLength=\"" + LONG_VALUETYPE + length + "\">" +
                 "<facet-builder name=\"hello.builder\" provides=\"hello.Facet\"/>" +
                 "</artifact>" +
                 "</deployed-artifacts>");
@@ -142,8 +142,8 @@ public class StAXArtifactModelPersistenceTestCase {
         String actual = writer.toString();
         assertTrue(actual.contains("<?xml version=\"1.0\" ?>"));
         assertTrue(actual.contains("<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">"));
-        assertTrue(actual.contains("<artifact uri=\"test:mock\" name=\"mock\" lastModified=\"" + lastModified + "\" artifactLength=\"" + length + "\"/>"));
-        assertTrue(actual.contains("<artifact uri=\"test:mock2\" name=\"mock2\" lastModified=\"" + lastModified2+ "\" artifactLength=\"" + length2 + "\"/>"));
+        assertTrue(actual.contains("<artifact uri=\"test:mock\" name=\"mock\" " + ATTRIBUTE_KEY + "lastModified=\"" + LONG_VALUETYPE + lastModified + "\" " + ATTRIBUTE_KEY + "artifactLength=\"" + LONG_VALUETYPE + length + "\"/>"));
+        assertTrue(actual.contains("<artifact uri=\"test:mock2\" name=\"mock2\" " + ATTRIBUTE_KEY + "lastModified=\"" + LONG_VALUETYPE + lastModified2 + "\" " + ATTRIBUTE_KEY + "artifactLength=\"" + LONG_VALUETYPE + length2 + "\"/>"));
         assertTrue(actual.contains("<wire from=\"test:mock\" to=\"test:mock2\"/>"));
         assertTrue(actual.contains("</deployed-artifacts>"));
 
@@ -151,13 +151,15 @@ public class StAXArtifactModelPersistenceTestCase {
 
     @Test
     public void testOneArtifactReload() throws Exception {
-        StringReader reader = new StringReader("<?xml version=\"1.0\" ?>" +
-                "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
-                "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\" lastModified=\"9791\" artifactLength=\"25\">" +
-                "<facet-builder name=\"" + HelloFacetBuilder.class.getName() + "\" provides=\"" + Hello.class.getName() + "\"/>" +
-                "</artifact>" +
-                "</deployed-artifacts>");
-
+        Long lastModified = 9791L;
+        Long artifactLength = 25L;
+        String xml = "<?xml version=\"1.0\" ?>" +
+        "<deployed-artifacts xmlns=\"http://www.peergreen.com/xmlns/deployment/1.0\">" +
+        "<artifact uri=\"test:mock\" name=\"mock\" root=\"true\" " + ATTRIBUTE_KEY + "lastModified=\"" + LONG_VALUETYPE + lastModified + "\" " + ATTRIBUTE_KEY + "artifactLength=\"" + LONG_VALUETYPE + artifactLength + "\">" +
+        "<facet-builder name=\"" + HelloFacetBuilder.class.getName() + "\" provides=\"" + Hello.class.getName() + "\"/>" +
+        "</artifact>" +
+        "</deployed-artifacts>";
+        StringReader reader = new StringReader(xml);
         StAXArtifactModelPersistence persistence = new StAXArtifactModelPersistence();
         persistence.load(manager, reader);
 
@@ -168,8 +170,8 @@ public class StAXArtifactModelPersistenceTestCase {
         assertEquals(model.getFacetArtifact().name(), "mock");
         assertFalse(model.isPersistent());
         assertTrue(model.isDeploymentRoot());
-        assertEquals(model.getLastModified(), 9791);
-        assertEquals(model.getArtifactLength(), 25);
+        assertEquals(model.getLastModified(), lastModified.longValue());
+        assertEquals(model.getArtifactLength(), artifactLength.longValue());
         assertEquals(model.getFacetArtifact().getFacetBuilders().size(), 1);
 
         DefaultFacetBuilderInfo facetBuilderInfo = new DefaultFacetBuilderInfo();

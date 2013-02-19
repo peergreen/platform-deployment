@@ -14,8 +14,13 @@
  *  limitations under the License.
  */
 package com.peergreen.deployment.internal.model;
+import static com.peergreen.deployment.model.ArtifactModelConstants.ARTIFACT_LENGTH;
+import static com.peergreen.deployment.model.ArtifactModelConstants.CHECKING_ARTIFACT_LENGTH;
+import static com.peergreen.deployment.model.ArtifactModelConstants.LAST_MODIFIED;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
@@ -33,9 +38,8 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
     private boolean undeployed = false;
 
-    private long lastModified = Long.MIN_VALUE;
-    private long artifactLength = 0;
-    private long checkingArtifactLength = 0;
+    private final Map<String, Object> attributes;
+
 
 
     public DefaultArtifactModel(IFacetArtifact facetArtifact) {
@@ -43,6 +47,7 @@ public class DefaultArtifactModel implements InternalArtifactModel {
         this.wires = new HashSet<InternalWire>();
         this.fromWires = new HashSet<InternalWire>();
         this.toWires = new HashSet<InternalWire>();
+        this.attributes = new HashMap<>();
     }
 
     @Override
@@ -136,35 +141,45 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
     }
 
+    protected long getLongAttribute(String attributeName) {
+        Long l = (Long) attributes.get(attributeName);
+        if (l == null) {
+            return Long.MIN_VALUE;
+        }
+        return l.longValue();
+    }
+
     @Override
     public long getLastModified() {
-        return lastModified;
+        return getLongAttribute(LAST_MODIFIED);
     }
 
     @Override
     public long getArtifactLength() {
-        return artifactLength;
-    }
-
-    @Override
-    public void setLastModified(long lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    @Override
-    public void setArtifactLength(long artifactLength) {
-        this.artifactLength = artifactLength;
-    }
-
-    @Override
-    public void setCheckingArtifactLength(long checkingArtifactLength) {
-        this.checkingArtifactLength = checkingArtifactLength;
+        return getLongAttribute(ARTIFACT_LENGTH);
     }
 
     @Override
     public long getCheckingArtifactLength() {
-        return checkingArtifactLength;
+        return getLongAttribute(CHECKING_ARTIFACT_LENGTH);
     }
+
+
+    @Override
+    public void setLastModified(long lastModified) {
+        this.attributes.put(LAST_MODIFIED, lastModified);
+    }
+
+    @Override
+    public void setArtifactLength(long artifactLength) {
+        this.attributes.put(ARTIFACT_LENGTH, artifactLength);
+    }
+
+    @Override
+    public void setCheckingArtifactLength(long checkingArtifactLength) {
+        this.attributes.put(CHECKING_ARTIFACT_LENGTH, checkingArtifactLength);
+    }
+
 
     @Override
     public void setDeploymentRoot(boolean rootDeployment) {
@@ -179,4 +194,16 @@ public class DefaultArtifactModel implements InternalArtifactModel {
     public void setPersistent(boolean persistent) {
         this.persistent = persistent;
     }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    @Override
+    public void setAttribute(String key, Object value) {
+        this.attributes.put(key, value);
+    }
+
+
 }

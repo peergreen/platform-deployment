@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,15 @@
 
 package com.peergreen.deployment.internal.model.persistence.read;
 
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.ATTRIBUTE_KEY;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.decodeValue;
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -30,11 +33,7 @@ import com.peergreen.deployment.internal.artifact.ImmutableArtifact;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 16/01/13
- * Time: 10:55
- * To change this template use File | Settings | File Templates.
+ * @author guillaume
  */
 public class ArtifactParser implements Parser {
 
@@ -52,23 +51,28 @@ public class ArtifactParser implements Parser {
                             String name = reader.getAttributeValue(null, "name");
                             boolean root = reader.getAttributeValue(null, "root") != null;
                             boolean persistent = reader.getAttributeValue(null, "persistent") != null;
-                            String lastModifiedStr = reader.getAttributeValue(null, "lastModified");
-                            String artifactLengthStr = reader.getAttributeValue(null, "artifactLength");
 
                             // TODO Complement with type and persistent attributes
                             try {
                                 model = new DefaultArtifactModel(new FacetArtifact(new ImmutableArtifact(name, new URI(uri))));
                                 model.setDeploymentRoot(root);
                                 model.setPersistent(persistent);
-                                if (lastModifiedStr != null) {
-                                    model.setLastModified(Long.parseLong(lastModifiedStr));
+
+                                int count = reader.getAttributeCount();
+                                for (int i = 0; i < count; i++) {
+                                    QName qName = reader.getAttributeName(i);
+                                    String localPart = qName.getLocalPart();
+                                    if (localPart.startsWith(ATTRIBUTE_KEY)) {
+                                        String attributeValue = reader.getAttributeValue(i);
+                                        String attributeName = qName.getLocalPart().substring(ATTRIBUTE_KEY.length());
+                                        model.getAttributes().put(attributeName, decodeValue(attributeValue));
+                                    }
                                 }
-                                if (artifactLengthStr != null) {
-                                    model.setArtifactLength(Long.parseLong(artifactLengthStr));
-                                }
+
                             } catch (URISyntaxException e) {
                                 throw new XMLStreamException(e);
                             }
+
                         }
                         if ("facet-builder".equals(reader.getLocalName())) {
                             FacetBuilderParser parser = new FacetBuilderParser();

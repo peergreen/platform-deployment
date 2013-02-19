@@ -15,6 +15,8 @@
  */
 package com.peergreen.deployment.internal.model;
 
+import java.util.Map;
+
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.model.ArtifactModel;
 
@@ -37,5 +39,9 @@ public interface InternalArtifactModel extends ArtifactModel {
     void setUndeployed(boolean undeployed);
     boolean isUndeployed();
     void setDeploymentRoot(boolean value);
+
+
+    Map<String, Object> getAttributes();
+    void setAttribute(String key, Object value);
 
 }
