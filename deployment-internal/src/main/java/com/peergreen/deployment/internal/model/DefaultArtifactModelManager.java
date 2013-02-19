@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
@@ -496,7 +497,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
                 }
 
                 // check the facet builder
-                if (!hasAllRequirementsProvided((InternalFacetBuilder<?>) wire.getProvider(), wireMap)) {
+                if (!hasAllRequirementsProvided(facetArtifact, (InternalFacetBuilder<?>) wire.getProvider(), wireMap, new Stack<InternalFacetBuilder<?>>())) {
                     // dependency doesn't have all requirements so we break
                     foundMissing = true;
                     break;
@@ -536,8 +537,16 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     }
 
 
-    protected boolean hasAllRequirementsProvided(InternalFacetBuilder<?> facetBuilder, Map<Resource, List<Wire>> wireMap) {
+    protected boolean hasAllRequirementsProvided(IFacetArtifact facetArtifact, InternalFacetBuilder<?> facetBuilder, Map<Resource, List<Wire>> wireMap, Stack<InternalFacetBuilder<?>> visitedNodes) {
         boolean hasAllRequirements = true;
+
+        if (visitedNodes.contains(facetBuilder)) {
+            getFacetBuilder(facetArtifact, facetBuilder.getName()).setThrowable(new IllegalStateException(String.format("Cycle detected between %s and %s", facetBuilder, visitedNodes)));
+            return false;
+        }
+        // add visited node
+        visitedNodes.push(facetBuilder);
+
 
         List<Wire> wires = wireMap.get(facetBuilder);
 
@@ -549,8 +558,9 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
             }
             // dependency
             // check if dependency has all its requirements too
-            hasAllRequirements = (hasAllRequirements && hasAllRequirementsProvided((InternalFacetBuilder<?>) wire.getProvider(), wireMap));
+            hasAllRequirements = (hasAllRequirements && hasAllRequirementsProvided(facetArtifact, (InternalFacetBuilder<?>) wire.getProvider(), wireMap, visitedNodes));
         }
+        visitedNodes.pop();
 
         return hasAllRequirements;
     }

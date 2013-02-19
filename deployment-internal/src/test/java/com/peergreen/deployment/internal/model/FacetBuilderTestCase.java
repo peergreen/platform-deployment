@@ -155,32 +155,51 @@ public class FacetBuilderTestCase {
     }
 
 
-    //@Test
+    @Test
     public void testFacetBuilderWithCycleDepedency() throws Exception {
-        DefaultFacetBuilderInfo dummyFacetBuilderInfo = new DefaultFacetBuilderInfo();
-        dummyFacetBuilderInfo.setName(DummyFacetBuilder.class.getName());
-        facetArtifact.getFacetBuilders().add(dummyFacetBuilderInfo);
+        // persistent
+        artifactModel.setPersistent(true);
 
-        DefaultFacetBuilderInfo cycleDependencyFacetBuilderInfo = new DefaultFacetBuilderInfo();
-        cycleDependencyFacetBuilderInfo.setName(CycleDependencyFacetBuilder.class.getName());
-        facetArtifact.getFacetBuilders().add(cycleDependencyFacetBuilderInfo);
+        DefaultFacetBuilderInfo cycle1DependencyFacetBuilderInfo = new DefaultFacetBuilderInfo();
+        cycle1DependencyFacetBuilderInfo.setName(Cycle1DependencyFacetBuilder.class.getName());
+        cycle1DependencyFacetBuilderInfo.setProvides(DummyFacet.class.getName());
+        facetArtifact.getFacetBuilders().add(cycle1DependencyFacetBuilderInfo);
+
+        DefaultFacetBuilderInfo cycle2DependencyFacetBuilderInfo = new DefaultFacetBuilderInfo();
+        cycle2DependencyFacetBuilderInfo.setName(Cycle2DependencyFacetBuilder.class.getName());
+        cycle2DependencyFacetBuilderInfo.setProvides(DummyDependencyFacet.class.getName());
+        facetArtifact.getFacetBuilders().add(cycle2DependencyFacetBuilderInfo);
+
 
         // Check artifact doesn't contains the facet
         Assert.assertNull(facetArtifact.as(DummyFacet.class));
+        Assert.assertNull(facetArtifact.as(DummyDependencyFacet.class));
 
-        // Now, bind the builder
-        manager.bindInternalFacetBuilder(new DummyDependencyDelegateFacetBuilder());
+
+        // Now, bind one of the builders
+        manager.bindInternalFacetBuilder(new Cycle1DependencyDelegateFacetBuilder());
+
+        // still null
+        Assert.assertNull(facetArtifact.as(DummyFacet.class));
+        Assert.assertNull(facetArtifact.as(DummyDependencyFacet.class));
 
         // This time, init the manager after
         manager.init();
 
-        // Check artifact still doesn't contains the facet (as dependency builder is not here)
+        // still null
         Assert.assertNull(facetArtifact.as(DummyFacet.class));
+        Assert.assertNull(facetArtifact.as(DummyDependencyFacet.class));
+
+        // no exception
+        Assert.assertNull(cycle1DependencyFacetBuilderInfo.getThrowable());
+        Assert.assertNull(cycle1DependencyFacetBuilderInfo.getThrowable());
 
         // Now, bind the new builder (with a cycle)
-        manager.bindInternalFacetBuilder(new CycleDependencyDelegateFacetBuilder());
+        manager.bindInternalFacetBuilder(new Cycle2DependencyDelegateFacetBuilder());
 
-        //FIXME : should check the exception in the facet artifact
+        // Check exception
+        Assert.assertNotNull(cycle1DependencyFacetBuilderInfo.getThrowable());
+        Assert.assertTrue(cycle1DependencyFacetBuilderInfo.getThrowable().getMessage().contains("Cycle"));
     }
 
 
@@ -236,26 +255,50 @@ public class FacetBuilderTestCase {
 
 
 
+    class Cycle1DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
 
-    class CycleDependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
-
-        public CycleDependencyDelegateFacetBuilder() {
-            super(new CycleDependencyFacetBuilder(), DummyFacet.class);
+        public Cycle1DependencyDelegateFacetBuilder() {
+            super(new Cycle1DependencyFacetBuilder(), DummyFacet.class);
             addCapability(new FacetCapabilityImpl(this,DummyFacet.class));
             addRequirement(new FacetRequirementImpl(this, DummyDependencyFacet.class));
         }
 
     }
 
-    class CycleDependencyFacetBuilder implements FacetBuilder<DummyFacet> {
+    class Cycle1DependencyFacetBuilder implements FacetBuilder<DummyFacet> {
 
         @Override
         public void build(BuilderContext<DummyFacet> context) throws FacetBuilderException {
 
             // get Dummy Facet
-            DummyFacet dummyFacet = context.getArtifact().as(DummyFacet.class);
-            if (dummyFacet != null) {
+            DummyDependencyFacet dummyDependencyFacet = context.getArtifact().as(DummyDependencyFacet.class);
+            if (dummyDependencyFacet != null) {
                 context.addFacet(new DummyFacet());
+                return;
+            }
+            throw new FacetBuilderException("Cannot build the facet as dependency is not found");
+        }
+    }
+
+    class Cycle2DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyDependencyFacet> {
+
+        public Cycle2DependencyDelegateFacetBuilder() {
+            super(new Cycle2DependencyFacetBuilder(), DummyDependencyFacet.class);
+            addCapability(new FacetCapabilityImpl(this, DummyDependencyFacet.class));
+            addRequirement(new FacetRequirementImpl(this, DummyFacet.class));
+        }
+
+    }
+
+    class Cycle2DependencyFacetBuilder implements FacetBuilder<DummyDependencyFacet> {
+
+        @Override
+        public void build(BuilderContext<DummyDependencyFacet> context) throws FacetBuilderException {
+
+            // get Dummy Facet
+            DummyDependencyFacet dummyDependencyFacet = context.getArtifact().as(DummyDependencyFacet.class);
+            if (dummyDependencyFacet != null) {
+                context.addFacet(new DummyDependencyFacet());
                 return;
             }
             throw new FacetBuilderException("Cannot build the facet as dependency is not found");
