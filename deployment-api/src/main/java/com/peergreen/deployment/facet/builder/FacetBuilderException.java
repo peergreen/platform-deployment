@@ -17,11 +17,7 @@
 package com.peergreen.deployment.facet.builder;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 18/01/13
- * Time: 09:31
- * To change this template use File | Settings | File Templates.
+ * @author guillaume
  */
 public class FacetBuilderException extends Exception {
     public FacetBuilderException(String message) {
