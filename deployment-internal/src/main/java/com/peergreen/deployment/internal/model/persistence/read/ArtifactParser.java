@@ -17,6 +17,8 @@
 package com.peergreen.deployment.internal.model.persistence.read;
 
 import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.ATTRIBUTE_KEY;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.NAME_ATTRIBUTE;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.URI_ATTRIBUTE;
 import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.decodeValue;
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -46,18 +48,15 @@ public class ArtifactParser implements Parser {
                 case START_ELEMENT:
                     if (PG_NAMESPACE_URI.equals(reader.getNamespaceURI())) {
                         if ("artifact".equals(reader.getLocalName())) {
-                            //FIXME : add constants for all these attributes
-                            String uri = reader.getAttributeValue(null, "uri");
-                            String name = reader.getAttributeValue(null, "name");
-                            boolean root = reader.getAttributeValue(null, "root") != null;
-                            boolean persistent = reader.getAttributeValue(null, "persistent") != null;
 
-                            // TODO Complement with type and persistent attributes
+                            // Read mandatory fields for building the model
+                            String uri = reader.getAttributeValue(null, URI_ATTRIBUTE);
+                            String name = reader.getAttributeValue(null, NAME_ATTRIBUTE);
+
                             try {
                                 model = new DefaultArtifactModel(new FacetArtifact(new ImmutableArtifact(name, new URI(uri))));
-                                model.setDeploymentRoot(root);
-                                model.setPersistent(persistent);
 
+                                // Now read the attributes
                                 int count = reader.getAttributeCount();
                                 for (int i = 0; i < count; i++) {
                                     QName qName = reader.getAttributeName(i);

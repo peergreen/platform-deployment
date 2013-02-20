@@ -35,6 +35,7 @@ import com.peergreen.deployment.facet.builder.FacetBuilderException;
 import com.peergreen.deployment.internal.artifact.FacetArtifact;
 import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
 import com.peergreen.deployment.internal.facet.FacetRequirementImpl;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelPersistenceView;
 
 /**
  * Test if facet builder can restore facets.
@@ -101,7 +102,7 @@ public class FacetBuilderTestCase {
         facetArtifact.getFacetBuilders().add(dummyFacetBuilderInfo);
 
         // persistent
-        artifactModel.setPersistent(true);
+        artifactModel.as(InternalArtifactModelPersistenceView.class).setPersistent(true);
 
         // Check artifact doesn't contains the facet
         Assert.assertNull(artifact.as(DummyFacet.class));
@@ -130,7 +131,7 @@ public class FacetBuilderTestCase {
         facetArtifact.getFacetBuilders().add(dummyDependencyFacetBuilderInfo);
 
         // persistent
-        artifactModel.setPersistent(true);
+        artifactModel.as(InternalArtifactModelPersistenceView.class).setPersistent(true);
 
         // Check artifact doesn't contains the facet
         Assert.assertNull(facetArtifact.as(DummyFacet.class));
@@ -158,7 +159,7 @@ public class FacetBuilderTestCase {
     @Test
     public void testFacetBuilderWithCycleDepedency() throws Exception {
         // persistent
-        artifactModel.setPersistent(true);
+        artifactModel.as(InternalArtifactModelPersistenceView.class).setPersistent(true);
 
         DefaultFacetBuilderInfo cycle1DependencyFacetBuilderInfo = new DefaultFacetBuilderInfo();
         cycle1DependencyFacetBuilderInfo.setName(Cycle1DependencyFacetBuilder.class.getName());

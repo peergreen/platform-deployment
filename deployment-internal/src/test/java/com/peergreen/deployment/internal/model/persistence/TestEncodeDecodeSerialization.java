@@ -74,6 +74,10 @@ public class TestEncodeDecodeSerialization {
         check(Boolean.valueOf(false));
     }
 
+    @Test
+    public void testNull() {
+        check(null);
+    }
 
     <T> void check(T object) {
         Assert.assertEquals(decodeValue(encodeValue(object)), object);

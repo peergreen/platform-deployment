@@ -40,7 +40,6 @@ import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.model.Created;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
@@ -49,6 +48,8 @@ import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
 import com.peergreen.deployment.internal.report.DefaultArtifactStatusReport;
 import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
 import com.peergreen.deployment.internal.thread.PeergreenThreadFactory;
+import com.peergreen.deployment.model.WireScope;
+import com.peergreen.deployment.model.flag.Created;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.ArtifactStatusReportException;
 import com.peergreen.deployment.report.DeploymentStatusReport;
@@ -162,16 +163,12 @@ public class BasicDeploymentService implements DeploymentService {
         LOGGER.info("[{0}] Artifacts ''{1}'' in ''{2}'' ms." , deploymentMode, artifacts, elapsedTime);
 
 
-        /*Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
-        TaskRenderingVisitor taskRenderingVisitor = new TaskRenderingVisitor(System.out);
-        taskRenderingVisitor.setGroups(holder.getGroups());
-        root.walk(taskRenderingVisitor);*/
         return deploymentStatusReport;
 
     }
 
     protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
-        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+        for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
             if (facetArtifact.getExceptions().size() > 0) {
                 deploymentStatusReport.setFailure();
@@ -190,7 +187,7 @@ public class BasicDeploymentService implements DeploymentService {
     * @param artifactModel
     */
     protected void addChildArtifactStatusReport(DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
-        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+        for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
             DefaultArtifactStatusReport childArtifactStatusReport = new DefaultArtifactStatusReport(facetArtifact);
             artifactStatusReport.addChild(childArtifactStatusReport);

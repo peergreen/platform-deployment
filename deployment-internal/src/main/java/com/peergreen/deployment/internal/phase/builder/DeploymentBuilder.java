@@ -32,19 +32,21 @@ import com.peergreen.deployment.internal.artifact.adapter.ArtifactFacetAdapter;
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.deployment.internal.context.BasicProcessorContext;
 import com.peergreen.deployment.internal.deploymentmode.adapter.DeploymentModeFacetAdapter;
-import com.peergreen.deployment.internal.model.Created;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultWire;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelDeploymentView;
 import com.peergreen.deployment.internal.phase.DiscoveryPhase;
 import com.peergreen.deployment.internal.phase.Phases;
 import com.peergreen.deployment.internal.phase.ProcessorJobPhase;
 import com.peergreen.deployment.internal.phase.job.DeployerCreationJob;
 import com.peergreen.deployment.internal.phase.job.NewArtifactsDiscoveryCreationJob;
 import com.peergreen.deployment.internal.service.InjectionContext;
-import com.peergreen.deployment.model.WireType;
+import com.peergreen.deployment.model.WireScope;
+import com.peergreen.deployment.model.flag.Created;
+import com.peergreen.deployment.model.flag.Use;
 import com.peergreen.deployment.resource.artifact.ArtifactCapability;
 import com.peergreen.deployment.resource.deploymentmode.DeploymentModeCapability;
 import com.peergreen.tasks.model.Parallel;
@@ -84,7 +86,7 @@ public class DeploymentBuilder {
 
         // Then add all new dependencies
         InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
-        for (InternalWire wire : artifactModel.getInternalFromWires()) {
+        for (InternalWire wire : artifactModel.getInternalWires(WireScope.FROM)) {
             InternalArtifactModel child = wire.getInternalTo();
             addInnerArtifacts(artifacts, child.getFacetArtifact(), artifactModelManager);
         }
@@ -162,7 +164,10 @@ public class DeploymentBuilder {
             if ((deploymentMode == DeploymentMode.DEPLOY)) {
                 if ((rootArtifactModel != null)) {
                     // we have a parent that want to use this artifact, add a link to this one
-                    InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel, WireType.USE);
+                    InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel);
+
+                    // Flag mode
+                    wire.setAttribute(Use.class.getName());
 
                     // first order
                     rootArtifactModel.addWire(wire);
@@ -172,17 +177,17 @@ public class DeploymentBuilder {
 
                     // wire for creating node ? add created flag
                     if (createdArtifactModel) {
-                        wire.addFlag(Created.class);
+                        wire.setAttribute(Created.class.getName());
                     }
                 } else {
                     // no parent, this is a root artifact (explicitly deployed)
                     // Mark the model as a deployment-root
-                    artifactModel.setDeploymentRoot(true);
+                    artifactModel.as(InternalArtifactModelDeploymentView.class).setDeploymentRoot(true);
                 }
             }
 
             if (DeploymentMode.UNDEPLOY == deploymentMode) {
-                artifactModel.setUndeployed(true);
+                artifactModel.as(InternalArtifactModelDeploymentView.class).setUndeployed(true);
             }
 
             // Needs to update the lastModified/Length

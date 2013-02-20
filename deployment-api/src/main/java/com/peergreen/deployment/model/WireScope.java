@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,20 +15,20 @@
  */
 package com.peergreen.deployment.model;
 
-/**
- * Defines a wire between two ArtifactModel nodes.
- * @author Florent Benoit
- */
-public interface Wire extends Attributes {
+public enum WireScope {
 
     /**
-     * @return the origin of this wire.
+     * All wires.
      */
-    ArtifactModel getFrom();
+    ALL,
 
     /**
-     * @return the target of this wire.
+     * Only wires that have the given artifact model as origin.
      */
-    ArtifactModel getTo();
+    FROM,
 
+    /**
+     * Only wires that have the given artifact model as target.
+     */
+    TO
 }

@@ -33,6 +33,7 @@ import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelChangesView;
 import com.peergreen.deployment.monitor.URITrackerException;
 import com.peergreen.deployment.monitor.URITrackerManager;
 
@@ -191,8 +192,9 @@ public class DeploymentServiceMonitor implements Runnable {
      * @return True if the file length has changed
      */
     private boolean lengthHasChanged(final InternalArtifactModel artifactModel) {
-        long previousLength = artifactModel.getArtifactLength();
-        long intermediateLength = artifactModel.getCheckingArtifactLength();
+        InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
+        long previousLength = modelChanges.getArtifactLength();
+        long intermediateLength = modelChanges.getCheckingArtifactLength();
 
         long currentLength = 0;
         try {
@@ -218,7 +220,8 @@ public class DeploymentServiceMonitor implements Runnable {
      * @return True if the last modified has changed
      */
     private boolean lastModifiedHasChanged(final InternalArtifactModel artifactModel) {
-        long previousLastModified = artifactModel.getLastModified();
+        InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
+        long previousLastModified = modelChanges.getLastModified();
         long currentLastModified = 0;
         try {
             currentLastModified = getLastModified(artifactModel.getFacetArtifact().uri());
@@ -247,11 +250,12 @@ public class DeploymentServiceMonitor implements Runnable {
 
     protected void saveIntermediateFileLengths( Collection<InternalArtifactModel> trackedArtifactModels) {
         for (InternalArtifactModel artifactModel : trackedArtifactModels) {
+            InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
             try {
                 long length = getLength(artifactModel.getFacetArtifact().uri());
-                artifactModel.setCheckingArtifactLength(length);
+                modelChanges.setCheckingArtifactLength(length);
             } catch (URITrackerException e) {
-                artifactModel.setCheckingArtifactLength(-1);
+                modelChanges.setCheckingArtifactLength(-1);
             }
 
         }

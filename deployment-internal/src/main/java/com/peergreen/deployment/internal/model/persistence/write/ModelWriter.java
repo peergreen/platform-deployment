@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,8 @@
 package com.peergreen.deployment.internal.model.persistence.write;
 
 import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.ATTRIBUTE_KEY;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.NAME_ATTRIBUTE;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.URI_ATTRIBUTE;
 import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.encodeValue;
 
 import java.io.Writer;
@@ -65,8 +67,12 @@ public class ModelWriter {
         writer.writeEmptyElement("wire");
         writeAttribute(writer, "from", wire.getInternalFrom().getFacetArtifact().uri().toString());
         writeAttribute(writer, "to", wire.getInternalTo().getFacetArtifact().uri().toString());
-        // TODO Complete with wire attributes (when ready)
-        //writer.writeEndElement();
+
+        Map<String, Object> attributes = wire.getAttributes();
+        Set<Map.Entry<String, Object>> entries = attributes.entrySet();
+        for (Map.Entry<String, Object> entry : entries) {
+            writeAttribute(writer, ATTRIBUTE_KEY.concat(entry.getKey()) , encodeValue(entry.getValue()));
+        }
     }
 
     private void writeArtifact(XMLStreamWriter writer, InternalArtifactModel artifact) throws XMLStreamException {
@@ -86,14 +92,8 @@ public class ModelWriter {
 
     private void writeArtifactAttributes(XMLStreamWriter writer, InternalArtifactModel artifact) throws XMLStreamException {
         IFacetArtifact facetArtifact = artifact.getFacetArtifact();
-        writeAttribute(writer, "uri", facetArtifact.uri().toString());
-        writeAttribute(writer, "name", facetArtifact.name());
-        if (artifact.isDeploymentRoot()) {
-            writeAttribute(writer, "root", "true");
-        }
-        if (artifact.isPersistent()) {
-            writeAttribute(writer, "persistent", "true");
-        }
+        writeAttribute(writer, URI_ATTRIBUTE, facetArtifact.uri().toString());
+        writeAttribute(writer, NAME_ATTRIBUTE, facetArtifact.name());
 
        Map<String, Object> attributes = artifact.getAttributes();
        Set<Map.Entry<String, Object>> entries = attributes.entrySet();
@@ -105,7 +105,7 @@ public class ModelWriter {
     private void writeFacets(XMLStreamWriter writer, IFacetArtifact artifact) throws XMLStreamException {
         for (FacetBuilderInfo facetBuilderInfo : artifact.getFacetBuilders()) {
             writer.writeEmptyElement("facet-builder");
-            writeAttribute(writer, "name", facetBuilderInfo.getName());
+            writeAttribute(writer, NAME_ATTRIBUTE, facetBuilderInfo.getName());
             writeAttribute(writer, "provides", facetBuilderInfo.getProvides());
         }
     }

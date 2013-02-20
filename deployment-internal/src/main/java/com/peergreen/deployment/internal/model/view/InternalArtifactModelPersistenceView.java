@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,10 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.model;
+package com.peergreen.deployment.internal.model.view;
 
-public enum WireType {
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 
-   USE
+/**
+ * Defines setters for persistence view
+ * @author Florent Benoit
+ */
+public interface InternalArtifactModelPersistenceView extends ArtifactModelPersistenceView {
 
+    void setPersistent(boolean persistent);
 }

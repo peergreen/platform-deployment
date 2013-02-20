@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,22 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.model;
+package com.peergreen.deployment.model.view;
 
 /**
- * Defines a wire between two ArtifactModel nodes.
+ * Updates view on the model.
  * @author Florent Benoit
  */
-public interface Wire extends Attributes {
+public interface ArtifactModelPersistenceView {
 
-    /**
-     * @return the origin of this wire.
-     */
-    ArtifactModel getFrom();
-
-    /**
-     * @return the target of this wire.
-     */
-    ArtifactModel getTo();
+    boolean isPersistent();
 
 }

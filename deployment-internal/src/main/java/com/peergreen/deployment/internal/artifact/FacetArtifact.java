@@ -62,11 +62,11 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         this.wrappedArtifact = wrappedArtifact;
         this.name = wrappedArtifact.name();
         this.uri = wrappedArtifact.uri();
-        this.facets = new HashMap<Class<?>, Object>();
-        this.facetInfos = new HashMap<Class<?>, FacetInfo>();
-        this.processorInfos = new HashSet<ProcessorInfo>();
+        this.facets = new HashMap<>();
+        this.facetInfos = new HashMap<>();
+        this.processorInfos = new HashSet<>();
         this.facetBuildersInfo = new ArrayList<>();
-        this.exceptions = new ArrayList<Exception>();
+        this.exceptions = new ArrayList<>();
     }
 
     @Override

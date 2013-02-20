@@ -14,54 +14,104 @@
  *  limitations under the License.
  */
 package com.peergreen.deployment.internal.model;
-import static com.peergreen.deployment.model.ArtifactModelConstants.ARTIFACT_LENGTH;
-import static com.peergreen.deployment.model.ArtifactModelConstants.CHECKING_ARTIFACT_LENGTH;
-import static com.peergreen.deployment.model.ArtifactModelConstants.LAST_MODIFIED;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.model.view.DefaultArtifactModelChangesView;
+import com.peergreen.deployment.internal.model.view.DefaultArtifactModelDeploymentView;
+import com.peergreen.deployment.internal.model.view.DefaultArtifactModelPersistenceView;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelChangesView;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelDeploymentView;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelPersistenceView;
 import com.peergreen.deployment.model.Wire;
+import com.peergreen.deployment.model.WireScope;
+import com.peergreen.deployment.model.view.ArtifactModelChangesView;
+import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 
-public class DefaultArtifactModel implements InternalArtifactModel {
+/**
+ * Default implementation of the artifaft model.
+ * The model is storing all data about a given artifact being managed/tracked by the deployment system.
+ * The model will be restored for persistent artifact only.
+ * @author Florent Benoit
+ */
+public class DefaultArtifactModel extends AbsInternalAttributes implements InternalArtifactModel {
 
+    /**
+     * Facet artifact used inside the artifact model.
+     */
     private final IFacetArtifact facetArtifact;
-    private boolean deploymentRoot = false;
-    private boolean persistent = false;
 
+    /**
+     * All the wires using this model.
+     */
     private final Set<InternalWire> wires;
+
+    /**
+     * Wires starting from this node.
+     */
     private final Set<InternalWire> fromWires;
+
+    /**
+     * Wires targeting this node.
+     */
     private final Set<InternalWire> toWires;
 
-    private boolean undeployed = false;
+    /**
+     * Manages the view of this artifact.
+     */
+    private final Map<Class<?>, Object> views;
 
-    private final Map<String, Object> attributes;
-
-
-
+    /**
+     * Build default model on a given {@link IFacetArtifact}
+     * @param facetArtifact the facet artifact
+     */
     public DefaultArtifactModel(IFacetArtifact facetArtifact) {
+        super();
         this.facetArtifact = facetArtifact;
-        this.wires = new HashSet<InternalWire>();
-        this.fromWires = new HashSet<InternalWire>();
-        this.toWires = new HashSet<InternalWire>();
-        this.attributes = new HashMap<>();
+        this.wires = new HashSet<>();
+        this.fromWires = new HashSet<>();
+        this.toWires = new HashSet<>();
+        this.views = new HashMap<>();
+        addDefaultViews();
     }
 
-    @Override
-    public void setUndeployed(boolean undeployed) {
-        this.undeployed = undeployed;
+    /**
+     * Adds the default view.
+     */
+    protected void addDefaultViews() {
+        addView(new DefaultArtifactModelChangesView(this), InternalArtifactModelChangesView.class, ArtifactModelChangesView.class);
+        addView(new DefaultArtifactModelDeploymentView(this), InternalArtifactModelDeploymentView.class, ArtifactModelDeploymentView.class);
+        addView(new DefaultArtifactModelPersistenceView(this), InternalArtifactModelPersistenceView.class, ArtifactModelPersistenceView.class);
     }
 
-    @Override
-    public boolean isUndeployed() {
-        return undeployed;
+    public void addView(Object o,  Class<?>... classes) {
+        for (Class<?> clazz : classes) {
+            views.put(clazz, o);
+        }
     }
+
+
+    /**
+     * @return a view for this model.
+     */
+    @Override
+    public <View> View as(Class<View> viewClass) {
+        return viewClass.cast(views.get(viewClass));
+    }
+
 
     @Override
     public void addWire(InternalWire wire) {
+        // Check that the wire is linked to this node
+        if (!this.equals(wire.getTo())  && !this.equals(wire.getFrom())) {
+            throw new IllegalStateException("Cannot add a wire that doesn't use the node");
+        }
+
         wires.add(wire);
         if (this.equals(wire.getFrom())) {
             fromWires.add(wire);
@@ -69,7 +119,7 @@ public class DefaultArtifactModel implements InternalArtifactModel {
         if (this.equals(wire.getTo())) {
             toWires.add(wire);
         }
-        //FIXME: check that it's strange to add a wire with being neither from and to
+
     }
 
 
@@ -78,61 +128,35 @@ public class DefaultArtifactModel implements InternalArtifactModel {
         return facetArtifact;
     }
 
+
+    /**
+     * Gets the wires using the given scope.
+     * @param scope the scope to use
+     * @param attributeNames the list of attributes that the wire needs to have
+     * @return a list of matching wire
+     */
     @Override
-    public Iterable<? extends Wire> getWires(Class<?>... flags) {
-        return getInternalWires(flags);
-    }
+    public Iterable<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames) {
+        Set<InternalWire> scopedWires;
+        if (scope == WireScope.ALL) {
+            scopedWires = this.wires;
+        } else if (scope == WireScope.FROM) {
+            scopedWires = this.fromWires;
+        } else if (scope == WireScope.TO) {
+            scopedWires = this.toWires;
+        } else {
+            return Collections.emptySet();
+        }
 
-    @Override
-    public Iterable<? extends Wire> getFromWires(Class<?>... flags) {
-        return getInternalFromWires(flags);
-    }
-
-    @Override
-    public Iterable<? extends Wire> getToWires(Class<?>... flags) {
-        return getInternalToWires(flags);
-    }
-
-    @Override
-    public boolean isUsed() {
-        return fromWires.isEmpty();
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return wires.isEmpty();
-    }
-
-    @Override
-    public boolean isDeploymentRoot() {
-        return deploymentRoot;
-    }
-
-    @Override
-    public Iterable<InternalWire> getInternalWires(Class<?>... flags) {
-        return getFlags(wires, flags);
-    }
-
-    @Override
-    public Iterable<InternalWire> getInternalFromWires(Class<?>... flags) {
-        return getFlags(fromWires, flags);
-    }
-
-    @Override
-    public Iterable<InternalWire> getInternalToWires(Class<?>... flags) {
-        return getFlags(toWires, flags);
-    }
-
-
-    public Iterable<InternalWire> getFlags(Set<InternalWire> wires, Class<?>... flags) {
-        if (flags == null) {
-            return wires;
+        // No search
+        if (attributeNames == null || attributeNames.length == 0) {
+            return scopedWires;
         }
 
         //search flags
         Set<InternalWire> flagsWire = new HashSet<InternalWire>();
-        for (InternalWire wire : wires) {
-            if (wire.isFlagged(flags)) {
+        for (InternalWire wire : scopedWires) {
+            if (wire.hasAttributes(attributeNames)) {
                 flagsWire.add(wire);
             }
         }
@@ -141,68 +165,9 @@ public class DefaultArtifactModel implements InternalArtifactModel {
 
     }
 
-    protected long getLongAttribute(String attributeName) {
-        Long l = (Long) attributes.get(attributeName);
-        if (l == null) {
-            return Long.MIN_VALUE;
-        }
-        return l.longValue();
-    }
-
     @Override
-    public long getLastModified() {
-        return getLongAttribute(LAST_MODIFIED);
-    }
-
-    @Override
-    public long getArtifactLength() {
-        return getLongAttribute(ARTIFACT_LENGTH);
-    }
-
-    @Override
-    public long getCheckingArtifactLength() {
-        return getLongAttribute(CHECKING_ARTIFACT_LENGTH);
-    }
-
-
-    @Override
-    public void setLastModified(long lastModified) {
-        this.attributes.put(LAST_MODIFIED, lastModified);
-    }
-
-    @Override
-    public void setArtifactLength(long artifactLength) {
-        this.attributes.put(ARTIFACT_LENGTH, artifactLength);
-    }
-
-    @Override
-    public void setCheckingArtifactLength(long checkingArtifactLength) {
-        this.attributes.put(CHECKING_ARTIFACT_LENGTH, checkingArtifactLength);
-    }
-
-
-    @Override
-    public void setDeploymentRoot(boolean rootDeployment) {
-        deploymentRoot = rootDeployment;
-    }
-
-    @Override
-    public boolean isPersistent() {
-        return persistent;
-    }
-
-    public void setPersistent(boolean persistent) {
-        this.persistent = persistent;
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    @Override
-    public void setAttribute(String key, Object value) {
-        this.attributes.put(key, value);
+    public Iterable<? extends Wire> getWires(WireScope scope, String... attributeNames) {
+        return getInternalWires(scope, attributeNames);
     }
 
 

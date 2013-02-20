@@ -16,27 +16,26 @@
 
 package com.peergreen.deployment.internal.model.persistence.read;
 
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.ATTRIBUTE_KEY;
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.decodeValue;
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 import com.peergreen.deployment.internal.model.DefaultWire;
-import com.peergreen.deployment.model.WireType;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 16/01/13
- * Time: 12:31
- * To change this template use File | Settings | File Templates.
+ * @author guillaume
  */
 public class WireParser implements Parser {
 
-    private Map<String, DefaultArtifactModel> models;
+    private final Map<String, DefaultArtifactModel> models;
 
     public WireParser(Map<String, DefaultArtifactModel> models) {
         this.models = models;
@@ -53,9 +52,21 @@ public class WireParser implements Parser {
                             String to = reader.getAttributeValue(null, "to");
                             DefaultArtifactModel fromModel = find(from);
                             DefaultArtifactModel toModel = find(to);
-                            DefaultWire wire = new DefaultWire(fromModel, toModel, WireType.USE);
+                            DefaultWire wire = new DefaultWire(fromModel, toModel);
                             fromModel.addWire(wire);
                             toModel.addWire(wire);
+
+                            int count = reader.getAttributeCount();
+                            for (int i = 0; i < count; i++) {
+                                QName qName = reader.getAttributeName(i);
+                                String localPart = qName.getLocalPart();
+                                if (localPart.startsWith(ATTRIBUTE_KEY)) {
+                                    String attributeValue = reader.getAttributeValue(i);
+                                    String attributeName = qName.getLocalPart().substring(ATTRIBUTE_KEY.length());
+                                    wire.getAttributes().put(attributeName, decodeValue(attributeValue));
+                                }
+                            }
+
                         }
                     }
                     break;

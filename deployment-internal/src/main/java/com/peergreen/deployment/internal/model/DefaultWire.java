@@ -15,31 +15,23 @@
  */
 package com.peergreen.deployment.internal.model;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
-import com.peergreen.deployment.model.WireType;
-
-public class DefaultWire implements InternalWire {
+/**
+ * Defines an implementation of a wire.
+ * @author Florent Benoit
+ */
+public class DefaultWire extends AbsInternalAttributes implements InternalWire {
 
     private final InternalArtifactModel from;
 
     private final InternalArtifactModel to;
 
-    private final WireType type;
 
-    private final Set<Class<?>> flags;
-
-
-
-    public DefaultWire(InternalArtifactModel from, InternalArtifactModel to, WireType type) {
+    public DefaultWire(InternalArtifactModel from, InternalArtifactModel to) {
+        super();
         this.from = from;
         this.to = to;
-        this.type = type;
-        this.flags = new HashSet<Class<?>>();
     }
-
 
     @Override
     public InternalArtifactModel getFrom() {
@@ -52,34 +44,14 @@ public class DefaultWire implements InternalWire {
     }
 
     @Override
-    public WireType getType() {
-        return type;
-    }
-
-
-    @Override
     public InternalArtifactModel getInternalFrom() {
         return from;
     }
-
 
     @Override
     public InternalArtifactModel getInternalTo() {
         return to;
     }
 
-    @Override
-    public boolean isFlagged(Class<?>... flagClasses) {
-        return flags.containsAll(Arrays.asList(flagClasses));
-    }
-
-    @Override
-    public boolean removeFlag(Class<?> flagClass) {
-        return flags.remove(flagClass);
-    }
-    @Override
-    public void addFlag(Class<?> flagClass) {
-        flags.add(flagClass);
-    }
 
 }

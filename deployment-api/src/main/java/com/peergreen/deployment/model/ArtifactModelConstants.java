@@ -22,9 +22,16 @@ package com.peergreen.deployment.model;
 public class ArtifactModelConstants {
 
     public static final String LAST_MODIFIED = "lastModified";
+
     public static final String ARTIFACT_LENGTH = "artifactLength";
+
     public static final String CHECKING_ARTIFACT_LENGTH = "checkingArtifactLength";
 
+    public static final String PERSISTENT = "persistent";
+
+    public static final String DEPLOYMENT_ROOT = "deploymentRoot";
+
+    public static final String UNDEPLOYED = "undeployed";
 
     private ArtifactModelConstants() {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,19 +16,24 @@
 package com.peergreen.deployment.model;
 
 /**
- * Defines a wire between two ArtifactModel nodes.
+ * Common interface for the model and the wire defining the way to get some attributes.
  * @author Florent Benoit
  */
-public interface Wire extends Attributes {
+public interface Attributes {
 
     /**
-     * @return the origin of this wire.
+     * Gets the given attribute by casting it to the expected type.
+     * @param attributeName the attribute to get
+     * @return the matching attribute or null if not found.
      */
-    ArtifactModel getFrom();
+    <T> T getAttribute(String attributeName);
 
     /**
-     * @return the target of this wire.
+     * Search if there are matching attribute with the given attribute names.
+     * @param attributesName the name of the attribute
+     * @return true if the attribute is there
      */
-    ArtifactModel getTo();
+    boolean hasAttributes(String... attributesName);
+
 
 }

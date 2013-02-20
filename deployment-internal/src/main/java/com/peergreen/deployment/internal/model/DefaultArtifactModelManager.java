@@ -65,9 +65,12 @@ import com.peergreen.deployment.internal.artifact.InternalFacetBuilderInfo;
 import com.peergreen.deployment.internal.model.persistence.ArtifactModelPersistence;
 import com.peergreen.deployment.internal.model.persistence.BuilderContextFactory;
 import com.peergreen.deployment.internal.model.persistence.PersistenceException;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelChangesView;
 import com.peergreen.deployment.internal.solver.MissingCapability;
 import com.peergreen.deployment.internal.solver.ResolveContextImpl;
 import com.peergreen.deployment.model.ArtifactModelManager;
+import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 import com.peergreen.deployment.monitor.URITrackerException;
 import com.peergreen.deployment.monitor.URITrackerManager;
 import com.peergreen.tree.Graph;
@@ -184,7 +187,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         }
         for (Entry<URI, InternalArtifactModel> entry : artifactsEntries) {
             // Exclude artifacts being un-deployed
-            if (entry.getValue().isUndeployed()) {
+            if (entry.getValue().as(ArtifactModelDeploymentView.class).isUndeployed()) {
                 continue;
             }
             uris.add(entry.getKey());
@@ -203,7 +206,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         }
         for (InternalArtifactModel artifactModel : artifactModelsSet) {
             // Exclude artifacts being un-deployed
-            if (artifactModel.isUndeployed()) {
+            if (artifactModel.as(ArtifactModelDeploymentView.class).isUndeployed()) {
                 continue;
             }
             artifactModels.add(artifactModel);
@@ -214,19 +217,20 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
 
     @Override
     public void updateLengthLastModified(InternalArtifactModel artifactModel) {
+        InternalArtifactModelChangesView artifactChanges = artifactModel.as(InternalArtifactModelChangesView.class);
         URI uri = artifactModel.getFacetArtifact().uri();
         try {
-            artifactModel.setLastModified(uriTrackerManager.getLastModified(uri));
+            artifactChanges.setLastModified(uriTrackerManager.getLastModified(uri));
         } catch (URITrackerException e) {
             // Unable to read
-            artifactModel.setLastModified(-1);
+            artifactChanges.setLastModified(-1);
         }
 
         try {
-            artifactModel.setArtifactLength(uriTrackerManager.getLength(uri));
+            artifactChanges.setArtifactLength(uriTrackerManager.getLength(uri));
         } catch (URITrackerException e) {
             // Unable to read
-            artifactModel.setArtifactLength(-1);
+            artifactChanges.setArtifactLength(-1);
         }
 
     }
@@ -234,7 +238,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     public void store() {
 
         // First, we write on the temporary file
-        try (FileOutputStream fileOutputStream = new FileOutputStream(persistenceFile); Writer writer = new OutputStreamWriter(fileOutputStream, Charset.defaultCharset())) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(persistenceFileTmp); Writer writer = new OutputStreamWriter(fileOutputStream, Charset.defaultCharset())) {
             try {
             // store the model
             artifactModelPersistence.store(this, writer);
@@ -290,7 +294,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         Collection<InternalArtifactModel> artifactModels = artifactsByURI.values();
         Collection<Artifact> forgetArtifacts = new HashSet<>();
         for (InternalArtifactModel artifactModel : artifactModels) {
-            if (!artifactModel.isPersistent()) {
+            if (!artifactModel.as(ArtifactModelPersistenceView.class).isPersistent()) {
                 forgetArtifacts.add(artifactModel.getFacetArtifact());
             }
         }
@@ -384,7 +388,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         for (InternalArtifactModel artifactModel : artifactsByURI.values()) {
             // Apply only on persistent artifact
             // (do not need to do a recovery for non persistent artifacts)
-            if (artifactModel.isPersistent()) {
+            if (artifactModel.as(ArtifactModelPersistenceView.class).isPersistent()) {
                 applyArtifactFacetBuilder(artifactModel);
             }
         }

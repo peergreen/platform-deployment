@@ -16,6 +16,7 @@
 
 package com.peergreen.deployment.internal.model.persistence.read;
 
+import static com.peergreen.deployment.internal.model.persistence.PersistenceModelConstants.NAME_ATTRIBUTE;
 import static com.peergreen.deployment.internal.model.persistence.StAXArtifactModelPersistence.PG_NAMESPACE_URI;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
@@ -40,7 +41,7 @@ public class FacetBuilderParser implements Parser {
                     facetBuilderInfo = new DefaultFacetBuilderInfo();
                     if (PG_NAMESPACE_URI.equals(reader.getNamespaceURI())) {
                         if ("facet-builder".equals(reader.getLocalName())) {
-                            String name = reader.getAttributeValue(null, "name");
+                            String name = reader.getAttributeValue(null, NAME_ATTRIBUTE);
                             String provides = reader.getAttributeValue(null, "provides");
                             facetBuilderInfo.setName(name);
                             facetBuilderInfo.setProvides(provides);

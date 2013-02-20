@@ -22,6 +22,16 @@ package com.peergreen.deployment.internal.model.persistence;
 public class PersistenceModelConstants {
 
     /**
+     * Name Attribute.
+     */
+    public static final String NAME_ATTRIBUTE = "name";
+
+    /**
+     * URI Attribute name.
+     */
+    public static final String URI_ATTRIBUTE = "uri";
+
+    /**
      * Attribute Name.
      */
     public static final String ATTRIBUTE_KEY = "attribute-";
@@ -76,7 +86,18 @@ public class PersistenceModelConstants {
      */
     public static final String SHORT_VALUETYPE = VALUETYPE_PREFIX.concat(Short.class.getSimpleName()).concat(VALUETYPE_SUFFIX);
 
+    /**
+     * Value type for Null.
+     */
+    public static final String NULL_VALUETYPE = VALUETYPE_PREFIX.concat("NULL").concat(VALUETYPE_SUFFIX);
+
+
+
     public static <T> String encodeValue(T object) {
+        if (object ==  null) {
+            return NULL_VALUETYPE;
+        }
+
         Class<T> objectClass = (Class<T>) object.getClass();
 
         if (Long.class.equals(objectClass)) {
@@ -135,6 +156,12 @@ public class PersistenceModelConstants {
         if (encodedValue.startsWith(CHARACTER_VALUETYPE)) {
             return (T) Character.valueOf(encodedValue.substring(CHARACTER_VALUETYPE.length()).charAt(0));
         }
+
+        if (NULL_VALUETYPE.equals(encodedValue)) {
+            return null;
+        }
+
+
         // Do not decode for other type
         return (T) encodedValue;
     }

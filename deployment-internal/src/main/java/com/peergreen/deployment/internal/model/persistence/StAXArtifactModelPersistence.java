@@ -39,6 +39,8 @@ import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.model.persistence.read.DeployedArtifactsParser;
 import com.peergreen.deployment.internal.model.persistence.write.ModelWriter;
+import com.peergreen.deployment.model.WireScope;
+import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
 
 /**
  * Allows to load or store the persistence model.
@@ -88,7 +90,7 @@ public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
             reader.close();
             if (models != null) {
                 for (DefaultArtifactModel model : models.values()) {
-                    if (model.isDeploymentRoot()) {
+                    if (model.as(ArtifactModelDeploymentView.class).isDeploymentRoot()) {
                         URI uri = model.getFacetArtifact().uri();
                         artifactModelManager.addArtifactModel(uri, model);
                     }
@@ -105,8 +107,8 @@ public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
         if (!artifacts.contains(model)) {
             artifacts.add(model);
             // Retrieve all its connections
-            for (InternalWire wire : model.getInternalWires()) {
-                // KKKK wires
+            for (InternalWire wire : model.getInternalWires(WireScope.ALL)) {
+                // apply wires
                 if (!wires.contains(wire)) {
                     wires.add(wire);
                 }

@@ -15,33 +15,34 @@
  */
 package com.peergreen.deployment.internal.model;
 
-import java.util.Map;
-
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.model.ArtifactModel;
+import com.peergreen.deployment.model.WireScope;
 
-public interface InternalArtifactModel extends ArtifactModel {
+/**
+ * Internal model used by the deployment system.
+ * It allows to modify the model while the super interface is only a read-only interface
+ * @author Florent Benoit
+ */
+public interface InternalArtifactModel extends InternalAttributes, ArtifactModel {
 
+    /**
+     * @return the facet artifact of this model.
+     */
     IFacetArtifact getFacetArtifact();
 
-    Iterable<InternalWire> getInternalWires(Class<?>... flags);
-    Iterable<InternalWire> getInternalToWires(Class<?>... flags);
-    Iterable<InternalWire> getInternalFromWires(Class<?>... flags);
+    /**
+     * Gets the wires using the given scope.
+     * @param scope the scope to use
+     * @param attributeNames the list of attributes that the wire needs to have
+     * @return a list of matching wire
+     */
+    Iterable<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames);
 
+    /**
+     * Adds a wire for this internal model.
+     * @param wire the wire to add.
+     */
     void addWire(InternalWire wire);
-
-    void setLastModified(long lastModified);
-    void setArtifactLength(long length);
-    void setCheckingArtifactLength(long length);
-    long getCheckingArtifactLength();
-
-    //FIXME : add flags ??
-    void setUndeployed(boolean undeployed);
-    boolean isUndeployed();
-    void setDeploymentRoot(boolean value);
-
-
-    Map<String, Object> getAttributes();
-    void setAttribute(String key, Object value);
 
 }

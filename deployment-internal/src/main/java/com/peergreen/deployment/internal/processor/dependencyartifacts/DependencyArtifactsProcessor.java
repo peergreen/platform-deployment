@@ -28,6 +28,7 @@ import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
+import com.peergreen.deployment.model.WireScope;
 import com.peergreen.tasks.model.Parallel;
 import com.peergreen.tasks.model.Task;
 
@@ -65,7 +66,7 @@ public class DependencyArtifactsProcessor implements Processor<BasicDeploymentCo
 
             // list of children
             List<Artifact> toUndeployArtifacts = new ArrayList<Artifact>();
-            for (InternalWire wire : artifactModel.getInternalToWires()) {
+            for (InternalWire wire : artifactModel.getInternalWires(WireScope.TO)) {
                 InternalArtifactModel child = wire.getInternalTo();
                 toUndeployArtifacts.add(child.getFacetArtifact());
             }
