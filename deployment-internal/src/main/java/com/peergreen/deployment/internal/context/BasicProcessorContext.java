@@ -16,7 +16,6 @@
 package com.peergreen.deployment.internal.context;
 
 import java.net.URI;
-import java.util.List;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
@@ -57,15 +56,11 @@ public class BasicProcessorContext implements ProcessorContext {
     }
 
     @Override
-    public void addArtifact(Artifact artifact) {
-        this.deploymentContext.addArtifact(artifact);
+    public void addArtifact(Artifact artifact, boolean isPersistent) {
+        this.deploymentContext.addArtifact(artifact, isPersistent);
 
     }
 
-    @Override
-    public void addArtifact(List<Artifact> artifacts) {
-        this.deploymentContext.addArtifact(artifacts);
-    }
 
     @Override
     public Artifact build(String name, URI uri) {

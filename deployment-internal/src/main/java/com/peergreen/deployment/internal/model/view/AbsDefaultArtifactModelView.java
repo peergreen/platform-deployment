@@ -37,6 +37,16 @@ public class AbsDefaultArtifactModelView {
         return l.longValue();
     }
 
+    protected boolean getBooleanAttribute(String attributeName) {
+        Boolean b = (Boolean) getAttribute(attributeName);
+        if (b == null) {
+            return Boolean.FALSE;
+        }
+        return b.booleanValue();
+    }
+
+
+
     public boolean hasAttributes(String... attributesName) {
         return this.artifactModel.hasAttributes(attributesName);
     }

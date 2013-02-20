@@ -28,6 +28,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
@@ -99,9 +100,7 @@ public class DeploymentServiceMonitor implements Runnable {
             }
 
             // Compute list of artifacts to UNDEPLOY or UPDATE
-            List<Artifact> toUndeploy = new ArrayList<Artifact>();
-            List<Artifact> toUpdate = new ArrayList<Artifact>();
-
+            List<ArtifactProcessRequest> artifactProcessRequests = new ArrayList<>();
 
             // Gets the tracked artifacts
             Collection<InternalArtifactModel> trackedArtifactModels = artifactModelManager.getDeployedRootArtifacts();
@@ -131,7 +130,10 @@ public class DeploymentServiceMonitor implements Runnable {
                 // checks if the artifact still exists ?
                 try {
                     if (!uriTrackerManager.exists(uri)) {
-                        toUndeploy.add(immutableArtifact);
+                        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+                        artifactProcessRequest.setArtifact(immutableArtifact);
+                        artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
+                        artifactProcessRequests.add(artifactProcessRequest);
                     }
                 } catch (URITrackerException e) {
                     // Unable to check if the artifact still exists
@@ -139,19 +141,17 @@ public class DeploymentServiceMonitor implements Runnable {
 
                 // Check if the artifact has been updated
                 if (artifactHasChanged(artifactModel)) {
-                    toUpdate.add(immutableArtifact);
+                    ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+                    artifactProcessRequest.setArtifact(immutableArtifact);
+                    artifactProcessRequest.setDeploymentMode(DeploymentMode.UPDATE);
+                    artifactProcessRequests.add(artifactProcessRequest);
                 }
             }
 
 
-            // Artifacts to undeploy ?
-            if (!toUndeploy.isEmpty()) {
-                deploymentService.process(toUndeploy, DeploymentMode.UNDEPLOY);
-            }
-
-            // Artifacts to update ?
-            if (!toUpdate.isEmpty()) {
-                deploymentService.process(toUpdate, DeploymentMode.UPDATE);
+            // Artifacts to send ?
+            if (!artifactProcessRequests.isEmpty()) {
+                deploymentService.process(artifactProcessRequests);
             }
 
             // Do not actively scan all deployed artifacts

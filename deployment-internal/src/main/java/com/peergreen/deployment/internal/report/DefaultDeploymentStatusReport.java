@@ -17,12 +17,8 @@ package com.peergreen.deployment.internal.report;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
-import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.report.DeploymentStatusReport;
-import com.peergreen.tasks.model.State;
 
 public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
@@ -34,22 +30,15 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     // top XX processors
 
-    private String state;
-
     private long elapsedTime;
 
     private final Collection<DefaultArtifactStatusReport> artifactsReport;
 
-    private final String deploymentMode;
-
     private boolean failure = false;
 
 
-    public DefaultDeploymentStatusReport(DeploymentMode deploymentMode, List<Artifact> artifacts) {
-        this.deploymentMode = deploymentMode.name();
+    public DefaultDeploymentStatusReport() {
         this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
-
-
     }
 
     public long getElapsedTime() {
@@ -61,20 +50,13 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
         this.elapsedTime = elapsedTime;
     }
 
-    public void setState(State state) {
-        this.state = state.name();
-    }
-
     public void setFailure() {
         this.failure = true;
     }
 
+    @Override
     public boolean hasFailed() {
         return failure;
-    }
-
-    public String getState() {
-        return state;
     }
 
 
@@ -87,9 +69,8 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("\nDeploymentStatus[mode=");
-        sb.append(deploymentMode);
-        sb.append(", elapsedTime='");
+        StringBuilder sb = new StringBuilder("\nDeploymentStatus[");
+        sb.append("elapsedTime='");
         sb.append(elapsedTime);
         sb.append("' ms.");
 

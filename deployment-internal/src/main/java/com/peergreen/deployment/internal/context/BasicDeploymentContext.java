@@ -24,6 +24,7 @@ import org.osgi.resource.Capability;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.facet.FacetBuilderReference;
@@ -38,7 +39,7 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
     private final ExecutionContext executionContext;
 
-    private List<Artifact> newArtifacts = null;
+    private List<ArtifactProcessRequest> newArtifacts = null;
 
     private final IFacetArtifact currentArtifact;
 
@@ -52,26 +53,21 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
         super();
         this.currentArtifact = artifact;
         this.executionContext = executionContext;
-        this.newArtifacts = new CopyOnWriteArrayList<Artifact>();
+        this.newArtifacts = new CopyOnWriteArrayList<ArtifactProcessRequest>();
         this.currentProcessor = executionContext.get(CurrentProcessor.class);
         this.artifactBuilder = executionContext.get(ArtifactBuilder.class);
     }
 
 
     @Override
-    public void addArtifact(Artifact artifact) {
-        newArtifacts.add(artifact);
+    public void addArtifact(Artifact artifact, boolean isPersistent) {
+        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+        artifactProcessRequest.setArtifact(artifact);
+        artifactProcessRequest.setPersistent(isPersistent);
+        newArtifacts.add(artifactProcessRequest);
     }
 
-    @Override
-    public void addArtifact(List<Artifact> artifacts) {
-        if (artifacts == null) {
-            return;
-        }
-        newArtifacts.addAll(artifacts);
-    }
-
-    public List<Artifact> getNewArtifacts() {
+    public List<ArtifactProcessRequest> getNewArtifacts() {
         return newArtifacts;
     }
 

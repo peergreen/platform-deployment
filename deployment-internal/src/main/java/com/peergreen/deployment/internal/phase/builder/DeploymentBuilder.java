@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.ProcessorContext;
@@ -38,6 +39,7 @@ import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.model.view.InternalArtifactModelDeploymentView;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelPersistenceView;
 import com.peergreen.deployment.internal.phase.DiscoveryPhase;
 import com.peergreen.deployment.internal.phase.Phases;
 import com.peergreen.deployment.internal.phase.ProcessorJobPhase;
@@ -77,44 +79,33 @@ public class DeploymentBuilder {
         this.deploymentModeFacetCapabilityAdapter = new DeploymentModeFacetAdapter();
     }
 
+    public Task buildTaskModel(TaskModelParameters parameters) {
 
-    protected void addInnerArtifacts(List<Artifact> artifacts, Artifact artifact, InternalArtifactModelManager artifactModelManager) {
-        // First, add ourself
-        if (!artifacts.contains(artifact)) {
-            artifacts.add(artifact);
-        }
-
-        // Then add all new dependencies
-        InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
-        for (InternalWire wire : artifactModel.getInternalWires(WireScope.FROM)) {
-            InternalArtifactModel child = wire.getInternalTo();
-            addInnerArtifacts(artifacts, child.getFacetArtifact(), artifactModelManager);
-        }
-
-    }
+        Collection<ArtifactProcessRequest> taskArtifacts = parameters.getArtifactProcessRequests();
+        DeploymentMode deploymentMode = parameters.getDeploymentMode();
+        TaskExecutionHolder taskExecutionHolder = parameters.getTaskExecutionHolder();
+        InternalArtifactModel rootArtifactModel = parameters.getRootArtifactModel();
 
 
-    public Task buildTaskModel(List<Artifact> taskArtifacts, DeploymentMode deploymentMode, TaskExecutionHolder taskExecutionHolder, InternalArtifactModel rootArtifactModel) {
+
         // Build a new deployment named Phases
         Phases phases = new Phases("Phases");
 
         // List of groups for the taskcontext factory
         Collection<Group> allgroups = taskExecutionHolder.getGroups();
 
-
         // In UNDEPLOY mode, needs to find all dependencies of the given artifacts
-        List<Artifact> artifacts;
+        List<ArtifactProcessRequest> artifactProcessRequests;
 
         if (DeploymentMode.UNDEPLOY == deploymentMode) {
-            artifacts = new ArrayList<Artifact>();
-            for (Artifact artifact : taskArtifacts) {
-                addInnerArtifacts(artifacts, artifact, artifactModelManager);
+            artifactProcessRequests = new ArrayList<ArtifactProcessRequest>();
+            for (ArtifactProcessRequest artifactProcessRequest : taskArtifacts) {
+                addInnerArtifacts(artifactProcessRequests, artifactProcessRequest, artifactModelManager);
             }
         } else {
-            artifacts = taskArtifacts;
+            artifactProcessRequests = new ArrayList<>();
+            artifactProcessRequests.addAll(taskArtifacts);
         }
-
-
 
 
         // One provider for switching the DeploymentContext for selected
@@ -123,7 +114,9 @@ public class DeploymentBuilder {
         List<BasicDeploymentContext> deploymentContexts = taskExecutionHolder.getDeploymentContexts();
 
         // For each artifact, build a deployment context and the associated group
-        for (Artifact artifact : artifacts) {
+        for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+
+            Artifact artifact = artifactProcessRequest.getArtifact();
 
             // Create group
             Group artifactGroup = new Group(artifact.uri().toString());
@@ -140,7 +133,6 @@ public class DeploymentBuilder {
 
             // Existing Artifact model
             InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
-
 
             boolean createdArtifactModel = false;
 
@@ -162,6 +154,9 @@ public class DeploymentBuilder {
 
             // do we have a parent ?
             if ((deploymentMode == DeploymentMode.DEPLOY)) {
+                // Set persistent mode
+                artifactModel.as(InternalArtifactModelPersistenceView.class).setPersistent(artifactProcessRequest.isPersistent());
+
                 if ((rootArtifactModel != null)) {
                     // we have a parent that want to use this artifact, add a link to this one
                     InternalWire wire = new DefaultWire(rootArtifactModel, artifactModel);
@@ -325,5 +320,31 @@ public class DeploymentBuilder {
 
         return pipeline;
     }
+
+
+
+    protected void addInnerArtifacts(List<ArtifactProcessRequest> artifactProcessRequests, ArtifactProcessRequest artifactProcessRequest, InternalArtifactModelManager artifactModelManager) {
+        // First, add ourself
+        if (!artifactProcessRequests.contains(artifactProcessRequest)) {
+            artifactProcessRequests.add(artifactProcessRequest);
+        }
+
+        Artifact artifact = artifactProcessRequest.getArtifact();
+
+        // Then add all dependencies created by this artifact
+        InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
+        for (InternalWire wire : artifactModel.getInternalWires(WireScope.FROM)) {
+            InternalArtifactModel child = wire.getInternalTo();
+            Artifact childArtifact = child.getFacetArtifact();
+            ArtifactProcessRequest childArtifactProcessRequest = new ArtifactProcessRequest();
+            childArtifactProcessRequest.setArtifact(childArtifact);
+            childArtifactProcessRequest.setPersistent(child.as(InternalArtifactModelPersistenceView.class).isPersistent());
+
+
+            addInnerArtifacts(artifactProcessRequests, childArtifactProcessRequest, artifactModelManager);
+        }
+
+    }
+
 
 }

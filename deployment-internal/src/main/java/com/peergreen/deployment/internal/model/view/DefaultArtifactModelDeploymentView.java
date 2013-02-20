@@ -37,12 +37,12 @@ public class DefaultArtifactModelDeploymentView extends AbsDefaultArtifactModelV
 
     @Override
     public boolean isDeploymentRoot() {
-        return hasAttributes(DEPLOYMENT_ROOT);
+        return getBooleanAttribute(DEPLOYMENT_ROOT);
     }
 
     @Override
     public boolean isUndeployed() {
-        return hasAttributes(UNDEPLOYED);
+        return getBooleanAttribute(UNDEPLOYED);
     }
 
     @Override

@@ -16,7 +16,6 @@
 package com.peergreen.deployment;
 
 import java.net.URI;
-import java.util.List;
 
 
 public interface ProcessorContext {
@@ -33,7 +32,6 @@ public interface ProcessorContext {
     /**
      * New artifacts to deploy
      */
-    void addArtifact(Artifact artifact);
-    void addArtifact(List<Artifact> artifacts);
+    void addArtifact(Artifact artifact, boolean isPersistent);
 
 }

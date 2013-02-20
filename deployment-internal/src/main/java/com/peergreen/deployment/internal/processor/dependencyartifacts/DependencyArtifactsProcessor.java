@@ -18,7 +18,7 @@ package com.peergreen.deployment.internal.processor.dependencyartifacts;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
@@ -28,6 +28,7 @@ import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
+import com.peergreen.deployment.internal.phase.builder.TaskModelParameters;
 import com.peergreen.deployment.model.WireScope;
 import com.peergreen.tasks.model.Parallel;
 import com.peergreen.tasks.model.Task;
@@ -46,14 +47,19 @@ public class DependencyArtifactsProcessor implements Processor<BasicDeploymentCo
         TaskExecutionHolder taskExecutionHolder = deploymentContext.get(TaskExecutionHolder.class);
         InternalArtifactModel artifactModel = deploymentContext.get(InternalArtifactModel.class);
 
-
+        TaskModelParameters taskModelParameters = new TaskModelParameters();
+        taskModelParameters.setDeploymentMode(deploymentMode);
+        taskModelParameters.setTaskExecutionHolder(taskExecutionHolder);
+        taskModelParameters.setRootArtifactModel(artifactModel);
 
         // In deployment mode, we need to call the deployment of new artifacts
         if (deploymentMode == DeploymentMode.DEPLOY) {
-            List<Artifact> newArtifacts = deploymentContext.getNewArtifacts();
+            List<ArtifactProcessRequest> newArtifactProcessRequests = deploymentContext.getNewArtifacts();
             // We have new artifacts
-            if (newArtifacts.size() > 0) {
-                Task newArtifactsTask  = deploymentBuilder.buildTaskModel(newArtifacts, deploymentMode, taskExecutionHolder, artifactModel);
+            if (newArtifactProcessRequests.size() > 0) {
+                taskModelParameters.setArtifactProcessRequests(newArtifactProcessRequests);
+
+                Task newArtifactsTask  = deploymentBuilder.buildTaskModel(taskModelParameters);
 
                 // We get the pipeline associated to the POST phase
                 Parallel containerTask = (Parallel) deploymentContext.getProperty("POST_DEPENDENCY_ARTIFACTS");
@@ -65,12 +71,17 @@ public class DependencyArtifactsProcessor implements Processor<BasicDeploymentCo
         } else if (deploymentMode == DeploymentMode.UNDEPLOY) {
 
             // list of children
-            List<Artifact> toUndeployArtifacts = new ArrayList<Artifact>();
+            List<ArtifactProcessRequest> toUndeployArtifactProcessRequests = new ArrayList<>();
             for (InternalWire wire : artifactModel.getInternalWires(WireScope.TO)) {
                 InternalArtifactModel child = wire.getInternalTo();
-                toUndeployArtifacts.add(child.getFacetArtifact());
+                ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+                artifactProcessRequest.setArtifact(child.getFacetArtifact());
+                toUndeployArtifactProcessRequests.add(artifactProcessRequest);
             }
-            Task newArtifactsTask  = deploymentBuilder.buildTaskModel(toUndeployArtifacts, deploymentMode, taskExecutionHolder, artifactModel);
+
+            taskModelParameters.setArtifactProcessRequests(toUndeployArtifactProcessRequests);
+
+            Task newArtifactsTask  = deploymentBuilder.buildTaskModel(taskModelParameters);
 
             // We get the pipeline associated to the POST phase
             Parallel containerTask = (Parallel) deploymentContext.getProperty("POST_DEPENDENCY_ARTIFACTS");

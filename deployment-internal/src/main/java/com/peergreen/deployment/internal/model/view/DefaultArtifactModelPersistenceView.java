@@ -35,7 +35,7 @@ public class DefaultArtifactModelPersistenceView extends AbsDefaultArtifactModel
 
     @Override
     public boolean isPersistent() {
-        return hasAttributes(PERSISTENT);
+        return getBooleanAttribute(PERSISTENT);
     }
 
     @Override
