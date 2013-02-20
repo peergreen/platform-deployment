@@ -36,7 +36,6 @@ public class OSGiBundleArchiveDelegateInternalProcessor extends DelegateHandlerP
         super(new OSGiBundleArchiveProcessor(), Archive.class);
     }
 
-
     @Override
     @Bind(optional=false)
     public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {

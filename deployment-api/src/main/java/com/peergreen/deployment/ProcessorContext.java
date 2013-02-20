@@ -16,7 +16,6 @@
 package com.peergreen.deployment;
 
 import java.net.URI;
-import java.util.List;
 
 
 public interface ProcessorContext {
@@ -27,11 +26,12 @@ public interface ProcessorContext {
     <Facet> Facet removeFacet(Class<Facet> facetClass);
     <Facet> void addFacet(Class<Facet> facetClass, Facet facet);
     <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter);
+    <F> void addFacet(Class<F> facetClass, F facet, String facetBuilderId);
+    <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId);
 
     /**
      * New artifacts to deploy
      */
-    void addArtifact(Artifact artifact);
-    void addArtifact(List<Artifact> artifacts);
+    void addArtifact(Artifact artifact, boolean isPersistent);
 
 }

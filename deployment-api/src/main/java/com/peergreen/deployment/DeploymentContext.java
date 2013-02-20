@@ -37,8 +37,7 @@ public interface DeploymentContext {
         /**
          * New artifacts to deploy
          */
-        void addArtifact(Artifact artifact);
-        void addArtifact(List<Artifact> artifacts);
+        void addArtifact(Artifact artifact, boolean isPersistent);
 
         ArtifactBuilder getArtifactBuilder();
 
@@ -46,6 +45,7 @@ public interface DeploymentContext {
         <Facet> Facet removeFacet(Class<Facet> facetClass);
         <Facet> void addFacet(Class<Facet> facetClass, Facet facet);
         <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter);
+        <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId);
 
 
         List<Capability> getCapabilities(String namespace);

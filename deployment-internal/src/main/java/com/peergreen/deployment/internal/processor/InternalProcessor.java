@@ -19,8 +19,6 @@ import com.peergreen.deployment.HandlerProcessor;
 import com.peergreen.deployment.StatisticsProcessor;
 import com.peergreen.tasks.model.Job;
 
-public interface InternalProcessor extends Job, HandlerProcessor, StatisticsProcessor {
-
-    String getName();
+public interface InternalProcessor extends Job, HandlerProcessor, StatisticsProcessor, NamedProcessor {
 
 }

@@ -36,7 +36,6 @@ import com.peergreen.deployment.internal.facet.xmlcontent.adapter.XMLContentFace
 /**
  * XML Content processor : Parse XML files to dectect the namespace and provides
  * a facet
- *
  * @author Florent Benoit
  */
 public class XMLContentProcessor implements Processor<Content> {
@@ -45,7 +44,7 @@ public class XMLContentProcessor implements Processor<Content> {
     private final StreamFilter streamFilter;
     private final FacetCapabilityAdapter<XMLContent> xmlContentFacetAdapter;
 
-    public XMLContentProcessor() throws ProcessorException {
+    public XMLContentProcessor()  {
         this.xmlInputFactory = XMLInputFactory.newInstance();
         xmlInputFactory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.TRUE);
         xmlInputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
@@ -57,34 +56,36 @@ public class XMLContentProcessor implements Processor<Content> {
 
     @Override
     public void handle(Content content, ProcessorContext processorContext) throws ProcessorException {
+        String namespace = findNamespace(content);
+        // add the facet
+        processorContext.addFacet(XMLContent.class, new XMLContentImpl(content, namespace), xmlContentFacetAdapter);
+    }
 
-        InputStream is = null;
-        XMLStreamReader xmlr = null;
-        try {
-            is = content.getInputStream();
-            try {
-                xmlr = xmlInputFactory.createFilteredReader(xmlInputFactory.createXMLStreamReader(is), streamFilter);
-            } catch (XMLStreamException e) {
-                throw new ProcessorException("Unable to parse XML", e);
-            }
 
-            String namespace = xmlr.getNamespaceURI();
-            // add the facet
-            processorContext.addFacet(XMLContent.class, new XMLContentImpl(content, namespace), xmlContentFacetAdapter);
 
+
+    public String findNamespace(Content content) throws ProcessorException {
+
+        XMLStreamReader reader = null;
+        try (InputStream is = content.getInputStream()) {
+            reader = xmlInputFactory.createXMLStreamReader(is);
+            reader = xmlInputFactory.createFilteredReader(reader, streamFilter);
+            return reader.getNamespaceURI();
         } catch (ContentException e) {
-            throw new ProcessorException("Unable to get inputstream", e);
+            throw new ProcessorException("Unable to get Content's InputStream", e);
+        } catch (XMLStreamException e) {
+            throw new ProcessorException("Unable to parse XML", e);
+        } catch (IOException e) {
+            throw new ProcessorException("Unable to get Content's InputStream", e);
         } finally {
-
-            if (is != null) {
+            if (reader != null) {
                 try {
-                    is.close();
-                } catch (IOException e) {
-                    // ignore
+                    reader.close();
+                } catch (XMLStreamException e) {
+                    // Ignored
                 }
             }
         }
-
     }
 
 }

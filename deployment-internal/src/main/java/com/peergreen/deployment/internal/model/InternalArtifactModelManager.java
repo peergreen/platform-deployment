@@ -26,7 +26,6 @@ import com.peergreen.deployment.model.ArtifactModelManager;
  */
 public interface InternalArtifactModelManager extends ArtifactModelManager {
 
-
     InternalArtifactModel getArtifactModel(URI uri);
 
     void addArtifactModel(URI uri, InternalArtifactModel artifactModel);
@@ -34,4 +33,6 @@ public interface InternalArtifactModelManager extends ArtifactModelManager {
     Collection<InternalArtifactModel> getDeployedRootArtifacts();
 
     void updateLengthLastModified(InternalArtifactModel artifactModel);
+
+    void save();
 }

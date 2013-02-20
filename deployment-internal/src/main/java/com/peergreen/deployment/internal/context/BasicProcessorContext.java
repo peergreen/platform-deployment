@@ -16,7 +16,6 @@
 package com.peergreen.deployment.internal.context;
 
 import java.net.URI;
-import java.util.List;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
@@ -38,24 +37,30 @@ public class BasicProcessorContext implements ProcessorContext {
 
     @Override
     public <Facet> void addFacet(Class<Facet> facetClass, Facet facet) {
-        addFacet(facetClass, facet, null);
+        addFacet(facetClass, facet, null, null);
     }
 
     @Override
     public <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter) {
-        deploymentContext.addFacet(facetClass, facet, facetAdapter);
+        addFacet(facetClass, facet, facetAdapter, null);
     }
 
     @Override
-    public void addArtifact(Artifact artifact) {
-        this.deploymentContext.addArtifact(artifact);
-
+    public <F> void addFacet(Class<F> facetClass, F facet, String facetBuilderId) {
+        addFacet(facetClass, facet, null, facetBuilderId);
     }
 
     @Override
-    public void addArtifact(List<Artifact> artifacts) {
-        this.deploymentContext.addArtifact(artifacts);
+    public <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId) {
+        deploymentContext.addFacet(facetClass, facet, facetAdapter, facetBuilderId);
     }
+
+    @Override
+    public void addArtifact(Artifact artifact, boolean isPersistent) {
+        this.deploymentContext.addArtifact(artifact, isPersistent);
+
+    }
+
 
     @Override
     public Artifact build(String name, URI uri) {

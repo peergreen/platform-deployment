@@ -19,6 +19,7 @@ package com.peergreen.deployment.internal.service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -35,24 +36,25 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.model.Created;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
+import com.peergreen.deployment.internal.phase.builder.TaskModelParameters;
 import com.peergreen.deployment.internal.report.DefaultArtifactStatusReport;
 import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
 import com.peergreen.deployment.internal.thread.PeergreenThreadFactory;
+import com.peergreen.deployment.model.WireScope;
+import com.peergreen.deployment.model.flag.Created;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.ArtifactStatusReportException;
 import com.peergreen.deployment.report.DeploymentStatusReport;
-import com.peergreen.tasks.context.ExecutionContext;
 import com.peergreen.tasks.execution.helper.ExecutorServiceBuilderManager;
 import com.peergreen.tasks.execution.helper.TaskExecutorService;
 import com.peergreen.tasks.execution.tracker.TrackerManager;
@@ -100,12 +102,95 @@ public class BasicDeploymentService implements DeploymentService {
         executorService.shutdown();
     }
 
+
+    /**
+     * Process of the deployment of the given list of requests.
+     * It accepts a collection, so the order it accepts is based on the underlying collection.
+     * For an ordered deployment, a list should be given.
+     * @param artifactProcessRequests the list of the requests.
+     * @return a report for the given request
+     */
     @Override
-    public DefaultDeploymentStatusReport process(List<Artifact> artifacts, DeploymentMode deploymentMode) {
+    public DeploymentStatusReport process(Collection<ArtifactProcessRequest> artifactProcessRequests) {
         long tStart = System.currentTimeMillis();
 
+        // Create report
+        DefaultDeploymentStatusReport deploymentStatusReport = new DefaultDeploymentStatusReport();
+
+
+        // split for each deployment mode
+        List<ArtifactProcessRequest> deployRequests = new ArrayList<>();
+        List<ArtifactProcessRequest> updateRequests = new ArrayList<>();
+        List<ArtifactProcessRequest> undeployRequests = new ArrayList<>();
+
+        for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+            if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.DEPLOY) {
+                deployRequests.add(artifactProcessRequest);
+            } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UPDATE) {
+                updateRequests.add(artifactProcessRequest);
+            } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UNDEPLOY) {
+                undeployRequests.add(artifactProcessRequest);
+            }
+        }
+
+        // Send list with items
+        if (deployRequests.size() > 0) {
+            process(deployRequests, DeploymentMode.DEPLOY);
+        }
+        if (updateRequests.size() > 0) {
+            process(updateRequests, DeploymentMode.UPDATE);
+        }
+        if (undeployRequests.size() > 0) {
+            process(undeployRequests, DeploymentMode.UNDEPLOY);
+        }
+
+        // end time
+        long tEnd = System.currentTimeMillis();
+
+        // populate report
+        for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+            // Get model
+            InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifactProcessRequest.getArtifact().uri());
+            DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(artifactModel.getFacetArtifact());
+            deploymentStatusReport.addChild(artifactStatusReport);
+            if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
+                deploymentStatusReport.setFailure();
+            }
+            // add children that have been created by our node
+            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
+        }
+
+
+        long elapsedTime = tEnd - tStart;
+        deploymentStatusReport.setElapsedTime(elapsedTime);
+        LOGGER.info("Artifacts ''{1}'' in ''{2}'' ms." , artifactProcessRequests, elapsedTime);
+
+        return deploymentStatusReport;
+    }
+
+
+    /**
+     * Process of the deployment of the given list of requests for a given deployment mode.
+     * It accepts a collection, so the order it accepts is based on the underlying collection.
+     * For an ordered deployment, a list should be given.
+     * @param artifactProcessRequests the list of the requests.
+     * @return a report for the given request
+     */
+    protected State process(Collection<ArtifactProcessRequest> artifactProcessRequests, DeploymentMode deploymentMode) {
+        // No request, so abort
+        if (artifactProcessRequests == null) {
+            return null;
+        }
+
         TaskExecutionHolder holder = new TaskExecutionHolder();
-        Task task = deploymentBuilder.buildTaskModel(artifacts, deploymentMode, holder, null);
+
+        TaskModelParameters taskModelParameters = new TaskModelParameters();
+        taskModelParameters.setArtifactProcessRequests(artifactProcessRequests);
+        taskModelParameters.setDeploymentMode(deploymentMode);
+        taskModelParameters.setTaskExecutionHolder(holder);
+
+
+        Task task = deploymentBuilder.buildTaskModel(taskModelParameters);
 
         // Create executor
         ExecutorServiceBuilderManager executorServiceBuilderManager = new ExecutorServiceBuilderManager(holder.getTaskContextFactory(), executorService);
@@ -119,13 +204,6 @@ public class BasicDeploymentService implements DeploymentService {
         TimeTaskTracker timeTracker = new TimeTaskTracker();
         trackerManager.registerTracker(timeTracker);
 
-        // Gets the execution context
-        ExecutionContext executionContext = executor.getExecutionContext();
-
-        // Add report
-        DefaultDeploymentStatusReport deploymentStatusReport = new DefaultDeploymentStatusReport(deploymentMode, artifacts);
-        executionContext.add(deploymentStatusReport);
-
         Future<State> future = executor.execute(task);
 
         // Wait for task completion
@@ -137,38 +215,16 @@ public class BasicDeploymentService implements DeploymentService {
             e.printStackTrace();
         }
 
+        // save state after a deployment
+        artifactModelManager.save();
 
-        long tEnd = System.currentTimeMillis();
+        return state;
 
-        // populate report
-        for (Artifact artifact : artifacts) {
-            // Get model
-            InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifact.uri());
-            DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(artifactModel.getFacetArtifact());
-            deploymentStatusReport.addChild(artifactStatusReport);
-            if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
-                deploymentStatusReport.setFailure();
-            }
-            // add children that have been created by our node
-            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
-        }
-
-        long elapsedTime = tEnd - tStart;
-        deploymentStatusReport.setState(state);
-        deploymentStatusReport.setElapsedTime(elapsedTime);
-        LOGGER.info("[{0}] Artifacts ''{1}'' in ''{2}'' ms." , deploymentMode, artifacts, elapsedTime);
-
-
-        /*Node<Task> root = new Node<Task>(new TaskNodeAdapter(), task);
-        TaskRenderingVisitor taskRenderingVisitor = new TaskRenderingVisitor(System.out);
-        taskRenderingVisitor.setGroups(holder.getGroups());
-        root.walk(taskRenderingVisitor);*/
-        return deploymentStatusReport;
 
     }
 
     protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
-        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+        for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
             if (facetArtifact.getExceptions().size() > 0) {
                 deploymentStatusReport.setFailure();
@@ -187,7 +243,7 @@ public class BasicDeploymentService implements DeploymentService {
     * @param artifactModel
     */
     protected void addChildArtifactStatusReport(DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
-        for (InternalWire fromWire : artifactModel.getInternalFromWires(Created.class)) {
+        for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
             DefaultArtifactStatusReport childArtifactStatusReport = new DefaultArtifactStatusReport(facetArtifact);
             artifactStatusReport.addChild(childArtifactStatusReport);
@@ -195,14 +251,6 @@ public class BasicDeploymentService implements DeploymentService {
             InternalArtifactModel childArtifactModel = artifactModelManager.getArtifactModel(facetArtifact.uri());
             addChildArtifactStatusReport(childArtifactStatusReport, childArtifactModel);
         }
-    }
-
-
-    @Override
-    public DeploymentStatusReport process(Artifact artifact, DeploymentMode mode) {
-        List<Artifact> artifacts = new ArrayList<Artifact>();
-        artifacts.add(artifact);
-        return process(artifacts, mode);
     }
 
 

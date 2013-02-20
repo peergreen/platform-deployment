@@ -17,7 +17,7 @@ package com.peergreen.deployment.internal.model;
 
 import com.peergreen.deployment.model.Wire;
 
-public interface InternalWire extends Wire {
+public interface InternalWire extends Wire, InternalAttributes {
 
     InternalArtifactModel getInternalFrom();
 

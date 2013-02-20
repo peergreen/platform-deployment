@@ -28,11 +28,13 @@ import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelChangesView;
 import com.peergreen.deployment.monitor.URITrackerException;
 import com.peergreen.deployment.monitor.URITrackerManager;
 
@@ -98,9 +100,7 @@ public class DeploymentServiceMonitor implements Runnable {
             }
 
             // Compute list of artifacts to UNDEPLOY or UPDATE
-            List<Artifact> toUndeploy = new ArrayList<Artifact>();
-            List<Artifact> toUpdate = new ArrayList<Artifact>();
-
+            List<ArtifactProcessRequest> artifactProcessRequests = new ArrayList<>();
 
             // Gets the tracked artifacts
             Collection<InternalArtifactModel> trackedArtifactModels = artifactModelManager.getDeployedRootArtifacts();
@@ -130,7 +130,10 @@ public class DeploymentServiceMonitor implements Runnable {
                 // checks if the artifact still exists ?
                 try {
                     if (!uriTrackerManager.exists(uri)) {
-                        toUndeploy.add(immutableArtifact);
+                        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+                        artifactProcessRequest.setArtifact(immutableArtifact);
+                        artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
+                        artifactProcessRequests.add(artifactProcessRequest);
                     }
                 } catch (URITrackerException e) {
                     // Unable to check if the artifact still exists
@@ -138,19 +141,17 @@ public class DeploymentServiceMonitor implements Runnable {
 
                 // Check if the artifact has been updated
                 if (artifactHasChanged(artifactModel)) {
-                    toUpdate.add(immutableArtifact);
+                    ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
+                    artifactProcessRequest.setArtifact(immutableArtifact);
+                    artifactProcessRequest.setDeploymentMode(DeploymentMode.UPDATE);
+                    artifactProcessRequests.add(artifactProcessRequest);
                 }
             }
 
 
-            // Artifacts to undeploy ?
-            if (!toUndeploy.isEmpty()) {
-                deploymentService.process(toUndeploy, DeploymentMode.UNDEPLOY);
-            }
-
-            // Artifacts to update ?
-            if (!toUpdate.isEmpty()) {
-                deploymentService.process(toUpdate, DeploymentMode.UPDATE);
+            // Artifacts to send ?
+            if (!artifactProcessRequests.isEmpty()) {
+                deploymentService.process(artifactProcessRequests);
             }
 
             // Do not actively scan all deployed artifacts
@@ -191,8 +192,9 @@ public class DeploymentServiceMonitor implements Runnable {
      * @return True if the file length has changed
      */
     private boolean lengthHasChanged(final InternalArtifactModel artifactModel) {
-        long previousLength = artifactModel.getArtifactLength();
-        long intermediateLength = artifactModel.getCheckingArtifactLength();
+        InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
+        long previousLength = modelChanges.getArtifactLength();
+        long intermediateLength = modelChanges.getCheckingArtifactLength();
 
         long currentLength = 0;
         try {
@@ -218,7 +220,8 @@ public class DeploymentServiceMonitor implements Runnable {
      * @return True if the last modified has changed
      */
     private boolean lastModifiedHasChanged(final InternalArtifactModel artifactModel) {
-        long previousLastModified = artifactModel.getLastModified();
+        InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
+        long previousLastModified = modelChanges.getLastModified();
         long currentLastModified = 0;
         try {
             currentLastModified = getLastModified(artifactModel.getFacetArtifact().uri());
@@ -247,11 +250,12 @@ public class DeploymentServiceMonitor implements Runnable {
 
     protected void saveIntermediateFileLengths( Collection<InternalArtifactModel> trackedArtifactModels) {
         for (InternalArtifactModel artifactModel : trackedArtifactModels) {
+            InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
             try {
                 long length = getLength(artifactModel.getFacetArtifact().uri());
-                artifactModel.setCheckingArtifactLength(length);
+                modelChanges.setCheckingArtifactLength(length);
             } catch (URITrackerException e) {
-                artifactModel.setCheckingArtifactLength(-1);
+                modelChanges.setCheckingArtifactLength(-1);
             }
 
         }

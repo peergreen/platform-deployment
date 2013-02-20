@@ -16,7 +16,6 @@
 package com.peergreen.deployment.internal.resource;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,7 +29,7 @@ import org.osgi.resource.Resource;
  */
 public class ConsumerResource implements Resource {
 
-    private final Collection<Requirement> requirements;
+    private final List<Requirement> requirements;
 
     public ConsumerResource() {
         this.requirements = new ArrayList<Requirement>();
@@ -42,30 +41,29 @@ public class ConsumerResource implements Resource {
     @Override
     public List<Capability> getCapabilities(String namespace) {
         return Collections.emptyList();
-            }
+    }
 
 
     @Override
     public List<Requirement> getRequirements(String namespace) {
+        // handle null namespace
+        if (namespace == null) {
+            return Collections.unmodifiableList(requirements);
+        }
 
         // New list
         List<Requirement> matchingRequirements = new ArrayList<Requirement>();
 
         // Add all matching requirements
-        if (namespace != null) {
-            for (Requirement requirement : requirements) {
-                if (namespace.equals(requirement.getNamespace())) {
-                    matchingRequirements.add(requirement);
-                }
+        for (Requirement requirement : requirements) {
+            if (namespace.equals(requirement.getNamespace())) {
+                matchingRequirements.add(requirement);
             }
-        } else {
-            // add all requirements for null namespace
-            matchingRequirements.addAll(requirements);
         }
 
         return Collections.unmodifiableList(matchingRequirements);
-
     }
+
 
 
     public void addRequirement(Requirement requirement) {

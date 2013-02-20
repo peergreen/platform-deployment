@@ -52,6 +52,9 @@ public class DeployerCreationJob implements Job {
             throw new IllegalStateException("Facet Life Cycle Manager should have been injected");
         }
 
+
+        //FIXME:  Should use capabilities/requirement in order to make the matching
+        // Order should be done through requirements
         for (InternalFacetLifeCyclePhaseProvider provider : facetLifeCycleManager.getProviders()) {
             Class<?> type = provider.getFacetType();
             List<String> phases = provider.getLifeCyclePhases(context.get(DeploymentMode.class));

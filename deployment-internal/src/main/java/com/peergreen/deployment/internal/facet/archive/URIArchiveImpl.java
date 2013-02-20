@@ -32,9 +32,12 @@ import java.util.zip.ZipEntry;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
+import com.peergreen.deployment.internal.facet.archive.builder.UriArchiveFacetBuilder;
 
+@FacetBuilderReference(UriArchiveFacetBuilder.class)
 public class URIArchiveImpl implements Archive {
 
     /**
@@ -64,11 +67,8 @@ public class URIArchiveImpl implements Archive {
 
     /**
      * Constructor.
-     *
-     * @param url
-     *            the url targeting a jar
-     * @throws IOException
-     *             if jar could not be read
+     * @param url the url targeting a jar
+     * @throws IOException if jar could not be read
      * @throws URISyntaxException
      */
     public URIArchiveImpl(final URI uri) throws ArchiveException {

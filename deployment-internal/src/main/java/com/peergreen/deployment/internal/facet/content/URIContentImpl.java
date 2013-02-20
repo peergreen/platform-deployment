@@ -20,9 +20,12 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
 
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.facet.content.ContentException;
+import com.peergreen.deployment.internal.facet.content.builder.UriContentFacetBuilder;
 
+@FacetBuilderReference(UriContentFacetBuilder.class)
 public class URIContentImpl implements Content {
 
     private final URI uri;

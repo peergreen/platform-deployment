@@ -15,9 +15,12 @@
  */
 package com.peergreen.deployment.internal.facet.xmlcontent;
 
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.facet.content.XMLContent;
+import com.peergreen.deployment.internal.facet.xmlcontent.builder.XmlContentFacetBuilder;
 
+@FacetBuilderReference(XmlContentFacetBuilder.class)
 public class XMLContentImpl implements XMLContent {
 
     private final String namespace;

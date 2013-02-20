@@ -19,12 +19,14 @@ import java.net.MalformedURLException;
 
 import org.osgi.framework.Constants;
 
+import com.peergreen.deployment.facet.FacetBuilderReference;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
+import com.peergreen.deployment.internal.facet.osgibundle.builder.OsgiBundleFacetBuilder;
 
+@FacetBuilderReference(OsgiBundleFacetBuilder.class)
 public class OSGiBundleImpl implements OSGiBundle {
-
 
     private final String symbolicName;
 

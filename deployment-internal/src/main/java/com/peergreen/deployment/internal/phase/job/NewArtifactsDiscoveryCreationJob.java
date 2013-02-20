@@ -18,12 +18,13 @@ package com.peergreen.deployment.internal.phase.job;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.internal.context.BasicDeploymentContext;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
+import com.peergreen.deployment.internal.phase.builder.TaskModelParameters;
 import com.peergreen.tasks.context.TaskContext;
 import com.peergreen.tasks.model.Job;
 import com.peergreen.tasks.model.Parallel;
@@ -66,9 +67,15 @@ public class NewArtifactsDiscoveryCreationJob implements Job {
         // Now, for each deployment contexts, try to see if there are new artifacts on them.
         // If we have new artifacts, we've to add a new discovery phase with the new artifacts
         for (BasicDeploymentContext deploymentContext : deploymentContexts) {
-            List<Artifact> newArtifacts = deploymentContext.getNewArtifacts();
-            if (newArtifacts.size() > 0) {
-                Task discoveryTask = deploymentBuilder.buildTaskModel(newArtifacts, deploymentMode, holderDeployment, deploymentContext.get(InternalArtifactModel.class));
+            List<ArtifactProcessRequest> newArtifactProcessRequests = deploymentContext.getNewArtifacts();
+            if (newArtifactProcessRequests.size() > 0) {
+                TaskModelParameters taskModelParameters = new TaskModelParameters();
+                taskModelParameters.setArtifactProcessRequests(newArtifactProcessRequests);
+                taskModelParameters.setDeploymentMode(deploymentMode);
+                taskModelParameters.setTaskExecutionHolder(holderDeployment);
+                taskModelParameters.setRootArtifactModel(deploymentContext.get(InternalArtifactModel.class));
+
+                Task discoveryTask = deploymentBuilder.buildTaskModel(taskModelParameters);
                 finders.add(discoveryTask);
             }
             deploymentContext.clearNewArtifacts();

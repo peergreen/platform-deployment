@@ -16,17 +16,28 @@
 
 package com.peergreen.deployment;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.ArtifactStatusReportException;
 import com.peergreen.deployment.report.DeploymentStatusReport;
 
+/**
+ * Interface of the deployment service.
+ * It handles the list of artifacts or request and return the result of the processing
+ * @author Florent Benoit
+ */
 public interface DeploymentService {
 
-    DeploymentStatusReport process(Artifact artifact, DeploymentMode mode);
+    /**
+     * Process of the deployment of the given list of requests.
+     * It accepts a collection, so the order it accepts is based on the underlying collection.
+     * For an ordered deployment, a list should be given.
+     * @param artifactProcessRequests the list of the requests.
+     * @return a report for the given request
+     */
+    DeploymentStatusReport process(Collection<ArtifactProcessRequest> artifactProcessRequests);
 
-    DeploymentStatusReport process(List<Artifact> artifact, DeploymentMode mode);
 
     ArtifactStatusReport getReport(String uriPath) throws ArtifactStatusReportException;
 

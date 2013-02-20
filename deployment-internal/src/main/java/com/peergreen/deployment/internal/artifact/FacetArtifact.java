@@ -32,7 +32,7 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 import com.peergreen.deployment.internal.processor.DefaultProcessorInfo;
-import com.peergreen.deployment.internal.processor.InternalProcessor;
+import com.peergreen.deployment.internal.processor.NamedProcessor;
 import com.peergreen.deployment.internal.resource.ProviderResource;
 
 /**
@@ -55,17 +55,18 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
     private final Map<Class<?>, FacetInfo> facetInfos;
     private final Set<ProcessorInfo> processorInfos;
-
+    private final List<InternalFacetBuilderInfo> facetBuildersInfo;
     private long totalTime = 0;
 
     public FacetArtifact(Artifact wrappedArtifact) {
         this.wrappedArtifact = wrappedArtifact;
         this.name = wrappedArtifact.name();
         this.uri = wrappedArtifact.uri();
-        this.facets = new HashMap<Class<?>, Object>();
-        this.facetInfos = new HashMap<Class<?>, FacetInfo>();
-        this.processorInfos = new HashSet<ProcessorInfo>();
-        this.exceptions = new ArrayList<Exception>();
+        this.facets = new HashMap<>();
+        this.facetInfos = new HashMap<>();
+        this.processorInfos = new HashSet<>();
+        this.facetBuildersInfo = new ArrayList<>();
+        this.exceptions = new ArrayList<>();
     }
 
     @Override
@@ -96,12 +97,14 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     }
 
     @Override
-    public <Facet> void addFacet(Class<Facet> facetClass, Facet facet, InternalProcessor processor) {
+    public <Facet> void addFacet(Class<Facet> facetClass, Facet facet, NamedProcessor processor) {
 
 
         DefaultFacetInfo facetInfo = new DefaultFacetInfo();
         facetInfo.setName(facetClass.getName());
-        facetInfo.setProcessor(processor.getName());
+        if (processor != null) {
+            facetInfo.setProcessor(processor.getName());
+        }
         facetInfos.put(facetClass, facetInfo);
 
         //LOGGER.info("Facet ''{0}'' added by processor ''{1}''", facet, processor.getName());
@@ -109,7 +112,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     }
 
     // Register the given facet object with all the interfaces and super interfaces of this object
-    protected <Facet> void addInnerFacet(Class<?> facetClass, Facet facet, InternalProcessor processor) {
+    protected <Facet> void addInnerFacet(Class<?> facetClass, Facet facet, NamedProcessor processor) {
         // for all interfaces
         Class<?>[] interfaces = facetClass.getInterfaces();
         if (interfaces != null) {
@@ -131,7 +134,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
 
     @Override
-    public <Facet> void addFacet(Facet facet, InternalProcessor processor) {
+    public <Facet> void addFacet(Facet facet, NamedProcessor processor) {
         if (facet == null) {
             throw new IllegalArgumentException("Invalid null facet");
         }
@@ -140,7 +143,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     }
 
     @Override
-    public void addProcessorTime(String phase, long totalTime, InternalProcessor processor) {
+    public void addProcessorTime(String phase, long totalTime, NamedProcessor processor) {
         processorInfos.add(new DefaultProcessorInfo(phase, processor.getName(), totalTime));
     }
 
@@ -169,7 +172,13 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         exceptions.add(e);
     }
 
+    @Override
     public List<Exception> getExceptions() {
         return exceptions;
+    }
+
+    @Override
+    public List<InternalFacetBuilderInfo> getFacetBuilders() {
+        return facetBuildersInfo;
     }
 }

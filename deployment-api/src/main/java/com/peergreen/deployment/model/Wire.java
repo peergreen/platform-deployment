@@ -15,16 +15,20 @@
  */
 package com.peergreen.deployment.model;
 
-public interface Wire {
+/**
+ * Defines a wire between two ArtifactModel nodes.
+ * @author Florent Benoit
+ */
+public interface Wire extends Attributes {
 
+    /**
+     * @return the origin of this wire.
+     */
     ArtifactModel getFrom();
 
+    /**
+     * @return the target of this wire.
+     */
     ArtifactModel getTo();
 
-    WireType getType();
-
-
-    boolean isFlagged(Class<?>... flagClass);
-    boolean removeFlag(Class<?> flagClass);
-    void addFlag(Class<?> flagClass);
 }
