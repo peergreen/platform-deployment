@@ -23,7 +23,6 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.DelegateFacetBuilder;
-import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.facet.content.XMLContent;
 import com.peergreen.deployment.resource.builder.CapabilityBuilder;
@@ -37,7 +36,7 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
 @Component
 @Provides
 @Instantiate
-public class XMLContentDelegateFacetBuilder extends DelegateFacetBuilder<XMLContent> implements FacetBuilder<XMLContent> {
+public class XMLContentDelegateFacetBuilder extends DelegateFacetBuilder<XMLContent> {
 
     public XMLContentDelegateFacetBuilder() {
         super(new XmlContentFacetBuilder(), XMLContent.class);

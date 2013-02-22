@@ -48,6 +48,8 @@ public class FacetBuilderParser implements Parser {
                         }
                     }
                     break;
+                default:
+                    break;
             }
             reader.nextTag();
         } while (!endingElement(reader));

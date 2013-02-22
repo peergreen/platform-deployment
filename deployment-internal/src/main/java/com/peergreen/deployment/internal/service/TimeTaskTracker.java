@@ -63,14 +63,16 @@ public class TimeTaskTracker extends TaskTracker<TimeKeeper> {
         switch (source.getState()) {
         case RUNNING:
             timeKeeper.setStartTime(System.currentTimeMillis());
-            return;
+            break;
         case COMPLETED:
         case FAILED:
             long endTime = System.currentTimeMillis();
 
             artifact.addTime((endTime - timeKeeper.getStartTime()));
+            break;
         default:
             // Nothing for this default case
+            break;
         }
 
     }

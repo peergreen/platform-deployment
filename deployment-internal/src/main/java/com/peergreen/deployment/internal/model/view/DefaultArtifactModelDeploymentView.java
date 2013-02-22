@@ -18,7 +18,7 @@ package com.peergreen.deployment.internal.model.view;
 import static com.peergreen.deployment.model.ArtifactModelConstants.DEPLOYMENT_ROOT;
 import static com.peergreen.deployment.model.ArtifactModelConstants.UNDEPLOYED;
 
-import com.peergreen.deployment.internal.model.DefaultArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModel;
 
 /**
  * Implementation of the {@link InternalArtifactModelChangesView}
@@ -30,7 +30,7 @@ public class DefaultArtifactModelDeploymentView extends AbsDefaultArtifactModelV
      * Default constructor.
      * @param artifactModel
      */
-    public DefaultArtifactModelDeploymentView(DefaultArtifactModel artifactModel) {
+    public DefaultArtifactModelDeploymentView(InternalArtifactModel artifactModel) {
         super(artifactModel);
     }
 

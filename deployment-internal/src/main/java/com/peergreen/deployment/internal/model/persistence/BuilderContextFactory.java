@@ -15,63 +15,16 @@
  */
 package com.peergreen.deployment.internal.model.persistence;
 
-import javax.xml.stream.XMLStreamReader;
-
-import org.osgi.resource.Capability;
-
-import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.facet.builder.BuilderContext;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
-import com.peergreen.deployment.internal.processor.NamedProcessor;
 
+/**
+ * Helper class used to build BuilderContext.
+ * @author Florent Benoit
+ */
 public class BuilderContextFactory {
 
-    public <Facet> BuilderContext<Facet> build(final Class<Facet> clazz, final IFacetArtifact facetArtifact, final String name/*, final XMLStreamReader xmlStreamReader*/) {
-
-        return new BuilderContext<Facet>() {
-
-            @Override
-            public Artifact getArtifact() {
-                return facetArtifact;
-            }
-
-            @Override
-            public void addFacet(Facet facet) {
-                addFacet(facet, null);
-
-            }
-
-            @Override
-            public void addFacet(Facet facet, FacetCapabilityAdapter<Facet> adapter) {
-             // Try to build capability based on the facet
-                if (adapter != null) {
-                    Capability capability = adapter.getCapability(facetArtifact, facet);
-                    if (capability != null) {
-                        facetArtifact.addCapability(capability);
-                    }
-                }
-
-                // Add the facet capability in all cases
-                facetArtifact.addCapability(new FacetCapabilityImpl(facetArtifact, clazz));
-
-                // Add facet
-                facetArtifact.addFacet(clazz, facet, new NamedProcessor() {
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
-                });
-            }
-
-            @Override
-            public XMLStreamReader getXMLStreamReader() {
-                throw new UnsupportedOperationException();
-                //return xmlStreamReader;
-            }
-        };
-
-
+    public <Facet> BuilderContext<Facet> build(final Class<Facet> facetClass, final IFacetArtifact facetArtifact, final String name/*, final XMLStreamReader xmlStreamReader*/) {
+        return new DefaultBuilderContext<>(facetClass, facetArtifact, name);
     }
 }

@@ -42,7 +42,7 @@ public class DelegatePersistenceArtifactManager implements InternalPersistenceAr
         this.requirements = requirements;
     }
 
-    public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
+    protected void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
         this.requirementBuilder = requirementBuilder;
     }
 

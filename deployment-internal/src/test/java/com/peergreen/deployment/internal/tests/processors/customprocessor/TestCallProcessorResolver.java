@@ -35,7 +35,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.DelegateHandlerProcessor;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.FacetCapabilityAdapter;
@@ -104,7 +103,7 @@ public class TestCallProcessorResolver {
         List<Requirement> requirements = new ArrayList<Requirement>();
 
         // Wrap
-        DelegateHandlerProcessor<Content> delegate = spy(new DelegateHandlerProcessor<>(dummyProcessor, Content.class));
+        TestHandlerProcessor<Content> delegate = spy(new TestHandlerProcessor<>(dummyProcessor, Content.class));
 
         // Execute only on a content with txt file extension
         requirements.add(requirementBuilder.buildContentRequirement(delegate));

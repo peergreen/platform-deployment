@@ -57,6 +57,8 @@ public class DeployedArtifactsParser implements Parser {
                         }
                     }
                     break;
+                default:
+                    break;
             }
             if (reader.hasNext()) {
                 reader.nextTag();

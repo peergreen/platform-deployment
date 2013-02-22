@@ -80,6 +80,8 @@ public class ArtifactParser implements Parser {
                         }
                     }
                     break;
+                default:
+                    break;
             }
             reader.nextTag();
         } while (!endingElement(reader));

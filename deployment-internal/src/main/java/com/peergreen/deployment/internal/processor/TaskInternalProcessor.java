@@ -114,7 +114,7 @@ public class TaskInternalProcessor implements InternalProcessor {
     }
 
     @Override
-    public long getTotaltime() {
+    public long getTotalTime() {
         return totalTime;
     }
 

@@ -19,7 +19,7 @@ public interface StatisticsProcessor {
 
     long getTotalCount();
 
-    long getTotaltime();
+    long getTotalTime();
 
     void resetStats();
 

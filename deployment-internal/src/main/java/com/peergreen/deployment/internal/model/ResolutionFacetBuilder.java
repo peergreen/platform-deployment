@@ -15,8 +15,6 @@
  */
 package com.peergreen.deployment.internal.model;
 
-import org.osgi.resource.Resource;
-
 import com.peergreen.deployment.FacetBuilderInfo;
 import com.peergreen.deployment.InternalFacetBuilder;
 import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
@@ -28,7 +26,7 @@ import com.peergreen.deployment.internal.resource.ProviderAndConsumerResource;
  * Requirements are extracted from the published facet builder.
  * @author Florent Benoit
  */
-public class ResolutionFacetBuilder extends ProviderAndConsumerResource implements Resource {
+public class ResolutionFacetBuilder extends ProviderAndConsumerResource {
 
     private final String toString;
     private final InternalFacetBuilder<?> facetBuilder;

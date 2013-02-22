@@ -204,14 +204,14 @@ public class FacetBuilderTestCase {
     }
 
 
-    class DummyFacet {
+    static class DummyFacet {
     }
 
-    class DummyDependencyFacet {
+    static class DummyDependencyFacet {
     }
 
 
-    class DummyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
+    static class DummyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
 
         public DummyDelegateFacetBuilder() {
             super(new DummyFacetBuilder(), DummyFacet.class);
@@ -220,7 +220,7 @@ public class FacetBuilderTestCase {
 
     }
 
-    class DummyFacetBuilder implements FacetBuilder<DummyFacet> {
+    static class DummyFacetBuilder implements FacetBuilder<DummyFacet> {
 
         @Override
         public void build(BuilderContext<DummyFacet> context) throws FacetBuilderException {
@@ -229,7 +229,7 @@ public class FacetBuilderTestCase {
     }
 
 
-    class DummyDependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyDependencyFacet> {
+    static class DummyDependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyDependencyFacet> {
 
         public DummyDependencyDelegateFacetBuilder() {
             super(new DummyDependencyFacetBuilder(), DummyDependencyFacet.class);
@@ -239,7 +239,7 @@ public class FacetBuilderTestCase {
 
     }
 
-    class DummyDependencyFacetBuilder implements FacetBuilder<DummyDependencyFacet> {
+    static class DummyDependencyFacetBuilder implements FacetBuilder<DummyDependencyFacet> {
 
         @Override
         public void build(BuilderContext<DummyDependencyFacet> context) throws FacetBuilderException {
@@ -256,7 +256,7 @@ public class FacetBuilderTestCase {
 
 
 
-    class Cycle1DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
+    static class Cycle1DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyFacet> {
 
         public Cycle1DependencyDelegateFacetBuilder() {
             super(new Cycle1DependencyFacetBuilder(), DummyFacet.class);
@@ -266,7 +266,7 @@ public class FacetBuilderTestCase {
 
     }
 
-    class Cycle1DependencyFacetBuilder implements FacetBuilder<DummyFacet> {
+    static class Cycle1DependencyFacetBuilder implements FacetBuilder<DummyFacet> {
 
         @Override
         public void build(BuilderContext<DummyFacet> context) throws FacetBuilderException {
@@ -281,7 +281,7 @@ public class FacetBuilderTestCase {
         }
     }
 
-    class Cycle2DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyDependencyFacet> {
+    static class Cycle2DependencyDelegateFacetBuilder extends DelegateFacetBuilder<DummyDependencyFacet> {
 
         public Cycle2DependencyDelegateFacetBuilder() {
             super(new Cycle2DependencyFacetBuilder(), DummyDependencyFacet.class);
@@ -291,7 +291,7 @@ public class FacetBuilderTestCase {
 
     }
 
-    class Cycle2DependencyFacetBuilder implements FacetBuilder<DummyDependencyFacet> {
+    static class Cycle2DependencyFacetBuilder implements FacetBuilder<DummyDependencyFacet> {
 
         @Override
         public void build(BuilderContext<DummyDependencyFacet> context) throws FacetBuilderException {

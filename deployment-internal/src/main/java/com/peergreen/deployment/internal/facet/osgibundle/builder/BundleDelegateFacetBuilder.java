@@ -26,7 +26,6 @@ import org.osgi.framework.BundleContext;
 
 import com.peergreen.deployment.DelegateFacetBuilder;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
-import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.resource.builder.CapabilityBuilder;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
@@ -38,7 +37,7 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
 @Component
 @Provides
 @Instantiate
-public class BundleDelegateFacetBuilder extends DelegateFacetBuilder<Bundle> implements FacetBuilder<Bundle> {
+public class BundleDelegateFacetBuilder extends DelegateFacetBuilder<Bundle> {
 
     public BundleDelegateFacetBuilder(BundleContext bundleContext) {
         super(new BundleFacetBuilder(bundleContext), Bundle.class);

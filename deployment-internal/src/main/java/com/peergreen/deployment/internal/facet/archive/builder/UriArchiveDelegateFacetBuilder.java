@@ -24,7 +24,6 @@ import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.DelegateFacetBuilder;
 import com.peergreen.deployment.facet.archive.Archive;
-import com.peergreen.deployment.facet.builder.FacetBuilder;
 import com.peergreen.deployment.resource.builder.CapabilityBuilder;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
@@ -36,7 +35,7 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
 @Component
 @Provides
 @Instantiate
-public class UriArchiveDelegateFacetBuilder extends DelegateFacetBuilder<Archive> implements FacetBuilder<Archive> {
+public class UriArchiveDelegateFacetBuilder extends DelegateFacetBuilder<Archive> {
 
     public UriArchiveDelegateFacetBuilder() {
         super(new UriArchiveFacetBuilder(), Archive.class);

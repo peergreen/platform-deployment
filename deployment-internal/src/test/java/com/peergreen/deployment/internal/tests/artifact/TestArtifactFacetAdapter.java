@@ -40,7 +40,7 @@ public class TestArtifactFacetAdapter {
         @Mock
         private Artifact artifact;
 
-        private ArtifactFacetAdapter facetAdapter = null;
+        private final ArtifactFacetAdapter facetAdapter;
 
         public TestArtifactFacetAdapter() {
             super();
@@ -54,12 +54,11 @@ public class TestArtifactFacetAdapter {
 
         @Test
         public void testPathExtension() throws URISyntaxException  {
-            ArtifactFacetAdapter artifactFacetAdapter = new ArtifactFacetAdapter();
 
             URI uri = new URI("file:///tmp/valid.jar");
             doReturn(uri).when(artifact).uri();
 
-            ArtifactCapability capability = artifactFacetAdapter.getCapability(resource, artifact);
+            ArtifactCapability capability = facetAdapter.getCapability(resource, artifact);
             Assert.assertNotNull(capability);
             Assert.assertEquals(capability.getAttributes().get(ArtifactNamespace.CAPABILITY_PATHEXTENSION_ATTRIBUTE), "jar");
         }
@@ -67,12 +66,11 @@ public class TestArtifactFacetAdapter {
 
         @Test
         public void testNoPathExtension() throws URISyntaxException  {
-            ArtifactFacetAdapter artifactFacetAdapter = new ArtifactFacetAdapter();
 
             URI uri = new URI("mvn:groupId/artifactId");
             doReturn(uri).when(artifact).uri();
 
-            ArtifactCapability capability = artifactFacetAdapter.getCapability(resource, artifact);
+            ArtifactCapability capability = facetAdapter.getCapability(resource, artifact);
             Assert.assertNotNull(capability);
             Assert.assertNull(capability.getAttributes().get(ArtifactNamespace.CAPABILITY_PATHEXTENSION_ATTRIBUTE));
         }

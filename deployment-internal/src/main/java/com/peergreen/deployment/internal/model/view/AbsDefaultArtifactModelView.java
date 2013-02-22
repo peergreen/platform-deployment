@@ -15,7 +15,7 @@
  */
 package com.peergreen.deployment.internal.model.view;
 
-import com.peergreen.deployment.internal.model.DefaultArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModel;
 
 /**
  * Common methods to make a view of the artifact model.
@@ -23,9 +23,9 @@ import com.peergreen.deployment.internal.model.DefaultArtifactModel;
  */
 public class AbsDefaultArtifactModelView {
 
-    private final DefaultArtifactModel artifactModel;
+    private final InternalArtifactModel artifactModel;
 
-    public AbsDefaultArtifactModelView(DefaultArtifactModel artifactModel) {
+    public AbsDefaultArtifactModelView(InternalArtifactModel artifactModel) {
         this.artifactModel = artifactModel;
     }
 

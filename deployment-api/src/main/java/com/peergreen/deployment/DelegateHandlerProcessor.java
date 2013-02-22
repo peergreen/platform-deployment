@@ -45,7 +45,7 @@ public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
         this.requirements = requirements;
     }
 
-    public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
+    protected void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
         this.requirementBuilder = requirementBuilder;
     }
 

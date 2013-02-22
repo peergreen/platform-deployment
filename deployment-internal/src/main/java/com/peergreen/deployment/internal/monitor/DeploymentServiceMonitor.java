@@ -64,7 +64,7 @@ public class DeploymentServiceMonitor implements Runnable {
     private URITrackerManager uriTrackerManager;
 
     //FIXME : add configurable attribute
-    private final long checkInterval = 5000L;
+    private static final long checkInterval = 5000L;
 
     private boolean stopThread = false;
 

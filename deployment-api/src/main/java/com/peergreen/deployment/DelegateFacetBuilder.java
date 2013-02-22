@@ -53,11 +53,11 @@ public class DelegateFacetBuilder<Facet> implements InternalFacetBuilder<Facet> 
         this.capabilities = capabilities;
     }
 
-    public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
+    protected void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
         this.requirementBuilder = requirementBuilder;
     }
 
-    public void bindCapabilityBuilder(CapabilityBuilder capabilityBuilder) {
+    protected void bindCapabilityBuilder(CapabilityBuilder capabilityBuilder) {
         this.capabilityBuilder = capabilityBuilder;
     }
 

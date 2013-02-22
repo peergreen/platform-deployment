@@ -19,7 +19,7 @@ import static com.peergreen.deployment.model.ArtifactModelConstants.ARTIFACT_LEN
 import static com.peergreen.deployment.model.ArtifactModelConstants.CHECKING_ARTIFACT_LENGTH;
 import static com.peergreen.deployment.model.ArtifactModelConstants.LAST_MODIFIED;
 
-import com.peergreen.deployment.internal.model.DefaultArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModel;
 
 /**
  *
@@ -33,7 +33,7 @@ public class DefaultArtifactModelChangesView extends AbsDefaultArtifactModelView
      * Default constructor.
      * @param artifactModel
      */
-    public DefaultArtifactModelChangesView(DefaultArtifactModel artifactModel) {
+    public DefaultArtifactModelChangesView(InternalArtifactModel artifactModel) {
         super(artifactModel);
     }
 

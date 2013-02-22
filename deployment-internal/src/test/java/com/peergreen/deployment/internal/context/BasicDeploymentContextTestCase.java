@@ -56,7 +56,7 @@ public class BasicDeploymentContextTestCase {
     @Mock
     private CurrentProcessor currentProcessor;
 
-    private List<InternalFacetBuilderInfo> facetBuilderInfos;
+    private List<InternalFacetBuilderInfo> facetBuilderInfos = null;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -104,14 +104,14 @@ public class BasicDeploymentContextTestCase {
     private interface Hello {}
 
     @FacetBuilderReference(HelloBuilder.class)
-    private class HelloImpl implements Hello {
+    static class HelloImpl implements Hello {
 
     }
 
     // No @Facet annotation, that's normal
-    private class Hello2Impl implements Hello {}
+    static class Hello2Impl implements Hello {}
 
-    private class HelloBuilder implements FacetBuilder<Void> {
+    static class HelloBuilder implements FacetBuilder<Void> {
 
         @Override
         public void build(BuilderContext<Void> context) throws FacetBuilderException {

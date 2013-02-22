@@ -70,6 +70,8 @@ public class WireParser implements Parser {
                         }
                     }
                     break;
+                default:
+                    break;
             }
             reader.nextTag();
         } while (!endingElement(reader));

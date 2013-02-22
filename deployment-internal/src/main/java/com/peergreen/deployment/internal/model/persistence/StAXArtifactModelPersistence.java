@@ -83,6 +83,9 @@ public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
                                 models = parser.getModels();
                             }
                             break;
+                        default:
+                            break;
+
                     }
                 } while (reader.hasNext());
             }

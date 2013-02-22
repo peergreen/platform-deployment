@@ -17,7 +17,7 @@ package com.peergreen.deployment.internal.model.view;
 
 import static com.peergreen.deployment.model.ArtifactModelConstants.PERSISTENT;
 
-import com.peergreen.deployment.internal.model.DefaultArtifactModel;
+import com.peergreen.deployment.internal.model.InternalArtifactModel;
 
 /**
  * Implementation of the {@link InternalArtifactModelChangesView}
@@ -29,7 +29,7 @@ public class DefaultArtifactModelPersistenceView extends AbsDefaultArtifactModel
      * Default constructor.
      * @param artifactModel
      */
-    public DefaultArtifactModelPersistenceView(DefaultArtifactModel artifactModel) {
+    public DefaultArtifactModelPersistenceView(InternalArtifactModel artifactModel) {
         super(artifactModel);
     }
 

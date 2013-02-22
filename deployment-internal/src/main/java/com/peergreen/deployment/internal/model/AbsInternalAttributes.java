@@ -55,8 +55,13 @@ public abstract class AbsInternalAttributes implements InternalAttributes {
 
     @Override
     public boolean hasAttributes(String... attributesName) {
+        // No attributes
+        if (attributesName == null) {
+            return false;
+        }
+
         // one attribute
-        if (attributesName != null && attributesName.length == 1) {
+        if (attributesName.length == 1) {
             return this.attributes.containsKey(attributesName[0]);
         }
 
