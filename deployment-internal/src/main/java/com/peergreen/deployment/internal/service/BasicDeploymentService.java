@@ -163,7 +163,7 @@ public class BasicDeploymentService implements DeploymentService {
 
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setElapsedTime(elapsedTime);
-        LOGGER.info("Artifacts ''{1}'' in ''{2}'' ms." , artifactProcessRequests, elapsedTime);
+        LOGGER.info("Artifacts ''{0}'' in ''{1}'' ms." , artifactProcessRequests, elapsedTime);
 
         return deploymentStatusReport;
     }
