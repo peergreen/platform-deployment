@@ -33,11 +33,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
@@ -155,7 +157,7 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         this.persistenceFile = bundleContext.getDataFile(PERSISTENCE_FILENAME);
         this.persistenceFileTmp = bundleContext.getDataFile(PERSISTENCE_FILENAME_TEMP);
         this.persistenceArtifactManagers = new HashSet<>();
-        this.artifactsByURI = Collections.synchronizedMap(new HashMap<URI, InternalArtifactModel>());
+        this.artifactsByURI = new ConcurrentHashMap<>();
         this.builderContextFactory = new BuilderContextFactory();
         this.facetBuilders = new HashSet<>();
     }
@@ -180,12 +182,11 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     @Override
     public Collection<URI> getDeployedRootURIs() {
         List<URI> uris = new ArrayList<URI>();
-        // Make a copy in a synchronized block to avoid concurrent modification exceptions
-        Set<Entry<URI, InternalArtifactModel>> artifactsEntries;
-        synchronized (artifactsByURI) {
-            artifactsEntries = new HashSet<>(artifactsByURI.entrySet());
-        }
-        for (Entry<URI, InternalArtifactModel> entry : artifactsEntries) {
+
+        // Iterate
+        Iterator<Entry<URI, InternalArtifactModel>> entriesIterator = artifactsByURI.entrySet().iterator();
+        while(entriesIterator.hasNext()) {
+            Entry<URI, InternalArtifactModel> entry = entriesIterator.next();
             // Exclude artifacts being un-deployed
             if (entry.getValue().as(ArtifactModelDeploymentView.class).isUndeployed()) {
                 continue;
@@ -199,12 +200,11 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     @Override
     public Collection<InternalArtifactModel> getDeployedRootArtifacts() {
         List<InternalArtifactModel> artifactModels = new ArrayList<InternalArtifactModel>();
-        // Make a copy in a synchronized block to avoid concurrent modification exceptions
-        Set<InternalArtifactModel> artifactModelsSet;
-        synchronized (artifactsByURI) {
-            artifactModelsSet = new HashSet<>(artifactsByURI.values());
-        }
-        for (InternalArtifactModel artifactModel : artifactModelsSet) {
+
+        // Iterate
+        Iterator<InternalArtifactModel> artifactModelsIterator = artifactsByURI.values().iterator();
+        while(artifactModelsIterator.hasNext()) {
+            InternalArtifactModel artifactModel = artifactModelsIterator.next();
             // Exclude artifacts being un-deployed
             if (artifactModel.as(ArtifactModelDeploymentView.class).isUndeployed()) {
                 continue;
@@ -236,6 +236,10 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     }
 
     public void store() {
+        // Without the persistence framework, abort
+        if (artifactModelPersistence == null) {
+            return;
+        }
 
         // First, we write on the temporary file
         try (FileOutputStream fileOutputStream = new FileOutputStream(persistenceFileTmp); Writer writer = new OutputStreamWriter(fileOutputStream, Charset.defaultCharset())) {
@@ -265,6 +269,11 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
 
         if (!persistenceFile.exists()) {
             loadedModel = true;
+            return;
+        }
+
+        // Without the persistence framework, abort
+        if (artifactModelPersistence == null) {
             return;
         }
 
@@ -476,11 +485,13 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         ResolveContext resolveContext = new ResolveContextImpl(resources, wirings, mandatoryResources, optionalResources);
 
         Map<Resource, List<Wire>> wireMap = null;
-        try {
-            wireMap = resolver.resolve(resolveContext);
-        } catch (ResolutionException e) {
-            //FIXME: fix throw of exception
-            e.printStackTrace();
+        if (resolver != null) {
+            try {
+                wireMap = resolver.resolve(resolveContext);
+            } catch (ResolutionException e) {
+                //FIXME: fix throw of exception
+                e.printStackTrace();
+            }
         }
 
         // Now check that for each facet builder, requirements (and transitive requirements) are OK
