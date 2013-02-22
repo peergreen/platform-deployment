@@ -21,18 +21,20 @@ package com.peergreen.deployment;
  */
 public class ArtifactProcessRequest {
 
-    private Artifact artifact;
+    private final Artifact artifact;
 
     private DeploymentMode deploymentMode;
 
     private boolean persistent = false;
 
-    public Artifact getArtifact() {
-        return artifact;
+    public ArtifactProcessRequest(Artifact artifact) {
+        this.artifact = artifact;
+        // default is deploy
+        this.deploymentMode = DeploymentMode.DEPLOY;
     }
 
-    public void setArtifact(Artifact artifact) {
-        this.artifact = artifact;
+    public Artifact getArtifact() {
+        return artifact;
     }
 
     public DeploymentMode getDeploymentMode() {
@@ -50,4 +52,23 @@ public class ArtifactProcessRequest {
     public void setPersistent(boolean persistent) {
         this.persistent = persistent;
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Artifact[name=");
+        sb.append(artifact.name());
+        sb.append(", uri=");
+        sb.append(artifact.uri());
+        if (deploymentMode != null) {
+            sb.append(", mode=");
+            sb.append(deploymentMode);
+        }
+        if (persistent) {
+            sb.append(", persistent");
+        }
+        sb.append("]").toString();
+        return sb.toString();
+    }
+
 }

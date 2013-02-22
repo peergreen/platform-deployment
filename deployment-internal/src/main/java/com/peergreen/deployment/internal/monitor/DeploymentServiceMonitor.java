@@ -130,8 +130,7 @@ public class DeploymentServiceMonitor implements Runnable {
                 // checks if the artifact still exists ?
                 try {
                     if (!uriTrackerManager.exists(uri)) {
-                        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
-                        artifactProcessRequest.setArtifact(immutableArtifact);
+                        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(immutableArtifact);
                         artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
                         artifactProcessRequests.add(artifactProcessRequest);
                     }
@@ -141,8 +140,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
                 // Check if the artifact has been updated
                 if (artifactHasChanged(artifactModel)) {
-                    ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
-                    artifactProcessRequest.setArtifact(immutableArtifact);
+                    ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(immutableArtifact);
                     artifactProcessRequest.setDeploymentMode(DeploymentMode.UPDATE);
                     artifactProcessRequests.add(artifactProcessRequest);
                 }

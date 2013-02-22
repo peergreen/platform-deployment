@@ -74,8 +74,7 @@ public class DependencyArtifactsProcessor implements Processor<BasicDeploymentCo
             List<ArtifactProcessRequest> toUndeployArtifactProcessRequests = new ArrayList<>();
             for (InternalWire wire : artifactModel.getInternalWires(WireScope.TO)) {
                 InternalArtifactModel child = wire.getInternalTo();
-                ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
-                artifactProcessRequest.setArtifact(child.getFacetArtifact());
+                ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(child.getFacetArtifact());
                 toUndeployArtifactProcessRequests.add(artifactProcessRequest);
             }
 

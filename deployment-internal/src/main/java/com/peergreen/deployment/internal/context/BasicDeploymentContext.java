@@ -61,8 +61,7 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
     @Override
     public void addArtifact(Artifact artifact, boolean isPersistent) {
-        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest();
-        artifactProcessRequest.setArtifact(artifact);
+        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
         artifactProcessRequest.setPersistent(isPersistent);
         newArtifacts.add(artifactProcessRequest);
     }

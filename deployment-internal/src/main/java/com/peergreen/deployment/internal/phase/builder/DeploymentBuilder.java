@@ -336,8 +336,7 @@ public class DeploymentBuilder {
         for (InternalWire wire : artifactModel.getInternalWires(WireScope.FROM)) {
             InternalArtifactModel child = wire.getInternalTo();
             Artifact childArtifact = child.getFacetArtifact();
-            ArtifactProcessRequest childArtifactProcessRequest = new ArtifactProcessRequest();
-            childArtifactProcessRequest.setArtifact(childArtifact);
+            ArtifactProcessRequest childArtifactProcessRequest = new ArtifactProcessRequest(childArtifact);
             childArtifactProcessRequest.setPersistent(child.as(InternalArtifactModelPersistenceView.class).isPersistent());
 
 
