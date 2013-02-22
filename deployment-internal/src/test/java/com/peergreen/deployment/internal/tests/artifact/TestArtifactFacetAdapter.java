@@ -63,6 +63,22 @@ public class TestArtifactFacetAdapter {
             Assert.assertEquals(capability.getAttributes().get(ArtifactNamespace.CAPABILITY_PATHEXTENSION_ATTRIBUTE), "jar");
         }
 
+        @Test(expectedExceptions=IllegalArgumentException.class)
+        public void testAlreadyExistPathExtension() throws URISyntaxException  {
+            URI uri = new URI("file:///tmp/valid.jar");
+            doReturn(uri).when(artifact).uri();
+            ArtifactCapability capability = facetAdapter.getCapability(resource, artifact);
+            capability.setPathExtension(".com");
+        }
+
+        @Test(expectedExceptions=IllegalArgumentException.class)
+        public void testSchemeAlreadyExist() throws URISyntaxException  {
+            URI uri = new URI("file:///tmp/valid.jar");
+            doReturn(uri).when(artifact).uri();
+            ArtifactCapability capability = facetAdapter.getCapability(resource, artifact);
+            capability.setURIScheme("toto");
+        }
+
 
         @Test
         public void testNoPathExtension() throws URISyntaxException  {
