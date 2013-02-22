@@ -23,10 +23,15 @@ import java.util.Collection;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.PersistenceArtifactManager;
 
+/**
+ * OSGi persistence manager which should forget all bundles that are not persistent.
+ * @author Florent Benoit
+ */
 public class OSGiPersitenceArtifactManager implements PersistenceArtifactManager {
 
     private final BundleContext bundleContext;
@@ -44,11 +49,13 @@ public class OSGiPersitenceArtifactManager implements PersistenceArtifactManager
             Bundle bundle = findBundle(artifact.uri());
             if (bundle != null) {
                 // Stop and uninstall as it's not persistent
-                try {
-                    bundle.stop();
-                } catch (BundleException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                if (!isFragment(bundle)) {
+                    try {
+                        bundle.stop();
+                    } catch (BundleException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
                 }
                 try {
                     bundle.uninstall();
@@ -60,8 +67,12 @@ public class OSGiPersitenceArtifactManager implements PersistenceArtifactManager
         }
     }
 
-
-    private Bundle findBundle(URI uri)  {
+    /**
+     * Finds the bundle based on the given URI.
+     * @param uri the URI of the bundle to find
+     * @return the bundle if found, else null
+     */
+    protected Bundle findBundle(URI uri)  {
         URL url;
         try {
             url = uri.toURL();
@@ -77,6 +88,14 @@ public class OSGiPersitenceArtifactManager implements PersistenceArtifactManager
         return found;
     }
 
+    /**
+     * Checks if the given bundle is a fragment
+     * @param bundle the bundle to check
+     * @return true if the bundle is a fragment.
+     */
+    protected boolean isFragment(final Bundle bundle) {
+        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
+    }
 
 
 }
