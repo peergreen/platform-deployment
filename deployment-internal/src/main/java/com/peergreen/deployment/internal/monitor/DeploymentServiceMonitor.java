@@ -18,12 +18,15 @@ package com.peergreen.deployment.internal.monitor;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
-import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.annotations.Validate;
 
 import com.peergreen.deployment.Artifact;
@@ -39,40 +42,53 @@ import com.peergreen.deployment.monitor.URITrackerException;
 import com.peergreen.deployment.monitor.URITrackerManager;
 
 /**
- * This tracker will check for update/deleted artifacts
- * If an artifact is updated, it will send the UPDATE order
- * if an artifact is deleted, it will send the UNDEPLOY order
+ * This tracker will check for update/deleted artifacts<br />
+ * If an artifact is updated, it will send the UPDATE order<br />
+ * if an artifact is deleted, it will send the UNDEPLOY order.<br />
+ * This class checks for bind/unbind on requires attributes as it's using Thread
+ * so fields may be null while checking them in run() method.
  * @author Florent Benoit
  */
 @Component
 @Instantiate(name="Deployment Service artifact monitor tracker")
 public class DeploymentServiceMonitor implements Runnable {
 
-    @Requires
+    /**
+     * Deployment service.
+     */
     private DeploymentService deploymentService;
 
-    @Requires
+    /**
+     * Artifact model manager.
+     */
     private InternalArtifactModelManager artifactModelManager;
 
-    @Requires
+    /**
+     * Artifact builder.
+     */
     private ArtifactBuilder artifactBuilder;
 
     /**
      * URI tracker.
      */
-    @Requires
     private URITrackerManager uriTrackerManager;
 
     //FIXME : add configurable attribute
     private static final long checkInterval = 5000L;
 
-    private boolean stopThread = false;
+    /**
+     * Boolean that is checked for stopping the loop.
+     */
+    private final AtomicBoolean stopThread = new AtomicBoolean(false);
 
+    /**
+     * Once all requirements are satisfied, thread is started to track the changes.
+     */
     @Validate
     public void startTracking() {
 
         // reset flag
-        this.stopThread = false;
+        this.stopThread.set(false);
 
         // Start a new thread
         Thread thread = new Thread(this);
@@ -80,9 +96,12 @@ public class DeploymentServiceMonitor implements Runnable {
         thread.start();
     }
 
+    /**
+     * Missing requirement, or being stopped so needs to tell the thread that we're stopping.
+     */
     @Invalidate
     public void stopTracking() {
-        this.stopThread = true;
+        this.stopThread.set(true);
     }
 
     /**
@@ -94,7 +113,7 @@ public class DeploymentServiceMonitor implements Runnable {
     public void run() {
 
         for (;;) {
-            if (stopThread) {
+            if (stopThread.get()) {
                 // Stop the thread
                 return;
             }
@@ -103,7 +122,14 @@ public class DeploymentServiceMonitor implements Runnable {
             List<ArtifactProcessRequest> artifactProcessRequests = new ArrayList<>();
 
             // Gets the tracked artifacts
-            Collection<InternalArtifactModel> trackedArtifactModels = artifactModelManager.getDeployedRootArtifacts();
+            Collection<InternalArtifactModel> trackedArtifactModels = null;
+
+            // Manager ?
+            if (artifactModelManager != null) {
+                trackedArtifactModels = artifactModelManager.getDeployedRootArtifacts();
+            } else {
+                trackedArtifactModels = Collections.emptySet();
+            }
 
             // Do a first update on the file length
             // This avoid to try to update file that are still being updated
@@ -124,6 +150,16 @@ public class DeploymentServiceMonitor implements Runnable {
                 IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
                 URI uri = facetArtifact.uri();
                 String name = facetArtifact.name();
+
+                // No artifact builder
+                if (artifactBuilder == null) {
+                    continue;
+                }
+
+                // No uri TrackerManager
+                if (uriTrackerManager == null) {
+                    continue;
+                }
 
                 Artifact immutableArtifact = artifactBuilder.build(name, uri);
 
@@ -146,6 +182,10 @@ public class DeploymentServiceMonitor implements Runnable {
                 }
             }
 
+            // No deployment service
+            if (deploymentService == null) {
+                continue;
+            }
 
             // Artifacts to send ?
             if (!artifactProcessRequests.isEmpty()) {
@@ -236,17 +276,38 @@ public class DeploymentServiceMonitor implements Runnable {
         return currentLastModified > previousLastModified;
     }
 
-
+    /**
+     * Gets the "file length" of the given URI.
+     * @param uri the URI on which we need to connect to get the length
+     * @return the length
+     * @throws URITrackerException if it's unable to get the length
+     */
     protected long getLength(URI uri) throws URITrackerException {
+        if (uriTrackerManager == null) {
+            throw new URITrackerException("No uri tracker manager available");
+        }
         return uriTrackerManager.getLength(uri);
     }
 
+    /**
+     * Gets the "last modified" of the given URI.
+     * @param uri the URI on which we need to connect to get the last modified
+     * @return the lastModified timestamp
+     * @throws URITrackerException if it's unable to get the length
+     */
     protected long getLastModified(URI uri) throws URITrackerException {
+        if (uriTrackerManager == null) {
+            throw new URITrackerException("No uri tracker manager available");
+        }
         return uriTrackerManager.getLastModified(uri);
     }
 
-
-    protected void saveIntermediateFileLengths( Collection<InternalArtifactModel> trackedArtifactModels) {
+    /**
+     * Save the intermediate file length of the given collection of artifacts.
+     * This is used to detect if artifacts are currently bein updated.
+     * @param trackedArtifactModels the collection to check
+     */
+    protected void saveIntermediateFileLengths(Collection<InternalArtifactModel> trackedArtifactModels) {
         for (InternalArtifactModel artifactModel : trackedArtifactModels) {
             InternalArtifactModelChangesView modelChanges = artifactModel.as(InternalArtifactModelChangesView.class);
             try {
@@ -258,4 +319,45 @@ public class DeploymentServiceMonitor implements Runnable {
 
         }
     }
+
+    @Bind
+    public void bindURITrackerManager(URITrackerManager uriTrackerManager) {
+        this.uriTrackerManager = uriTrackerManager;
+    }
+
+    @Unbind
+    public void unbindURITrackerManager(URITrackerManager uriTrackerManager) {
+        this.uriTrackerManager = null;
+    }
+
+    @Bind
+    public void bindArtifactBuilder(ArtifactBuilder artifactBuilder) {
+        this.artifactBuilder = artifactBuilder;
+    }
+
+    @Unbind
+    public void unbindArtifactBuilder(ArtifactBuilder artifactBuilder) {
+        this.artifactBuilder = null;
+    }
+
+    @Bind
+    public void bindInternalArtifactModelManager(InternalArtifactModelManager artifactModelManager) {
+        this.artifactModelManager = artifactModelManager;
+    }
+
+    @Unbind
+    public void unbindInternalArtifactModelManager(InternalArtifactModelManager artifactModelManager) {
+        this.artifactModelManager = null;
+    }
+
+    @Bind
+    public void bindDeploymentService(DeploymentService deploymentService) {
+        this.deploymentService = deploymentService;
+    }
+
+    @Unbind
+    public void unbindDeploymentService(DeploymentService deploymentService) {
+        this.deploymentService = null;
+    }
+
 }
