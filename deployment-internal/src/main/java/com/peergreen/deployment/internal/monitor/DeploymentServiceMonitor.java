@@ -93,6 +93,7 @@ public class DeploymentServiceMonitor implements Runnable {
         // Start a new thread
         Thread thread = new Thread(this);
         thread.setName("Peergreen Deployment artifact monitor");
+        thread.setDaemon(true);
         thread.start();
     }
 
