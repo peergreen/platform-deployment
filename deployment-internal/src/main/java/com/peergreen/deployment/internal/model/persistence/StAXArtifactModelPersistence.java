@@ -39,8 +39,10 @@ import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.InternalWire;
 import com.peergreen.deployment.internal.model.persistence.read.DeployedArtifactsParser;
 import com.peergreen.deployment.internal.model.persistence.write.ModelWriter;
+import com.peergreen.deployment.internal.model.view.InternalArtifactModelDeploymentView;
+import com.peergreen.deployment.model.ArtifactModelDeploymentState;
 import com.peergreen.deployment.model.WireScope;
-import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 
 /**
  * Allows to load or store the persistence model.
@@ -93,10 +95,13 @@ public class StAXArtifactModelPersistence implements ArtifactModelPersistence {
             reader.close();
             if (models != null) {
                 for (DefaultArtifactModel model : models.values()) {
-                    if (model.as(ArtifactModelDeploymentView.class).isDeploymentRoot()) {
-                        URI uri = model.getFacetArtifact().uri();
-                        artifactModelManager.addArtifactModel(uri, model);
+                    URI uri = model.getFacetArtifact().uri();
+                    // If not persistent, set it as undeployed
+                    if (!model.as(ArtifactModelPersistenceView.class).isPersistent()) {
+                        model.as(InternalArtifactModelDeploymentView.class).setDeploymentState(ArtifactModelDeploymentState.UNDEPLOYED);
                     }
+
+                    artifactModelManager.addArtifactModel(uri, model);
                 }
             }
 

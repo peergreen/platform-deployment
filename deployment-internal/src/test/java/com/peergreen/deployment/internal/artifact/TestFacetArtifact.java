@@ -13,29 +13,85 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.tests.artifact;
+package com.peergreen.deployment.internal.artifact;
+
+import static org.mockito.Mockito.doReturn;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.List;
 
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.peergreen.deployment.internal.artifact.FacetArtifact;
-import com.peergreen.deployment.internal.artifact.IFacetArtifact;
-import com.peergreen.deployment.internal.artifact.ImmutableArtifact;
+import com.peergreen.deployment.facet.FacetInfo;
+import com.peergreen.deployment.internal.processor.NamedProcessor;
 
 public class TestFacetArtifact {
 
-    private final IFacetArtifact artifact;
+    private IFacetArtifact artifact;
 
     private final static String NAME = "FacetArtifact";
 
-    private final URI URI;
+    private URI URI;
 
-    public TestFacetArtifact() throws URISyntaxException {
+    @Mock
+    private NamedProcessor processor;
+
+
+    @BeforeMethod
+    public void init() throws URISyntaxException {
+        MockitoAnnotations.initMocks(this);
         this.URI = new URI("test://myURI");
         this.artifact = new FacetArtifact(new ImmutableArtifact(NAME, URI));
+    }
+
+    @Test(expectedExceptions=IllegalArgumentException.class)
+    public void testAddNullFacet() {
+        artifact.addFacet(null, null);
+    }
+
+
+    @Test
+    public void testAddAndCheckException() {
+        Exception e = new IllegalStateException();
+        artifact.addException(e);
+        List<Exception> exceptions = artifact.getExceptions();
+        Assert.assertEquals(exceptions.size(), 1);
+        Assert.assertEquals(exceptions.iterator().next(), e);
+    }
+
+
+    @Test
+    public void testAddWithProcessor() {
+        Toto toto = new Toto();
+        String processorName = "myProcessorName";
+        doReturn(processorName).when(processor).getName();
+
+        artifact.addFacet(toto, processor);
+
+        Collection<FacetInfo> facetInfos = artifact.getFacetInfos();
+        Assert.assertEquals(facetInfos.size(), 1);
+        FacetInfo facetInfo = facetInfos.iterator().next();
+        Assert.assertEquals(facetInfo.getName(), Toto.class.getName());
+        Assert.assertEquals(facetInfo.getProcessor(), processorName);
+    }
+
+
+    @Test
+    public void testAddWithNullProcessor() {
+        Toto toto = new Toto();
+        artifact.addFacet(Toto.class, toto, null);
+
+        Collection<FacetInfo> facetInfos = artifact.getFacetInfos();
+        Assert.assertEquals(facetInfos.size(), 1);
+        FacetInfo facetInfo = facetInfos.iterator().next();
+        Assert.assertEquals(facetInfo.getName(), Toto.class.getName());
+        Assert.assertNull(facetInfo.getProcessor());
     }
 
     @Test

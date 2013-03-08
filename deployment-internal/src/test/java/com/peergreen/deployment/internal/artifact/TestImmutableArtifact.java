@@ -13,19 +13,21 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.tests.artifact;
+package com.peergreen.deployment.internal.artifact;
+
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.content.Content;
-import com.peergreen.deployment.internal.artifact.ImmutableArtifactBuilder;
 
 public class TestImmutableArtifact {
 
@@ -44,17 +46,21 @@ public class TestImmutableArtifact {
 
     @Test
     public void testArtifact() {
-        Assert.assertEquals(NAME,  artifact.name());
-        Assert.assertEquals(uri,  artifact.uri());
+        assertEquals(NAME,  artifact.name());
+        assertEquals(uri,  artifact.uri());
     }
 
 
     @Test(dependsOnMethods="testArtifact")
     public void testImmutableArtifact() {
-        Assert.assertNull(artifact.as(Archive.class));
-        Assert.assertNull(artifact.as(Content.class));
+        assertNull(artifact.as(Archive.class));
+        assertNull(artifact.as(Content.class));
      }
 
+    @Test(dependsOnMethods="testArtifact")
+    public void testToString() {
+        assertEquals(artifact.toString(), "Artifact[name=ArtifactName, uri=test://myURI]");
+    }
 
 
 

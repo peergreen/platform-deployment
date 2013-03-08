@@ -21,6 +21,4 @@ public interface FacetInfo {
 
     String getProcessor();
 
-    long getTime();
-
 }

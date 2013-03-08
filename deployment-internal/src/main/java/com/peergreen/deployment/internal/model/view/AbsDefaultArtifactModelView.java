@@ -45,8 +45,6 @@ public class AbsDefaultArtifactModelView {
         return b.booleanValue();
     }
 
-
-
     public boolean hasAttributes(String... attributesName) {
         return this.artifactModel.hasAttributes(attributesName);
     }
@@ -58,6 +56,10 @@ public class AbsDefaultArtifactModelView {
     @SuppressWarnings("unchecked")
     protected <T> T getAttribute(String attributeName) {
         return (T) this.artifactModel.getAttribute(attributeName);
+    }
+
+    public void unsetAttribute(String key) {
+        this.artifactModel.unsetAttribute(key);
     }
 
 }

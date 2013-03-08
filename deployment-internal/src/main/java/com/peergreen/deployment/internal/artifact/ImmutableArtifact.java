@@ -55,7 +55,7 @@ public class ImmutableArtifact implements Artifact {
 
     @Override
     public String toString() {
-     return toString;
+        return toString;
     }
 
 }

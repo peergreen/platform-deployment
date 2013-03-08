@@ -15,6 +15,8 @@
  */
 package com.peergreen.deployment.model.view;
 
+import com.peergreen.deployment.model.ArtifactModelDeploymentState;
+
 /**
  * Updates view on the model.
  * @author Florent Benoit
@@ -23,6 +25,8 @@ public interface ArtifactModelDeploymentView {
 
     boolean isDeploymentRoot();
 
+    ArtifactModelDeploymentState getDeploymentState();
     boolean isUndeployed();
+    boolean isDeployed();
 
 }

@@ -13,27 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.model;
+package com.peergreen.deployment.internal.service;
 
-/**
- * Constants for the model.
- * @author Florent Benoit
- */
-public class ArtifactModelConstants {
+public class XmlPlanFacet {
 
-    public static final String LAST_MODIFIED = "lastModified";
-
-    public static final String ARTIFACT_LENGTH = "artifactLength";
-
-    public static final String CHECKING_ARTIFACT_LENGTH = "checkingArtifactLength";
-
-    public static final String PERSISTENT = "persistent";
-
-    public static final String DEPLOYMENT_ROOT = "deploymentRoot";
-
-    public static final String DEPLOYMENT_STATE = "deploymentState";
-
-    private ArtifactModelConstants() {
-
-    }
 }

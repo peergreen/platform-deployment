@@ -61,17 +61,17 @@ public class BasicInjectionContext implements InjectionContext {
 
 
     @Bind(optional=false)
-        public void bindArtifactBuilder(ArtifactBuilder artifactBuilder) {
+    public void bindArtifactBuilder(ArtifactBuilder artifactBuilder) {
         this.artifactBuilder = artifactBuilder;
     }
 
     @Bind(optional=false)
-        public void bindResolver(Resolver resolver) {
+    public void bindResolver(Resolver resolver) {
         this.resolver = resolver;
     }
 
     @Bind(optional=false)
-        public void bindProcessorManager(ProcessorManager processorManager) {
+    public void bindProcessorManager(ProcessorManager processorManager) {
         this.processorManager = processorManager;
     }
 

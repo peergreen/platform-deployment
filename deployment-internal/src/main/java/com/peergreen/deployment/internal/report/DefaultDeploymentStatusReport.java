@@ -16,8 +16,10 @@
 package com.peergreen.deployment.internal.report;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
+import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.DeploymentStatusReport;
 
 public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
@@ -32,13 +34,13 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     private long elapsedTime;
 
-    private final Collection<DefaultArtifactStatusReport> artifactsReport;
+    private final Collection<ArtifactStatusReport> artifactsReport;
 
     private boolean failure = false;
 
 
     public DefaultDeploymentStatusReport() {
-        this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
+        this.artifactsReport = new HashSet<>();
     }
 
     public long getElapsedTime() {
@@ -65,6 +67,10 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     }
 
 
+    public Collection<ArtifactStatusReport> getArtifactStatusReports() {
+        return Collections.unmodifiableCollection(artifactsReport);
+    }
+
 
 
     @Override
@@ -76,7 +82,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
         sb.append("\nArtifacts");
         if (artifactsReport != null) {
-            for (DefaultArtifactStatusReport artifactStatusReport : artifactsReport) {
+            for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
                 sb.append(artifactStatusReport.toString("  "));
             }
         }

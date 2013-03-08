@@ -16,9 +16,10 @@
 package com.peergreen.deployment.internal.model.view;
 
 import static com.peergreen.deployment.model.ArtifactModelConstants.DEPLOYMENT_ROOT;
-import static com.peergreen.deployment.model.ArtifactModelConstants.UNDEPLOYED;
+import static com.peergreen.deployment.model.ArtifactModelConstants.DEPLOYMENT_STATE;
 
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
+import com.peergreen.deployment.model.ArtifactModelDeploymentState;
 
 /**
  * Implementation of the {@link InternalArtifactModelChangesView}
@@ -42,12 +43,23 @@ public class DefaultArtifactModelDeploymentView extends AbsDefaultArtifactModelV
 
     @Override
     public boolean isUndeployed() {
-        return getBooleanAttribute(UNDEPLOYED);
+        return ArtifactModelDeploymentState.UNDEPLOYED.equals(getAttribute(DEPLOYMENT_STATE));
     }
 
     @Override
-    public void setUndeployed(boolean undeployed) {
-        setAttribute(UNDEPLOYED, undeployed);
+    public boolean isDeployed() {
+        return ArtifactModelDeploymentState.DEPLOYED.equals(getAttribute(DEPLOYMENT_STATE));
+    }
+
+    @Override
+    public ArtifactModelDeploymentState getDeploymentState() {
+        return getAttribute(DEPLOYMENT_STATE);
+    }
+
+
+    @Override
+    public void setDeploymentState(ArtifactModelDeploymentState state) {
+        setAttribute(DEPLOYMENT_STATE, state);
     }
 
     @Override
@@ -55,6 +67,5 @@ public class DefaultArtifactModelDeploymentView extends AbsDefaultArtifactModelV
         setAttribute(DEPLOYMENT_ROOT, value);
 
     }
-
 
 }

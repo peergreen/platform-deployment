@@ -15,6 +15,8 @@
  */
 package com.peergreen.deployment.internal.model;
 
+import java.util.Collection;
+
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.model.ArtifactModel;
 import com.peergreen.deployment.model.WireScope;
@@ -37,7 +39,7 @@ public interface InternalArtifactModel extends InternalAttributes, ArtifactModel
      * @param attributeNames the list of attributes that the wire needs to have
      * @return a list of matching wire
      */
-    Iterable<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames);
+    Collection<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames);
 
     /**
      * Adds a wire for this internal model.

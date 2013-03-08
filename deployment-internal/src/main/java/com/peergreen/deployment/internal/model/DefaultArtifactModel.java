@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package com.peergreen.deployment.internal.model;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -136,7 +137,7 @@ public class DefaultArtifactModel extends AbsInternalAttributes implements Inter
      * @return a list of matching wire
      */
     @Override
-    public Iterable<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames) {
+    public Collection<? extends InternalWire> getInternalWires(WireScope scope, String... attributeNames) {
         Set<InternalWire> scopedWires;
         if (scope == WireScope.ALL) {
             scopedWires = this.wires;

@@ -15,6 +15,7 @@
  */
 package com.peergreen.deployment.internal.model.view;
 
+import com.peergreen.deployment.model.ArtifactModelDeploymentState;
 import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
 
 /**
@@ -23,6 +24,6 @@ import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
  */
 public interface InternalArtifactModelDeploymentView extends ArtifactModelDeploymentView {
 
-    void setUndeployed(boolean undeployed);
+    void setDeploymentState(ArtifactModelDeploymentState state);
     void setDeploymentRoot(boolean value);
 }

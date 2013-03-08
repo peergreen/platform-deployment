@@ -13,32 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.facet.osgibundle.processor;
+package com.peergreen.deployment.internal.processor.undeploy;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-
+import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.internal.model.InternalArtifactModel;
 
 /**
- * Uninstall the OSGi bundles on the gateway.
+ * Undeploy post config processor
  * @author Florent Benoit
  */
-public class OSGiBundleUninstallProcessor implements Processor<Bundle> {
+public class UndeployPostConfigProcessor implements Processor<DeploymentContext> {
 
-
+    /**
+     * Remove any added facets.
+     */
     @Override
-    public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
-
-        // uninstall bundle
-        try {
-            bundle.uninstall();
-        } catch (BundleException e) {
-            throw new ProcessorException("Unable to uninstall the bundle", e);
-        }
-
+    public void handle(DeploymentContext deploymentContext, ProcessorContext processorContext) throws ProcessorException {
+        InternalArtifactModel artifactModel  = deploymentContext.get(InternalArtifactModel.class);
+        artifactModel.getFacetArtifact().reset();
     }
-
 }

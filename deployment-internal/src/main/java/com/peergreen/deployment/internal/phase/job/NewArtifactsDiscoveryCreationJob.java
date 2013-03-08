@@ -26,8 +26,8 @@ import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
 import com.peergreen.deployment.internal.phase.builder.TaskModelParameters;
 import com.peergreen.tasks.context.TaskContext;
+import com.peergreen.tasks.model.Container;
 import com.peergreen.tasks.model.Job;
-import com.peergreen.tasks.model.Parallel;
 import com.peergreen.tasks.model.Task;
 
 /**
@@ -38,10 +38,10 @@ import com.peergreen.tasks.model.Task;
  */
 public class NewArtifactsDiscoveryCreationJob implements Job {
 
-    private final Parallel finders;
+    private final Container findersContainerTasks;
 
-    public NewArtifactsDiscoveryCreationJob(Parallel finders) {
-        this.finders = finders;
+    public NewArtifactsDiscoveryCreationJob(Container findersContainerTasks) {
+        this.findersContainerTasks = findersContainerTasks;
     }
 
     @Override
@@ -76,7 +76,7 @@ public class NewArtifactsDiscoveryCreationJob implements Job {
                 taskModelParameters.setRootArtifactModel(deploymentContext.get(InternalArtifactModel.class));
 
                 Task discoveryTask = deploymentBuilder.buildTaskModel(taskModelParameters);
-                finders.add(discoveryTask);
+                findersContainerTasks.add(discoveryTask);
             }
             deploymentContext.clearNewArtifacts();
         }

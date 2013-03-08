@@ -13,27 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.model;
+package com.peergreen.deployment.internal.service;
 
-/**
- * Constants for the model.
- * @author Florent Benoit
- */
-public class ArtifactModelConstants {
+import com.peergreen.deployment.DelegateHandlerProcessor;
+import com.peergreen.deployment.Processor;
 
-    public static final String LAST_MODIFIED = "lastModified";
 
-    public static final String ARTIFACT_LENGTH = "artifactLength";
+public class TestHandlerProcessor<T> extends DelegateHandlerProcessor<T>{
 
-    public static final String CHECKING_ARTIFACT_LENGTH = "checkingArtifactLength";
-
-    public static final String PERSISTENT = "persistent";
-
-    public static final String DEPLOYMENT_ROOT = "deploymentRoot";
-
-    public static final String DEPLOYMENT_STATE = "deploymentState";
-
-    private ArtifactModelConstants() {
-
+    public TestHandlerProcessor(Processor<T> processor, Class<T> expectedHandleType) {
+        super(processor, expectedHandleType);
     }
 }
+

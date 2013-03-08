@@ -28,7 +28,7 @@ import com.peergreen.deployment.InternalFacetLifeCyclePhaseProvider;
 
 @Component
 @Provides
-@Instantiate(name="Facet Life cycle Manager")
+@Instantiate
 public class DefaultFacetLifeCyclePhaseManager implements FacetLifeCycleManager {
 
     private final Set<InternalFacetLifeCyclePhaseProvider> providers;

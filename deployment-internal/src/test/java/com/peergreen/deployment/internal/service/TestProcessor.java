@@ -13,20 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.tests.processors.customprocessor;
+package com.peergreen.deployment.internal.service;
 
-import com.peergreen.deployment.DelegateHandlerProcessor;
+import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.Processor;
-import com.peergreen.deployment.resource.builder.RequirementBuilder;
+import com.peergreen.deployment.ProcessorContext;
+import com.peergreen.deployment.ProcessorException;
 
-public class TestHandlerProcessor<T> extends DelegateHandlerProcessor<T>{
+public class TestProcessor implements Processor<DeploymentContext> {
 
-        public TestHandlerProcessor(Processor<T> processor, Class<T> expectedHandleType) {
-        super(processor, expectedHandleType);
+    @Override
+    public void handle(DeploymentContext deploymentContext, ProcessorContext processorContext) throws ProcessorException {
+        Artifact artifact = deploymentContext.getArtifact();
+
+
+        if (artifact.name().endsWith(".jar")) {
+            processorContext.addFacet(DummyFacet.class, new DummyFacet());
+        }
     }
 
-        @Override
-        public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
-            super.bindRequirementBuilder(requirementBuilder);
-        }
 }

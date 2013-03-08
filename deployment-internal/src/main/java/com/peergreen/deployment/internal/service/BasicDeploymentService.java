@@ -27,16 +27,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
+import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
-import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
@@ -64,38 +64,59 @@ import com.peergreen.tasks.model.Task;
 
 @Component
 @Provides
-@Instantiate(name="Deployment Service")
+@Instantiate
 public class BasicDeploymentService implements DeploymentService {
 
+    /**
+     * Logger.
+     */
     private static final Log LOGGER = LogFactory.getLog(BasicDeploymentService.class);
 
+    /**
+     * Executor service used for threading.
+     */
     private ExecutorService executorService;
 
+    /**
+     * Deployment builder that produces the tasks to execute.
+     */
     private DeploymentBuilder deploymentBuilder;
 
-    @Requires
+    /**
+     * Injection context used to inject services in the deployment context.
+     */
     private InjectionContext injectionContext;
 
-    @Requires
-    private ArtifactBuilder artifactBuilder;
-
-    @Requires
+    /**
+     * Manager of all artifacts model
+     */
     private InternalArtifactModelManager artifactModelManager;
 
+    /**
+     * Thread factory used to prefix threads.
+     */
     private final ThreadFactory threadFactory;
 
 
+    /**
+     * Default constructor.
+     */
     public BasicDeploymentService() {
         this.threadFactory = new PeergreenThreadFactory(Executors.defaultThreadFactory(), "Deployment Executor");
     }
 
-
+    /**
+     * Start the service.
+     */
     @Validate
     public void start() {
         this.executorService = Executors.newFixedThreadPool(10, threadFactory);
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
     }
 
+    /**
+     * Stop executor when stopping.
+     */
     @Invalidate
     public void stop() {
         // stop the threads
@@ -117,19 +138,20 @@ public class BasicDeploymentService implements DeploymentService {
         // Create report
         DefaultDeploymentStatusReport deploymentStatusReport = new DefaultDeploymentStatusReport();
 
-
         // split for each deployment mode
         List<ArtifactProcessRequest> deployRequests = new ArrayList<>();
         List<ArtifactProcessRequest> updateRequests = new ArrayList<>();
         List<ArtifactProcessRequest> undeployRequests = new ArrayList<>();
 
-        for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
-            if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.DEPLOY) {
-                deployRequests.add(artifactProcessRequest);
-            } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UPDATE) {
-                updateRequests.add(artifactProcessRequest);
-            } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UNDEPLOY) {
-                undeployRequests.add(artifactProcessRequest);
+        if (artifactProcessRequests != null) {
+            for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+                if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.DEPLOY) {
+                    deployRequests.add(artifactProcessRequest);
+                } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UPDATE) {
+                    updateRequests.add(artifactProcessRequest);
+                } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UNDEPLOY) {
+                    undeployRequests.add(artifactProcessRequest);
+                }
             }
         }
 
@@ -148,16 +170,18 @@ public class BasicDeploymentService implements DeploymentService {
         long tEnd = System.currentTimeMillis();
 
         // populate report
-        for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
-            // Get model
-            InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifactProcessRequest.getArtifact().uri());
-            DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(artifactModel.getFacetArtifact());
-            deploymentStatusReport.addChild(artifactStatusReport);
-            if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
-                deploymentStatusReport.setFailure();
+        if (artifactProcessRequests != null) {
+            for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+                // Get model
+                InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(artifactProcessRequest.getArtifact().uri());
+                DefaultArtifactStatusReport artifactStatusReport = new DefaultArtifactStatusReport(artifactModel.getFacetArtifact());
+                deploymentStatusReport.addChild(artifactStatusReport);
+                if (artifactModel.getFacetArtifact().getExceptions().size() > 0) {
+                    deploymentStatusReport.setFailure();
+                }
+                // add children that have been created by our node
+                addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
             }
-            // add children that have been created by our node
-            addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
         }
 
 
@@ -177,11 +201,6 @@ public class BasicDeploymentService implements DeploymentService {
      * @return a report for the given request
      */
     protected State process(Collection<ArtifactProcessRequest> artifactProcessRequests, DeploymentMode deploymentMode) {
-        // No request, so abort
-        if (artifactProcessRequests == null) {
-            return null;
-        }
-
         TaskExecutionHolder holder = new TaskExecutionHolder();
 
         TaskModelParameters taskModelParameters = new TaskModelParameters();
@@ -201,8 +220,12 @@ public class BasicDeploymentService implements DeploymentService {
         executorServiceBuilderManager.setTrackerManager(trackerManager);
 
         // Adds the time tracker that can check the total time used for a given deployment context
+        //TaskRenderingVisitor visitor = new TaskRenderingVisitor();
+        //visitor.setGroups(taskModelParameters.getTaskExecutionHolder().getGroups());
+
         TimeTaskTracker timeTracker = new TimeTaskTracker();
         trackerManager.registerTracker(timeTracker);
+        //trackerManager.registerTracker(visitor);
 
         Future<State> future = executor.execute(task);
 
@@ -215,16 +238,23 @@ public class BasicDeploymentService implements DeploymentService {
             e.printStackTrace();
         }
 
+        //Node<Task> node = new LazyNode<Task>(new TaskNodeAdapter(), task);
+        //node.walk(visitor);
+
         // save state after a deployment
         artifactModelManager.save();
 
         return state;
-
-
     }
 
+
     protected void addCreatedNode(DefaultDeploymentStatusReport deploymentStatusReport, DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
-        for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
+        Iterable<? extends InternalWire> createdWires = artifactModel.getInternalWires(WireScope.FROM, Created.class.getName());
+        // no created nodes
+        if (createdWires == null) {
+            return;
+        }
+        for (InternalWire fromWire : createdWires) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
             if (facetArtifact.getExceptions().size() > 0) {
                 deploymentStatusReport.setFailure();
@@ -271,6 +301,27 @@ public class BasicDeploymentService implements DeploymentService {
         addChildArtifactStatusReport(artifactStatusReport, artifactModel);
 
         return artifactStatusReport;
+    }
+
+
+    @Bind
+    protected void bindInjectionContext(InjectionContext injectionContext) {
+        this.injectionContext = injectionContext;
+    }
+
+    @Unbind
+    protected void unbindInjectionContext(InjectionContext injectionContext) {
+        this.injectionContext = null;
+    }
+
+    @Bind
+    protected void bindInternalArtifactModelManager(InternalArtifactModelManager artifactModelManager) {
+        this.artifactModelManager = artifactModelManager;
+    }
+
+    @Unbind
+    protected void unbindInternalArtifactModelManager(InternalArtifactModelManager artifactModelManager) {
+        this.artifactModelManager = null;
     }
 
 

@@ -15,25 +15,11 @@
  */
 package com.peergreen.deployment.model;
 
-/**
- * Constants for the model.
- * @author Florent Benoit
- */
-public class ArtifactModelConstants {
+public enum ArtifactModelDeploymentState {
 
-    public static final String LAST_MODIFIED = "lastModified";
+    DEPLOYED,
 
-    public static final String ARTIFACT_LENGTH = "artifactLength";
+    UNDEPLOYED,
 
-    public static final String CHECKING_ARTIFACT_LENGTH = "checkingArtifactLength";
-
-    public static final String PERSISTENT = "persistent";
-
-    public static final String DEPLOYMENT_ROOT = "deploymentRoot";
-
-    public static final String DEPLOYMENT_STATE = "deploymentState";
-
-    private ArtifactModelConstants() {
-
-    }
+    UNKNOWN
 }

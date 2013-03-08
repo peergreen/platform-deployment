@@ -17,13 +17,11 @@
 package com.peergreen.deployment.internal.artifact;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Stack;
 
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -42,31 +40,35 @@ import com.peergreen.deployment.internal.resource.ProviderResource;
  */
 public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
-    private final List<Exception> exceptions;
-
     private static final Log LOGGER = LogFactory.getLog(FacetArtifact.class);
 
+    /**
+     * Name of this artifact.
+     */
+    private final String name;
+
+    /**
+     * URI of this artifact.
+     */
+    private final URI uri;
+
+    /**
+     * Wrapped artifact.
+     */
     private final Artifact wrappedArtifact;
 
     private final Map<Class<?>, Object> facets;
 
-    private final String name;
-    private final URI uri;
-
-    private final Map<Class<?>, FacetInfo> facetInfos;
-    private final Set<ProcessorInfo> processorInfos;
-    private final List<InternalFacetBuilderInfo> facetBuildersInfo;
-    private long totalTime = 0;
+    private final Stack<FacetArtifactData> dataPerDeployment;
 
     public FacetArtifact(Artifact wrappedArtifact) {
         this.wrappedArtifact = wrappedArtifact;
         this.name = wrappedArtifact.name();
         this.uri = wrappedArtifact.uri();
+        this.dataPerDeployment = new Stack<>();
         this.facets = new HashMap<>();
-        this.facetInfos = new HashMap<>();
-        this.processorInfos = new HashSet<>();
-        this.facetBuildersInfo = new ArrayList<>();
-        this.exceptions = new ArrayList<>();
+        // be ready
+        newDeploymentMode();
     }
 
     @Override
@@ -83,8 +85,8 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     public <Facet> Facet as(Class<Facet> facetClass) {
         Facet found = facetClass.cast(facets.get(facetClass));
 
-        // ask the wrapped artifact (if any) if not found
-        if (found == null && wrappedArtifact != null) {
+        // ask the wrapped artifactif not found
+        if (found == null) {
             return wrappedArtifact.as(facetClass);
         }
         return found;
@@ -92,7 +94,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
     @Override
     public <Facet> Facet removeFacet(Class<Facet> facetClass) {
-        facetInfos.remove(facetClass);
+        getCurrentData().getFacetInfosMap().remove(facetClass);
         return facetClass.cast(facets.remove(facetClass));
     }
 
@@ -105,7 +107,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         if (processor != null) {
             facetInfo.setProcessor(processor.getName());
         }
-        facetInfos.put(facetClass, facetInfo);
+        getCurrentData().getFacetInfosMap().put(facetClass, facetInfo);
 
         //LOGGER.info("Facet ''{0}'' added by processor ''{1}''", facet, processor.getName());
         facets.put(facetClass, facet);
@@ -115,17 +117,15 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     protected <Facet> void addInnerFacet(Class<?> facetClass, Facet facet, NamedProcessor processor) {
         // for all interfaces
         Class<?>[] interfaces = facetClass.getInterfaces();
-        if (interfaces != null) {
-            for (Class<?> itf : interfaces) {
-                addInnerFacet(itf, itf.cast(facet), processor);
-            }
+        for (Class<?> itf : interfaces) {
+            addInnerFacet(itf, itf.cast(facet), processor);
         }
 
         DefaultFacetInfo facetInfo = new DefaultFacetInfo();
         facetInfo.setName(facetClass.getName());
         if (processor != null) {
-        facetInfo.setProcessor(processor.getName());
-        facetInfos.put(facetClass, facetInfo);
+            facetInfo.setProcessor(processor.getName());
+            getCurrentData().getFacetInfosMap().put(facetClass, facetInfo);
         }
 
         // add current interface
@@ -144,41 +144,70 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
     @Override
     public void addProcessorTime(String phase, long totalTime, NamedProcessor processor) {
-        processorInfos.add(new DefaultProcessorInfo(phase, processor.getName(), totalTime));
+        getCurrentData().getProcessors().add(new DefaultProcessorInfo(phase, processor.getName(), totalTime));
     }
 
     @Override
-    public Collection<FacetInfo> getFacets() {
-        return facetInfos.values();
+    public Map<Class<?>, Object> getFacets() {
+        return facets;
+    }
+
+
+    @Override
+    public Collection<FacetInfo> getFacetInfos() {
+        return getCurrentData().getFacetInfos();
     }
 
     @Override
     public Collection<ProcessorInfo> getProcessors() {
-        return processorInfos;
+        return getCurrentData().getProcessors();
     }
 
     @Override
     public void addTime(long time) {
-        totalTime += time;
+        getCurrentData().addTime(time);
     }
 
     @Override
     public long getTotalTime() {
-        return totalTime;
+        return getCurrentData().getTotalTime();
     }
 
     @Override
     public void addException(Exception e) {
-        exceptions.add(e);
+        getCurrentData().addException(e);
     }
 
     @Override
     public List<Exception> getExceptions() {
-        return exceptions;
+        return getCurrentData().getExceptions();
     }
 
     @Override
     public List<InternalFacetBuilderInfo> getFacetBuilders() {
-        return facetBuildersInfo;
+        return getCurrentData().getFacetBuilders();
+    }
+
+    /**
+     * Adds a new stack
+     */
+    @Override
+    public void newDeploymentMode() {
+        dataPerDeployment.push(new FacetArtifactData());
+    }
+
+
+    protected FacetArtifactData getCurrentData() {
+        return dataPerDeployment.peek();
+    }
+
+    @Override
+    public void reset() {
+        // remove facets
+        facets.clear();
+
+        // remove capabilities
+        getInnerCapabilities().clear();
+
     }
 }

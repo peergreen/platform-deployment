@@ -17,6 +17,7 @@ package com.peergreen.deployment.internal.artifact;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
@@ -44,12 +45,27 @@ public interface IFacetArtifact extends Artifact, Resource {
 
     void addCapability(Capability capability);
 
+
+    /**
+     * Start new deployment mode so it will use new values.
+     */
+    void newDeploymentMode();
+
+
+    /**
+     * Reset
+     */
+    void reset();
+
     void addException(Exception e);
     List<Exception> getExceptions();
 
-
-    Collection<FacetInfo> getFacets();
+    Map<Class<?>, Object> getFacets();
+    Collection<FacetInfo> getFacetInfos();
     Collection<ProcessorInfo> getProcessors();
     List<InternalFacetBuilderInfo> getFacetBuilders();
+
+
+
 
 }

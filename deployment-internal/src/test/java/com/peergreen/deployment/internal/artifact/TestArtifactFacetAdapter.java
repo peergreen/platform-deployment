@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.internal.tests.artifact;
+package com.peergreen.deployment.internal.artifact;
 
 import static org.mockito.Mockito.doReturn;
 

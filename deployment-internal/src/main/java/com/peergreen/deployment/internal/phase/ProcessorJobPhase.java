@@ -1,6 +1,6 @@
 package com.peergreen.deployment.internal.phase;
 
-import java.util.List;
+import java.util.Collection;
 
 import com.peergreen.deployment.internal.processor.ProcessorJob;
 import com.peergreen.deployment.internal.processor.WrapDeploymentContextJob;
@@ -15,13 +15,13 @@ public class ProcessorJobPhase {
 
     private final String phase;
 
-    private final List<Group> groups;
+    private final Collection<Group> groups;
 
     public ProcessorJobPhase(String phase, Pipeline pipeline) {
         this(phase, pipeline, null, true);
     }
 
-    public ProcessorJobPhase(String phase, Pipeline pipeline, List<Group> groups, boolean parallel) {
+    public ProcessorJobPhase(String phase, Pipeline pipeline, Collection<Group> groups, boolean parallel) {
         this.phase = phase;
         this.pipeline = pipeline;
         this.groups = groups;

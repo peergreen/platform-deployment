@@ -22,7 +22,7 @@ import com.peergreen.deployment.resource.facet.FacetNamespace;
 import com.peergreen.deployment.resource.facet.FacetRequirement;
 
 /**
- * Requires a facet for a given resource.
+ * Requires a deployment mode capability for a given resource.
  * @author Florent Benoit
  */
 public class DeploymentModeRequirementImpl extends AbsDeploymentRequirement implements FacetRequirement {

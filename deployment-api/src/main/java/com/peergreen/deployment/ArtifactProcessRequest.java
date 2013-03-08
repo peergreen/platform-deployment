@@ -53,6 +53,28 @@ public class ArtifactProcessRequest {
         this.persistent = persistent;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 1;
+        hash = hash * 17 + deploymentMode.hashCode();
+        hash = hash * 31 + artifact.hashCode();
+        return hash;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!ArtifactProcessRequest.class.isAssignableFrom(o.getClass())) {
+            return false;
+        }
+        ArtifactProcessRequest other = (ArtifactProcessRequest) o;
+        return this.artifact.equals(other.artifact) && (this.persistent == other.persistent) && this.deploymentMode.equals(other.deploymentMode);
+    }
+
+
 
     @Override
     public String toString() {

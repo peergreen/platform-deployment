@@ -15,12 +15,11 @@
  */
 package com.peergreen.deployment;
 
-import java.util.List;
 
 public interface InternalFacetLifeCyclePhaseProvider {
 
 
-    List<String> getLifeCyclePhases(DeploymentMode deploymentMode);
+    Iterable<String> getLifeCyclePhases(DeploymentMode deploymentMode);
 
     Class<?> getFacetType();
 }

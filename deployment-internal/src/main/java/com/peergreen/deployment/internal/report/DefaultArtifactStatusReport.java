@@ -15,6 +15,7 @@
  */
 package com.peergreen.deployment.internal.report;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -38,37 +39,42 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
     */
 
     private final String name;
-    private final String uri;
+    private final URI uri;
     private final Collection<FacetInfo> facetInfos;
     private final List<Exception> exceptions;
     private final Collection<ProcessorInfo> processors;
     private final Collection<DefaultArtifactStatusReport> artifactsReport;
     private final long totalTime;
 
+    @Override
     public List<Exception> getExceptions() {
         return exceptions;
     }
 
+    @Override
     public Collection<ProcessorInfo> getProcessors() {
         return processors;
     }
 
-    public String getName() {
+    @Override
+    public String name() {
         return name;
     }
 
-    public String getUri() {
+    @Override
+    public URI uri() {
         return uri;
     }
 
+    @Override
     public Collection<FacetInfo> getFacets() {
         return facetInfos;
     }
 
     public DefaultArtifactStatusReport(IFacetArtifact facetArtifact) {
         this.name = facetArtifact.name();
-        this.uri = facetArtifact.uri().toString();
-        this.facetInfos = facetArtifact.getFacets();
+        this.uri = facetArtifact.uri();
+        this.facetInfos = facetArtifact.getFacetInfos();
         this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
         this.processors = facetArtifact.getProcessors();
         this.totalTime = facetArtifact.getTotalTime();
@@ -85,6 +91,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
         return toString("");
     }
 
+    @Override
     public String toString(String indent) {
         StringBuilder sb;
         if (indent != null && indent.length() > 0) {
@@ -111,9 +118,6 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
             sb.append(facetInfo.getName());
             sb.append(", addedBy=");
             sb.append(facetInfo.getProcessor());
-            sb.append(", duration='");
-            sb.append(facetInfo.getTime());
-            sb.append("' ms");
             sb.append("]");
         }
         for (ProcessorInfo processorInfo : processors) {

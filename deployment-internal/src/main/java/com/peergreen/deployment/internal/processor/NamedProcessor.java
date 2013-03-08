@@ -17,11 +17,6 @@
 package com.peergreen.deployment.internal.processor;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 18/01/13
- * Time: 12:18
- * To change this template use File | Settings | File Templates.
  */
 public interface NamedProcessor {
     String getName();

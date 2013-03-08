@@ -1,5 +1,5 @@
 /**
- * Copyright 2012 Peergreen S.A.S.
+ * Copyright 2012-2013 Peergreen S.A.S.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment.report;
+package com.peergreen.deployment.internal.phase;
 
-import java.util.Collection;
+public enum InternalPhases  {
 
-public interface DeploymentStatusReport {
-
-    Collection<ArtifactStatusReport> getArtifactStatusReports();
-    boolean hasFailed();
+    /**
+     * Post configuration phase at undeploy. Use to cleanup data for example
+     */
+    UNDEPLOY_POSTCONFIG
 }

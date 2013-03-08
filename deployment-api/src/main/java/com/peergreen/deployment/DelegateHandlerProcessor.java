@@ -117,5 +117,9 @@ public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
         return expectedHandleType;
     }
 
+    public Processor<T> getWrappedProcessor() {
+        return wrappedProcessor;
+    }
+
 
 }

@@ -26,7 +26,6 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.StringReader;
@@ -245,7 +244,7 @@ public class StAXArtifactModelPersistenceTestCase {
         assertTrue(model.as(ArtifactModelPersistenceView.class).isPersistent());
         assertTrue(model.as(ArtifactModelDeploymentView.class).isDeploymentRoot());
 
-        assertNull(manager.getArtifactModel(new URI("test:mock2")));
+        assertNotNull(manager.getArtifactModel(new URI("test:mock2")));
         assertEquals(manager.getDeployedRootURIs().size(), 1);
 
         Wire wire = model.getWires(WireScope.FROM).iterator().next();

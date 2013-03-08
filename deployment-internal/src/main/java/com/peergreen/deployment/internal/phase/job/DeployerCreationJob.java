@@ -24,16 +24,16 @@ import com.peergreen.deployment.InternalFacetLifeCyclePhaseProvider;
 import com.peergreen.deployment.internal.phase.builder.DeploymentBuilder;
 import com.peergreen.deployment.internal.phase.lifecycle.FacetLifeCycleManager;
 import com.peergreen.tasks.context.TaskContext;
+import com.peergreen.tasks.model.Container;
 import com.peergreen.tasks.model.Job;
-import com.peergreen.tasks.model.Pipeline;
 import com.peergreen.tasks.model.group.Group;
 
 public class DeployerCreationJob implements Job {
 
-    private final Pipeline deployers;
+    private final Container deployersContainerTasks;
 
-    public DeployerCreationJob(Pipeline deployers) {
-        this.deployers = deployers;
+    public DeployerCreationJob(Container deployersContainerTasks) {
+        this.deployersContainerTasks = deployersContainerTasks;
     }
 
     @Override
@@ -52,12 +52,19 @@ public class DeployerCreationJob implements Job {
             throw new IllegalStateException("Facet Life Cycle Manager should have been injected");
         }
 
+        Iterable<InternalFacetLifeCyclePhaseProvider> iterableLifeCyclePhases = facetLifeCycleManager.getProviders();
+
+        // No provider
+        if (iterableLifeCyclePhases == null) {
+            return;
+        }
+
 
         //FIXME:  Should use capabilities/requirement in order to make the matching
         // Order should be done through requirements
-        for (InternalFacetLifeCyclePhaseProvider provider : facetLifeCycleManager.getProviders()) {
+        for (InternalFacetLifeCyclePhaseProvider provider : iterableLifeCyclePhases) {
             Class<?> type = provider.getFacetType();
-            List<String> phases = provider.getLifeCyclePhases(context.get(DeploymentMode.class));
+            Iterable<String> phases = provider.getLifeCyclePhases(context.get(DeploymentMode.class));
 
             //FIXME : should be ordered !!! like Bundles after deployment plan, etc.
 
@@ -73,7 +80,7 @@ public class DeployerCreationJob implements Job {
 
             // We have something to deploy ?
             if (facetGroup.size() > 0) {
-                deployers.add(deploymentBuilder.getDeploymentPhases(type.getName(), phases , facetGroup, false));
+                deployersContainerTasks.add(deploymentBuilder.getDeploymentPhases(type.getName(), phases , facetGroup, false));
             }
 
         }

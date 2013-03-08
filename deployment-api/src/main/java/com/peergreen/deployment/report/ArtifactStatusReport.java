@@ -15,6 +15,21 @@
  */
 package com.peergreen.deployment.report;
 
+import java.net.URI;
+import java.util.Collection;
+
+import com.peergreen.deployment.ProcessorInfo;
+import com.peergreen.deployment.facet.FacetInfo;
+
 public interface ArtifactStatusReport {
 
+
+    Collection<Exception> getExceptions();
+    Collection<ProcessorInfo> getProcessors();
+    String name();
+    URI uri();
+
+    Collection<FacetInfo> getFacets();
+
+    String toString(String indent);
 }

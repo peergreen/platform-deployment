@@ -187,8 +187,15 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
         Iterator<Entry<URI, InternalArtifactModel>> entriesIterator = artifactsByURI.entrySet().iterator();
         while(entriesIterator.hasNext()) {
             Entry<URI, InternalArtifactModel> entry = entriesIterator.next();
+            InternalArtifactModel artifactModel = entry.getValue();
+
+            // only deployment root URIs
+            if (!artifactModel.as(ArtifactModelDeploymentView.class).isDeploymentRoot()) {
+                continue;
+            }
+
             // Exclude artifacts being un-deployed
-            if (entry.getValue().as(ArtifactModelDeploymentView.class).isUndeployed()) {
+            if (artifactModel.as(ArtifactModelDeploymentView.class).isUndeployed()) {
                 continue;
             }
             uris.add(entry.getKey());
