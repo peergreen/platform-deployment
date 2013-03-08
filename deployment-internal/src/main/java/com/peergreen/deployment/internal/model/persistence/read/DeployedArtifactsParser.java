@@ -28,11 +28,7 @@ import javax.xml.stream.XMLStreamReader;
 import com.peergreen.deployment.internal.model.DefaultArtifactModel;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 16/01/13
- * Time: 10:48
- * To change this template use File | Settings | File Templates.
+ * @author Guillaume Sauthier
  */
 public class DeployedArtifactsParser implements Parser {
 

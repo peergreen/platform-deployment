@@ -39,11 +39,7 @@ import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
 import com.peergreen.tasks.context.ExecutionContext;
 
 /**
- * Created with IntelliJ IDEA.
- * User: guillaume
- * Date: 18/01/13
- * Time: 13:25
- * To change this template use File | Settings | File Templates.
+ * @author Guillaume Sauthier
  */
 public class BasicDeploymentContextTestCase {
 
