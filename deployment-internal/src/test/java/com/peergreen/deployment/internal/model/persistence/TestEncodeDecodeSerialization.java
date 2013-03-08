@@ -79,10 +79,13 @@ public class TestEncodeDecodeSerialization {
         check(null);
     }
 
+    @Test
+    public void testEnum() {
+        check(MyEnum.VALID);
+    }
+
     <T> void check(T object) {
         Assert.assertEquals(decodeValue(encodeValue(object)), object);
     }
-
-
 
 }

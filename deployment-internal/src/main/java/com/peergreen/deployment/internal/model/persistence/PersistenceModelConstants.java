@@ -87,6 +87,12 @@ public class PersistenceModelConstants {
     public static final String SHORT_VALUETYPE = VALUETYPE_PREFIX.concat(Short.class.getSimpleName()).concat(VALUETYPE_SUFFIX);
 
     /**
+     * Value type for Enum.
+     */
+    public static final String ENUM_VALUETYPE = VALUETYPE_PREFIX.concat(Enum.class.getSimpleName()).concat(VALUETYPE_SUFFIX);
+
+
+    /**
      * Value type for Null.
      */
     public static final String NULL_VALUETYPE = VALUETYPE_PREFIX.concat("NULL").concat(VALUETYPE_SUFFIX);
@@ -124,11 +130,18 @@ public class PersistenceModelConstants {
         if (Short.class.equals(objectClass)) {
             return SHORT_VALUETYPE.concat(String.valueOf(object));
         }
+
+        // Enum
+        if (objectClass.isEnum()) {
+            return ENUM_VALUETYPE.concat(VALUETYPE_PREFIX).concat(objectClass.getName()).concat(VALUETYPE_SUFFIX).concat(object.toString());
+        }
+
+
         // Do not encode
         if (String.class.equals(objectClass)) {
             return String.valueOf(object);
         }
-        throw new IllegalStateException(String.format("Unssuported serialization format for value %s", object));
+        throw new IllegalStateException(String.format("Unsupported serialization format for value %s", object));
     }
 
     public static <T> T decodeValue(String encodedValue) {
@@ -159,6 +172,21 @@ public class PersistenceModelConstants {
 
         if (NULL_VALUETYPE.equals(encodedValue)) {
             return null;
+        }
+
+        if (encodedValue.startsWith(ENUM_VALUETYPE)) {
+            // get class of the enum
+            String enumAndValue = encodedValue.substring(ENUM_VALUETYPE.length());
+            int iStart = enumAndValue.indexOf(VALUETYPE_PREFIX);
+            int iEnd = enumAndValue.indexOf(VALUETYPE_SUFFIX);
+
+            String className = enumAndValue.substring(iStart + 1, iEnd);
+            String valueName = enumAndValue.substring(iEnd + 1);
+            try {
+                return (T) Enum.valueOf((Class<? extends Enum>)Class.forName(className), valueName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
         }
 
 
