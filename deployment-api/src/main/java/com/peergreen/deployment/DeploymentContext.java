@@ -37,7 +37,7 @@ public interface DeploymentContext {
         /**
          * New artifacts to deploy
          */
-        void addArtifact(Artifact artifact, boolean isPersistent);
+        void addArtifact(Artifact artifact);
 
         ArtifactBuilder getArtifactBuilder();
 

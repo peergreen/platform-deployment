@@ -33,6 +33,8 @@ import com.peergreen.deployment.internal.facet.FacetCapabilityImpl;
 import com.peergreen.deployment.internal.model.DefaultFacetBuilderInfo;
 import com.peergreen.deployment.internal.processor.current.CurrentProcessor;
 import com.peergreen.deployment.internal.resource.ProviderResource;
+import com.peergreen.deployment.model.ArtifactModel;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 import com.peergreen.tasks.context.ExecutionContext;
 
 public class BasicDeploymentContext extends ProviderResource implements DeploymentContext  {
@@ -60,9 +62,13 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
 
 
     @Override
-    public void addArtifact(Artifact artifact, boolean isPersistent) {
+    public void addArtifact(Artifact artifact) {
         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
-        artifactProcessRequest.setPersistent(isPersistent);
+
+        // Get current artifact model
+        ArtifactModel artifactModel = this.get(ArtifactModel.class);
+        ArtifactModelPersistenceView artifactModelPersistenceView = artifactModel.as(ArtifactModelPersistenceView.class);
+        artifactProcessRequest.setPersistent(artifactModelPersistenceView.isPersistent());
         newArtifacts.add(artifactProcessRequest);
     }
 

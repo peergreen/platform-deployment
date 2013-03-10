@@ -43,7 +43,7 @@ public class TestAddingArtifactProcessor implements Processor<DeploymentContext>
         if (artifact.name().endsWith(".xml")) {
             // Add 15 dependencies
             for (int i = 0; i < 15; i++) {
-                processorContext.addArtifact(build(prefix.concat(String.valueOf(i))), false);
+                processorContext.addArtifact(build(prefix.concat(String.valueOf(i))));
             }
             processorContext.addFacet(XmlPlanFacet.class, new XmlPlanFacet());
 

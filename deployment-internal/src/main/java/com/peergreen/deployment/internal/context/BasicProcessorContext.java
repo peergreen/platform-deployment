@@ -57,8 +57,8 @@ public class BasicProcessorContext implements ProcessorContext {
     }
 
     @Override
-    public void addArtifact(Artifact artifact, boolean isPersistent) {
-        this.deploymentContext.addArtifact(artifact, isPersistent);
+    public void addArtifact(Artifact artifact) {
+        this.deploymentContext.addArtifact(artifact);
 
     }
 

@@ -33,7 +33,7 @@ public interface ProcessorContext {
     /**
      * New artifacts to deploy
      */
-    void addArtifact(Artifact artifact, boolean isPersistent);
+    void addArtifact(Artifact artifact);
 
 
     ArtifactModel getArtifactModel();
