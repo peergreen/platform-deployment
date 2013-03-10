@@ -21,6 +21,7 @@ import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactBuilder;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.ProcessorContext;
+import com.peergreen.deployment.model.ArtifactModel;
 
 public class BasicProcessorContext implements ProcessorContext {
 
@@ -67,5 +68,9 @@ public class BasicProcessorContext implements ProcessorContext {
         return deploymentContext.get(ArtifactBuilder.class).build(name, uri);
     }
 
+    @Override
+    public ArtifactModel getArtifactModel() {;
+        return deploymentContext.get(ArtifactModel.class);
+    }
 
 }

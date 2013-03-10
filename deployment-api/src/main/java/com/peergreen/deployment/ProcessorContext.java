@@ -17,11 +17,12 @@ package com.peergreen.deployment;
 
 import java.net.URI;
 
+import com.peergreen.deployment.model.ArtifactModel;
+
 
 public interface ProcessorContext {
 
     Artifact build(String name, URI uri);
-
 
     <Facet> Facet removeFacet(Class<Facet> facetClass);
     <Facet> void addFacet(Class<Facet> facetClass, Facet facet);
@@ -34,4 +35,6 @@ public interface ProcessorContext {
      */
     void addArtifact(Artifact artifact, boolean isPersistent);
 
+
+    ArtifactModel getArtifactModel();
 }
