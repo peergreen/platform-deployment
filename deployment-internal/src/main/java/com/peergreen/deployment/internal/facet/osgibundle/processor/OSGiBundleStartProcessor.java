@@ -22,6 +22,8 @@ import org.osgi.framework.Constants;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.model.ArtifactModel;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 
 /**
  * Start the OSGi bundles on the gateway.
@@ -33,10 +35,25 @@ public class OSGiBundleStartProcessor implements Processor<Bundle> {
     @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
 
+
+        // Persistent mode ?
+        ArtifactModel artifactModel = processorContext.getArtifactModel();
+        ArtifactModelPersistenceView artifactModelPersistenceView = artifactModel.as(ArtifactModelPersistenceView.class);
+
+        // For bundles that are not persistent, set it as transient
+        boolean isTransient = true;
+        if (artifactModelPersistenceView.isPersistent()) {
+            isTransient = false;
+        }
+
         // Start the bundle if it is not a fragment
         if (!isFragment(bundle)) {
             try {
-                bundle.start();
+                if (isTransient) {
+                    bundle.start(Bundle.START_TRANSIENT);
+                } else {
+                    bundle.start();
+                }
             } catch (BundleException e) {
                 throw new ProcessorException("Unable to start the bundle", e);
             }
