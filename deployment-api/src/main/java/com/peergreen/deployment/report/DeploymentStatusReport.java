@@ -21,4 +21,6 @@ public interface DeploymentStatusReport {
 
     Collection<ArtifactStatusReport> getArtifactStatusReports();
     boolean hasFailed();
+
+    String shortReport();
 }

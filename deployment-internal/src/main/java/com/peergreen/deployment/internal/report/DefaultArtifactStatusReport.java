@@ -43,13 +43,18 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
     private final Collection<FacetInfo> facetInfos;
     private final List<Exception> exceptions;
     private final Collection<ProcessorInfo> processors;
-    private final Collection<DefaultArtifactStatusReport> artifactsReport;
+    private final Collection<ArtifactStatusReport> artifactsReport;
     private final long totalTime;
 
     @Override
     public List<Exception> getExceptions() {
         return exceptions;
     }
+
+    public Collection<ArtifactStatusReport> children() {
+        return artifactsReport;
+    }
+
 
     @Override
     public Collection<ProcessorInfo> getProcessors() {
@@ -75,7 +80,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
         this.name = facetArtifact.name();
         this.uri = facetArtifact.uri();
         this.facetInfos = facetArtifact.getFacetInfos();
-        this.artifactsReport = new HashSet<DefaultArtifactStatusReport>();
+        this.artifactsReport = new HashSet<>();
         this.processors = facetArtifact.getProcessors();
         this.totalTime = facetArtifact.getTotalTime();
         this.exceptions = facetArtifact.getExceptions();
@@ -148,7 +153,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
 
         }
         if (artifactsReport.size() > 0) {
-            for (DefaultArtifactStatusReport artifactStatusReport : artifactsReport) {
+            for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
                 sb.append(artifactStatusReport.toString(indent + "  "));
             }
         }

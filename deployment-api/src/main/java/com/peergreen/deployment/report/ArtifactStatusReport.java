@@ -29,6 +29,8 @@ public interface ArtifactStatusReport {
     String name();
     URI uri();
 
+    Collection<ArtifactStatusReport> children();
+
     Collection<FacetInfo> getFacets();
 
     String toString(String indent);

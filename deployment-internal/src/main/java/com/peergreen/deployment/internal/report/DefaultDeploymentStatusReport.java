@@ -15,9 +15,11 @@
  */
 package com.peergreen.deployment.internal.report;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.DeploymentStatusReport;
@@ -67,10 +69,136 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     }
 
 
+    @Override
     public Collection<ArtifactStatusReport> getArtifactStatusReports() {
         return Collections.unmodifiableCollection(artifactsReport);
     }
 
+
+    protected String getReport(ArtifactStatusReport artifactStatusReport) {
+
+        StringBuilder sb = new StringBuilder();
+
+        // failure or not ?
+
+        // failures
+        List<String> exceptions = new ArrayList<>();
+        if (childException(artifactStatusReport, exceptions)) {
+
+            Stats stats = new Stats();
+            updateStats(artifactStatusReport, stats);
+
+            sb.append(exceptions.size()).append(" errors for ").append(artifactStatusReport.uri()).append(":");
+            int i = 1;
+            for (String exception : exceptions) {
+                sb.append("\n  [").append(i++).append("] :").append(exception);
+            }
+            sb.append("\nTotal: ").append(stats.total).append(" artifacts with ");
+            sb.append(stats.success).append(" OK");
+            sb.append(", ").append(stats.fail).append(" KO");
+
+        } else {
+            // No exception gets only a resume
+            Stats stats = new Stats();
+
+            // There are children
+            if (artifactStatusReport.children().size() > 0) {
+                updateStats(artifactStatusReport, stats);
+                sb.append(artifactStatusReport.uri());
+                sb.append(" : ");
+                sb.append(String.format("%d children, %d OK, %d FAIL.", stats.total, stats.success, stats.fail));
+            } else {
+                sb.append(artifactStatusReport.uri().toString()).append(":\t").append("OK");
+            }
+
+        }
+
+
+
+        return sb.toString();
+
+    }
+
+
+    protected boolean childException(ArtifactStatusReport artifactStatusReport, Collection<String> exceptions) {
+        boolean hasExceptions = false;
+        // we've exceptions
+        if (artifactStatusReport.getExceptions() != null && artifactStatusReport.getExceptions().size() > 0) {
+            hasExceptions = true;
+            exceptions.add(artifactStatusReport.uri().toString().concat(" : ").concat(formatException(artifactStatusReport.getExceptions())));
+        }
+
+        if (artifactStatusReport.children() != null && artifactStatusReport.children().size() > 0) {
+            for (ArtifactStatusReport child : artifactStatusReport.children()) {
+                hasExceptions =  childException(child, exceptions) || hasExceptions;
+            }
+        }
+
+        return hasExceptions;
+    }
+
+    protected String formatException(Collection<Exception> exceptions) {
+        StringBuilder sb = new StringBuilder();
+        for (Exception exception : exceptions) {
+            sb.append(exception.getMessage());
+            Throwable cause = exception.getCause();
+            String indent = "    ";
+            while(cause != null) {
+                if (cause.getMessage() != null && cause.getMessage().length() > 0) {
+                    sb.append("\n").append(indent).append("cause: ").append(cause.getMessage());
+                }
+                cause = cause.getCause();
+                indent = indent.concat("  ");
+            }
+        }
+
+
+        return sb.toString();
+    }
+
+
+
+    @Override
+    public String shortReport() {
+        StringBuilder sb = new StringBuilder("Report: \n");
+
+        // Only one request ?
+        if (artifactsReport.size() == 0) {
+            sb.append(" No request.");
+            return sb.toString();
+        }
+
+
+        // Request
+        for (ArtifactStatusReport artifactStatusReport : artifactsReport) {
+            sb.append(getReport(artifactStatusReport));
+        }
+
+        sb.append("\nProcess done in '");
+        sb.append(elapsedTime);
+        sb.append("' ms.");
+
+        return sb.toString();
+    }
+
+    protected void updateStats(ArtifactStatusReport artifactStatusReport, Stats stats) {
+        Collection<ArtifactStatusReport> children = artifactStatusReport.children();
+
+        stats.total++;
+        if (artifactStatusReport.getExceptions() != null && artifactStatusReport.getExceptions().size() > 0) {
+            stats.fail++;
+        } else {
+            stats.success++;
+        }
+
+
+
+        if (children != null) {
+            for (ArtifactStatusReport child : children) {
+                updateStats(child, stats);
+            }
+        }
+    }
 
 
     @Override
@@ -93,4 +221,13 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
         sb.append("\n");
         return sb.toString();
     }
+
+
+    static class Stats {
+        public int total;
+        public int fail;
+        public int success;
+    }
+
+
 }
