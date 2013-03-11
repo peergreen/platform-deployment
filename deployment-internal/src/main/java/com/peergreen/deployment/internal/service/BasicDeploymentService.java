@@ -49,6 +49,7 @@ import com.peergreen.deployment.internal.phase.builder.TaskExecutionHolder;
 import com.peergreen.deployment.internal.phase.builder.TaskModelParameters;
 import com.peergreen.deployment.internal.report.DefaultArtifactStatusReport;
 import com.peergreen.deployment.internal.report.DefaultDeploymentStatusReport;
+import com.peergreen.deployment.internal.thread.GroupingThreadFactory;
 import com.peergreen.deployment.internal.thread.PeergreenThreadFactory;
 import com.peergreen.deployment.model.WireScope;
 import com.peergreen.deployment.model.flag.Created;
@@ -95,21 +96,19 @@ public class BasicDeploymentService implements DeploymentService {
     /**
      * Thread factory used to prefix threads.
      */
-    private final ThreadFactory threadFactory;
-
+    private ThreadFactory threadFactory;
 
     /**
-     * Default constructor.
+     * Group that will contain the Threads created for deployment purpose.
      */
-    public BasicDeploymentService() {
-        this.threadFactory = new PeergreenThreadFactory(Executors.defaultThreadFactory(), "Deployment Executor");
-    }
+    private ThreadGroup threadGroup;
 
     /**
      * Start the service.
      */
     @Validate
     public void start() {
+        this.threadFactory = new PeergreenThreadFactory(new GroupingThreadFactory(threadGroup), "Deployment Executor");
         this.executorService = Executors.newFixedThreadPool(10, threadFactory);
         this.deploymentBuilder = new DeploymentBuilder(artifactModelManager, injectionContext);
     }
@@ -128,6 +127,7 @@ public class BasicDeploymentService implements DeploymentService {
      * Process of the deployment of the given list of requests.
      * It accepts a collection, so the order it accepts is based on the underlying collection.
      * For an ordered deployment, a list should be given.
+     *
      * @param artifactProcessRequests the list of the requests.
      * @return a report for the given request
      */
@@ -187,7 +187,7 @@ public class BasicDeploymentService implements DeploymentService {
 
         long elapsedTime = tEnd - tStart;
         deploymentStatusReport.setElapsedTime(elapsedTime);
-        LOGGER.info("Artifacts ''{0}'' in ''{1}'' ms." , artifactProcessRequests, elapsedTime);
+        LOGGER.info("Artifacts ''{0}'' in ''{1}'' ms.", artifactProcessRequests, elapsedTime);
 
         return deploymentStatusReport;
     }
@@ -197,6 +197,7 @@ public class BasicDeploymentService implements DeploymentService {
      * Process of the deployment of the given list of requests for a given deployment mode.
      * It accepts a collection, so the order it accepts is based on the underlying collection.
      * For an ordered deployment, a list should be given.
+     *
      * @param artifactProcessRequests the list of the requests.
      * @return a report for the given request
      */
@@ -267,11 +268,12 @@ public class BasicDeploymentService implements DeploymentService {
         }
     }
 
-   /**
-    * Add the artifacts for the given artifact status report.
-    * @param artifactStatusReport
-    * @param artifactModel
-    */
+    /**
+     * Add the artifacts for the given artifact status report.
+     *
+     * @param artifactStatusReport
+     * @param artifactModel
+     */
     protected void addChildArtifactStatusReport(DefaultArtifactStatusReport artifactStatusReport, InternalArtifactModel artifactModel) {
         for (InternalWire fromWire : artifactModel.getInternalWires(WireScope.FROM, Created.class.getName())) {
             IFacetArtifact facetArtifact = fromWire.getInternalTo().getFacetArtifact();
@@ -324,5 +326,8 @@ public class BasicDeploymentService implements DeploymentService {
         this.artifactModelManager = null;
     }
 
-
+    @Bind(filter = "(group.name=peergreen)")
+    public void bindThreadGroup(ThreadGroup threadGroup) {
+        this.threadGroup = threadGroup;
+    }
 }

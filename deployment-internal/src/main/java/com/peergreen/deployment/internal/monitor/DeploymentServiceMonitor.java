@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package com.peergreen.deployment.internal.monitor;
 
 import java.net.URI;
@@ -47,10 +48,11 @@ import com.peergreen.deployment.monitor.URITrackerManager;
  * if an artifact is deleted, it will send the UNDEPLOY order.<br />
  * This class checks for bind/unbind on requires attributes as it's using Thread
  * so fields may be null while checking them in run() method.
+ *
  * @author Florent Benoit
  */
 @Component
-@Instantiate(name="Deployment Service artifact monitor tracker")
+@Instantiate(name = "Deployment Service artifact monitor tracker")
 public class DeploymentServiceMonitor implements Runnable {
 
     /**
@@ -82,6 +84,11 @@ public class DeploymentServiceMonitor implements Runnable {
     private final AtomicBoolean stopThread = new AtomicBoolean(false);
 
     /**
+     * Group that will contain the Thread created to run this instance.
+     */
+    private ThreadGroup threadGroup;
+
+    /**
      * Once all requirements are satisfied, thread is started to track the changes.
      */
     @Validate
@@ -91,7 +98,7 @@ public class DeploymentServiceMonitor implements Runnable {
         this.stopThread.set(false);
 
         // Start a new thread
-        Thread thread = new Thread(this);
+        Thread thread = new Thread(threadGroup, this);
         thread.setName("Peergreen Deployment artifact monitor");
         thread.setDaemon(true);
         thread.start();
@@ -113,7 +120,7 @@ public class DeploymentServiceMonitor implements Runnable {
     @Override
     public void run() {
 
-        for (;;) {
+        for (; ; ) {
             if (stopThread.get()) {
                 // Stop the thread
                 return;
@@ -207,6 +214,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
     /**
      * Checks if the artifact at the given artifact model has been updated since the last check.
+     *
      * @param artifactModel the model representing the artifact
      * @return true if the artifact has been updated, else return false
      */
@@ -227,6 +235,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
     /**
      * Check if the file length has changed.
+     *
      * @param file The given file
      * @return True if the file length has changed
      */
@@ -255,6 +264,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
     /**
      * Check if the last modified attribute has changed.
+     *
      * @param artifactModel The given artifactModel
      * @return True if the last modified has changed
      */
@@ -279,6 +289,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
     /**
      * Gets the "file length" of the given URI.
+     *
      * @param uri the URI on which we need to connect to get the length
      * @return the length
      * @throws URITrackerException if it's unable to get the length
@@ -292,6 +303,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
     /**
      * Gets the "last modified" of the given URI.
+     *
      * @param uri the URI on which we need to connect to get the last modified
      * @return the lastModified timestamp
      * @throws URITrackerException if it's unable to get the length
@@ -306,6 +318,7 @@ public class DeploymentServiceMonitor implements Runnable {
     /**
      * Save the intermediate file length of the given collection of artifacts.
      * This is used to detect if artifacts are currently bein updated.
+     *
      * @param trackedArtifactModels the collection to check
      */
     protected void saveIntermediateFileLengths(Collection<InternalArtifactModel> trackedArtifactModels) {
@@ -359,6 +372,12 @@ public class DeploymentServiceMonitor implements Runnable {
     @Unbind
     public void unbindDeploymentService(DeploymentService deploymentService) {
         this.deploymentService = null;
+    }
+
+
+    @Bind(filter = "(group.name=peergreen)")
+    public void bindThreadGroup(ThreadGroup threadGroup) {
+        this.threadGroup = threadGroup;
     }
 
 }

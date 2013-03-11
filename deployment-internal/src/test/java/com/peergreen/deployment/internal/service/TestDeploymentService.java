@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package com.peergreen.deployment.internal.service;
 
 import static org.mockito.Matchers.any;
@@ -86,6 +87,7 @@ import com.peergreen.deployment.report.DeploymentStatusReport;
 
 /**
  * Tests the deployment service
+ *
  * @author Florent Benoit
  */
 public class TestDeploymentService {
@@ -141,23 +143,24 @@ public class TestDeploymentService {
         deploymentService.bindInjectionContext(injectionContext);
         deploymentService.bindInternalArtifactModelManager(artifactModelManager);
         addProcessor(new TestHandlerProcessor<DeploymentContext>(new UndeployPostConfigProcessor(), DeploymentContext.class), InternalPhases.UNDEPLOY_POSTCONFIG.toString());
+        deploymentService.bindThreadGroup(new ThreadGroup("Testing"));
         deploymentService.start();
 
         this.artifactModelManagerMap = new HashMap<URI, InternalArtifactModel>();
-        doAnswer(new Answer<Void>(){
+        doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args= invocation.getArguments();
+                Object[] args = invocation.getArguments();
                 URI uri = (URI) args[0];
                 InternalArtifactModel artifactModel = (InternalArtifactModel) args[1];
                 artifactModelManagerMap.put(uri, artifactModel);
                 return null;
             }
         }).when(artifactModelManager).addArtifactModel(any(URI.class), any(InternalArtifactModel.class));
-        doAnswer(new Answer<InternalArtifactModel>(){
+        doAnswer(new Answer<InternalArtifactModel>() {
             @Override
             public InternalArtifactModel answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args= invocation.getArguments();
+                Object[] args = invocation.getArguments();
                 URI uri = (URI) args[0];
                 return artifactModelManagerMap.get(uri);
             }
@@ -194,10 +197,11 @@ public class TestDeploymentService {
 
     /**
      * Test
+     *
      * @throws URISyntaxException
      */
     @Test
-    public void testProcessNullRequests() throws URISyntaxException  {
+    public void testProcessNullRequests() throws URISyntaxException {
         DeploymentStatusReport deploymentStatusReport = deploymentService.process(null);
         Assert.assertNotNull(deploymentStatusReport);
 
@@ -232,10 +236,8 @@ public class TestDeploymentService {
     }
 
 
-
-
     @Test
-    public void testSingleDeploy() throws URISyntaxException  {
+    public void testSingleDeploy() throws URISyntaxException {
         InternalArtifactModel artifactModel = createArtifactModel("testSingleDeploy.jar", "test://testSingleDeploy.jar");
         IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(facetArtifact);
@@ -284,8 +286,8 @@ public class TestDeploymentService {
 
     }
 
-    @Test(dependsOnMethods="testSingleDeploy")
-    public void testSingleUnDeploy() throws URISyntaxException  {
+    @Test(dependsOnMethods = "testSingleDeploy")
+    public void testSingleUnDeploy() throws URISyntaxException {
         URI uri = new URI("test://testSingleDeploy.jar");
         Artifact artifact = new ImmutableArtifact("testSingleDeploy.jar", uri);
         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
@@ -323,9 +325,8 @@ public class TestDeploymentService {
     }
 
 
-
     @Test
-    public void testMultiDeploy() throws URISyntaxException  {
+    public void testMultiDeploy() throws URISyntaxException {
         // emulate a deployment plan
         InternalArtifactModel artifactModelXml = createArtifactModel("testMultiDeploy.xml", "test://testMultiDeploy.xml");
         IFacetArtifact facetArtifactXml = artifactModelXml.getFacetArtifact();
@@ -375,68 +376,65 @@ public class TestDeploymentService {
     }
 
 
+    @Test(dependsOnMethods = "testMultiUnDeployGetReport")
+    public void testMultiUnDeploy() throws URISyntaxException {
+        URI uri = new URI("test://testMultiDeploy.xml");
+        Artifact artifact = new ImmutableArtifact("testMultiDeploy.xml", uri);
+        ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
+        artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
 
-    @Test(dependsOnMethods="testMultiUnDeployGetReport")
-    public void testMultiUnDeploy() throws URISyntaxException  {
-            URI uri = new URI("test://testMultiDeploy.xml");
-            Artifact artifact = new ImmutableArtifact("testMultiDeploy.xml", uri);
-            ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
-            artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
+        DeploymentStatusReport deploymentStatusReport = deploymentService.process(Collections.singleton(artifactProcessRequest));
+        Assert.assertNotNull(deploymentStatusReport);
 
-            DeploymentStatusReport deploymentStatusReport = deploymentService.process(Collections.singleton(artifactProcessRequest));
-            Assert.assertNotNull(deploymentStatusReport);
+        Collection<ArtifactStatusReport> artifactStatusReports = deploymentStatusReport.getArtifactStatusReports();
+        Assert.assertNotNull(artifactStatusReports);
 
-            Collection<ArtifactStatusReport> artifactStatusReports = deploymentStatusReport.getArtifactStatusReports();
-            Assert.assertNotNull(artifactStatusReports);
+        // only one node
+        Assert.assertEquals(artifactStatusReports.size(), 1);
+        ArtifactStatusReport artifactStatusReport = artifactStatusReports.iterator().next();
 
-            // only one node
-            Assert.assertEquals(artifactStatusReports.size(), 1);
-            ArtifactStatusReport artifactStatusReport = artifactStatusReports.iterator().next();
+        // No more facets in the model
+        InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(uri);
+        Assert.assertNotNull(artifactModel);
+        IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
 
-            // No more facets in the model
-            InternalArtifactModel artifactModel = artifactModelManager.getArtifactModel(uri);
-            Assert.assertNotNull(artifactModel);
-            IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
+        // Facets should have been removed
+        Assert.assertEquals(facetArtifact.getFacets().size(), 0);
+
+        // Processors info and facet info
+        Collection<ProcessorInfo> processorInfos = artifactStatusReport.getProcessors();
+        ProcessorInfo processorInfo = processorInfos.iterator().next();
+        Assert.assertEquals(processorInfo.getName(), UndeployPostConfigProcessor.class.getName());
+        Assert.assertEquals(processorInfo.getPhase(), InternalPhases.UNDEPLOY_POSTCONFIG.toString());
+
+
+        // Wires
+        Iterable<? extends InternalWire> wires = artifactModel.getInternalWires(WireScope.FROM, Created.class.getName());
+        for (InternalWire wire : wires) {
+            InternalArtifactModel toArtifactModel = wire.getInternalTo();
+            Assert.assertNotNull(toArtifactModel);
+            IFacetArtifact addedFacetArtifact = toArtifactModel.getFacetArtifact();
 
             // Facets should have been removed
-            Assert.assertEquals(facetArtifact.getFacets().size(), 0);
-
-            // Processors info and facet info
-            Collection<ProcessorInfo> processorInfos = artifactStatusReport.getProcessors();
-            ProcessorInfo processorInfo = processorInfos.iterator().next();
-            Assert.assertEquals(processorInfo.getName(), UndeployPostConfigProcessor.class.getName());
-            Assert.assertEquals(processorInfo.getPhase(), InternalPhases.UNDEPLOY_POSTCONFIG.toString());
-
-
-            // Wires
-            Iterable<? extends InternalWire> wires = artifactModel.getInternalWires(WireScope.FROM, Created.class.getName());
-            for (InternalWire wire : wires) {
-                InternalArtifactModel toArtifactModel = wire.getInternalTo();
-                Assert.assertNotNull(toArtifactModel);
-                IFacetArtifact addedFacetArtifact = toArtifactModel.getFacetArtifact();
-
-                // Facets should have been removed
-                Assert.assertEquals(addedFacetArtifact.getFacets().size(), 0);
-            }
+            Assert.assertEquals(addedFacetArtifact.getFacets().size(), 0);
+        }
     }
 
 
-
-    @Test(expectedExceptions=ArtifactStatusReportException.class)
-    public void testInvalidURIGetReport() throws ArtifactStatusReportException  {
-            deploymentService.getReport("::::@@@::@@@://abc");
+    @Test(expectedExceptions = ArtifactStatusReportException.class)
+    public void testInvalidURIGetReport() throws ArtifactStatusReportException {
+        deploymentService.getReport("::::@@@::@@@://abc");
     }
 
-    @Test(expectedExceptions=ArtifactStatusReportException.class)
-    public void testMissingURIGetReport() throws ArtifactStatusReportException, URISyntaxException  {
+    @Test(expectedExceptions = ArtifactStatusReportException.class)
+    public void testMissingURIGetReport() throws ArtifactStatusReportException, URISyntaxException {
         URI uri = new URI("test://unknown.xml");
         deploymentService.getReport(uri.toString());
     }
 
 
-
-    @Test(expectedExceptions=IllegalArgumentException.class)
-    public void testUndeployNotRootElement() throws URISyntaxException  {
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testUndeployNotRootElement() throws URISyntaxException {
         InternalArtifactModel artifactModel = createArtifactModel("testUndeployNotRootElement.xml", "test://testUndeployNotRootElement.xml");
         IFacetArtifact facetArtifact = artifactModel.getFacetArtifact();
         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(facetArtifact);
@@ -459,9 +457,9 @@ public class TestDeploymentService {
         Assert.assertNotNull(deploymentSubElementStatusReport);
     }
 
-    @Test(expectedExceptions=IllegalArgumentException.class)
-    public void testUndeployNotExistingElement() throws URISyntaxException  {
-        Artifact artifact = new ImmutableArtifact("testUndeployNotExistingElement",  new URI("test://testUndeployNotExistingElement.xml"));
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testUndeployNotExistingElement() throws URISyntaxException {
+        Artifact artifact = new ImmutableArtifact("testUndeployNotExistingElement", new URI("test://testUndeployNotExistingElement.xml"));
         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(artifact);
         artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
         DeploymentStatusReport deploymentSubElementStatusReport = deploymentService.process(Collections.singleton(artifactProcessRequest));
@@ -471,9 +469,8 @@ public class TestDeploymentService {
     }
 
 
-
-    @Test(dependsOnMethods="testMultiDeploy")
-    public void testMultiUnDeployGetReport() throws URISyntaxException, ArtifactStatusReportException  {
+    @Test(dependsOnMethods = "testMultiDeploy")
+    public void testMultiUnDeployGetReport() throws URISyntaxException, ArtifactStatusReportException {
         URI uri = new URI("test://testMultiDeploy.xml");
         ArtifactStatusReport artifactStatusReport = deploymentService.getReport(uri.toString());
         assertNotNull(artifactStatusReport);
@@ -486,7 +483,7 @@ public class TestDeploymentService {
 
     // Test many deploy / undeploy
     @Test
-    public void testMultiDeployUndeploy() throws URISyntaxException  {
+    public void testMultiDeployUndeploy() throws URISyntaxException {
         // emulate a deployment plan
         InternalArtifactModel artifactModelXml = createArtifactModel("testMultiDeployUndeploy.xml", "test://testMultiDeployUndeploy.xml");
         IFacetArtifact facetArtifactXml = artifactModelXml.getFacetArtifact();
