@@ -36,7 +36,17 @@ public class ArtifactFacetAdapter implements FacetCapabilityAdapter<Artifact> {
             int dot = name.lastIndexOf('.');
             if (dot != -1) {
                 pathExtension = name.substring(dot + 1);
+
+                // Directory URI
+                if (pathExtension.endsWith("/")) {
+                    pathExtension = pathExtension.substring(0, pathExtension.length() - 1);
+                }
+
+
             }
+
+
+
 
             // extension
             artifactCapability.setPathExtension(pathExtension);

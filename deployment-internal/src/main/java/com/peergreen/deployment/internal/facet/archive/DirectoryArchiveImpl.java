@@ -52,12 +52,12 @@ public class DirectoryArchiveImpl implements Archive {
     /**
      * Internal resource used as archive.
      */
-    private final File directory = null;
+    private final File directory;
 
     /**
      * URI of this directory.
      */
-    private URI uri = null;
+    private final URI uri;
 
     /**
      * Metadata analyzed ?
@@ -78,6 +78,7 @@ public class DirectoryArchiveImpl implements Archive {
             throw new IllegalArgumentException("Directory cannot be null");
         }
         this.uri = directory.toURI();
+        this.directory = directory;
     }
 
     /**
