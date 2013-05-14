@@ -41,16 +41,17 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
     private final String name;
     private final URI uri;
     private final Collection<FacetInfo> facetInfos;
-    private final List<Exception> exceptions;
+    private final List<Throwable> exceptions;
     private final Collection<ProcessorInfo> processors;
     private final Collection<ArtifactStatusReport> artifactsReport;
     private final long totalTime;
 
     @Override
-    public List<Exception> getExceptions() {
+    public List<Throwable> getExceptions() {
         return exceptions;
     }
 
+    @Override
     public Collection<ArtifactStatusReport> children() {
         return artifactsReport;
     }
@@ -138,7 +139,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
             sb.append("' ms");
             sb.append("]");
         }
-        for (Exception exception : exceptions) {
+        for (Throwable exception : exceptions) {
             sb.append("\n");
             sb.append(indent);
             sb.append("  |-");

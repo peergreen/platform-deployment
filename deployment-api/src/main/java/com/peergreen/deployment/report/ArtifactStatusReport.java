@@ -24,7 +24,7 @@ import com.peergreen.deployment.facet.FacetInfo;
 public interface ArtifactStatusReport {
 
 
-    Collection<Exception> getExceptions();
+    Collection<Throwable> getExceptions();
     Collection<ProcessorInfo> getProcessors();
     String name();
     URI uri();

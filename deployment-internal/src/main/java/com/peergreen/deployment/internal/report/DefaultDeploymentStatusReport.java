@@ -137,9 +137,9 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
         return hasExceptions;
     }
 
-    protected String formatException(Collection<Exception> exceptions) {
+    protected String formatException(Collection<Throwable> exceptions) {
         StringBuilder sb = new StringBuilder();
-        for (Exception exception : exceptions) {
+        for (Throwable exception : exceptions) {
             sb.append(exception.getMessage());
             Throwable cause = exception.getCause();
             String indent = "    ";

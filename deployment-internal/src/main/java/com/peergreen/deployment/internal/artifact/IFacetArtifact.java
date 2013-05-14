@@ -57,8 +57,8 @@ public interface IFacetArtifact extends Artifact, Resource {
      */
     void reset();
 
-    void addException(Exception e);
-    List<Exception> getExceptions();
+    void addException(Throwable e);
+    List<Throwable> getExceptions();
 
     Map<Class<?>, Object> getFacets();
     Collection<FacetInfo> getFacetInfos();

@@ -60,7 +60,7 @@ public class TestFacetArtifact {
     public void testAddAndCheckException() {
         Exception e = new IllegalStateException();
         artifact.addException(e);
-        List<Exception> exceptions = artifact.getExceptions();
+        List<Throwable> exceptions = artifact.getExceptions();
         Assert.assertEquals(exceptions.size(), 1);
         Assert.assertEquals(exceptions.iterator().next(), e);
     }

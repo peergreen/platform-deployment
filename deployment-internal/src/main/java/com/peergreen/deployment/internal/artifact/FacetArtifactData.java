@@ -32,7 +32,7 @@ import com.peergreen.deployment.facet.FacetInfo;
  */
 public class FacetArtifactData {
 
-    private final List<Exception> exceptions;
+    private final List<Throwable> exceptions;
     private final Map<Class<?>, FacetInfo> facetInfos;
     private final Set<ProcessorInfo> processorInfos;
     private final List<InternalFacetBuilderInfo> facetBuildersInfo;
@@ -66,11 +66,11 @@ public class FacetArtifactData {
         return totalTime;
     }
 
-    protected void addException(Exception e) {
+    protected void addException(Throwable e) {
         exceptions.add(e);
     }
 
-    protected List<Exception> getExceptions() {
+    protected List<Throwable> getExceptions() {
         return exceptions;
     }
 

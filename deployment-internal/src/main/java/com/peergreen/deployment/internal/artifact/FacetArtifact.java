@@ -174,12 +174,12 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
     }
 
     @Override
-    public void addException(Exception e) {
+    public void addException(Throwable e) {
         getCurrentData().addException(e);
     }
 
     @Override
-    public List<Exception> getExceptions() {
+    public List<Throwable> getExceptions() {
         return getCurrentData().getExceptions();
     }
 
