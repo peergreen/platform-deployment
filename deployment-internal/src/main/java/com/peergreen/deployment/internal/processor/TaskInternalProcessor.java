@@ -70,9 +70,8 @@ public class TaskInternalProcessor implements InternalProcessor {
         long tStart = System.currentTimeMillis();
         try {
             handlerProcessor.handle(deploymentContext);
-        } catch (ProcessorException | RuntimeException e) {
+        } catch (ProcessorException | RuntimeException | Error e) {
             // Add the error on the artifact
-
             deploymentContext.getFacetArtifact().addException(e);
 
             // Flag deployment context as being in error
