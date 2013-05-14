@@ -73,4 +73,9 @@ public class BasicProcessorContext implements ProcessorContext {
         return deploymentContext.get(ArtifactModel.class);
     }
 
+    @Override
+    public Artifact getArtifact() {;
+        return deploymentContext.getArtifact();
+    }
+
 }

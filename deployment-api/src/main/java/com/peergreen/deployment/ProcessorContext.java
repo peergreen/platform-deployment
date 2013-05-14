@@ -37,4 +37,6 @@ public interface ProcessorContext {
 
 
     ArtifactModel getArtifactModel();
+
+    Artifact getArtifact();
 }
