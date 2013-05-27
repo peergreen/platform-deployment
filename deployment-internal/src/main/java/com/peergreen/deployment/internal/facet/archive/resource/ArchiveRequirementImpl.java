@@ -15,8 +15,10 @@
  */
 package com.peergreen.deployment.internal.facet.archive.resource;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -55,19 +57,18 @@ public class ArchiveRequirementImpl extends AbsDeploymentRequirement implements 
 
     @Override
     protected IFilter computeFilter(IFilter filter) {
-        if (requiredAttributes != null && requiredAttributes.isEmpty()) {
-            Iterator<Entry<String, String>> it = requiredAttributes.entrySet().iterator();
-            while (it.hasNext()) {
-                Entry<String, String> entry = it.next();
+        List<IFilter> chain = new ArrayList<>();
+        if (requiredAttributes != null && !requiredAttributes.isEmpty()) {
+            for (Entry<String, String> entry : requiredAttributes.entrySet()) {
                 // Null value, check if only present
                 if (entry.getValue() == null) {
-                    return Filters.and(filter, Filters.present(entry.getKey()));
+                    chain.add(Filters.present(entry.getKey()));
                 } else {
                     // check equals for attribute
-                    return Filters.and(filter, Filters.equal(entry.getKey(), entry.getValue()));
+                    chain.add(Filters.equal(entry.getKey(), entry.getValue()));
                 }
             }
         }
-        return filter;
+        return Filters.and(filter, chain.toArray(new IFilter[chain.size()]));
     }
 }

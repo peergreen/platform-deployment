@@ -43,9 +43,10 @@ public class XMLContentRequirementImpl extends AbsDeploymentRequirement implemen
 
     @Override
     protected IFilter computeFilter(IFilter filter) {
+        IFilter namespace = null;
         if (xmlNamespace != null) {
-            return Filters.and(filter, Filters.equal(XMLContentNamespace.CAPABILITY_XMLNAMESPACE_ATTRIBUTE, xmlNamespace));
+            namespace = Filters.equal(XMLContentNamespace.CAPABILITY_XMLNAMESPACE_ATTRIBUTE, xmlNamespace);
         }
-        return filter;
+        return Filters.and(filter, namespace);
     }
 }

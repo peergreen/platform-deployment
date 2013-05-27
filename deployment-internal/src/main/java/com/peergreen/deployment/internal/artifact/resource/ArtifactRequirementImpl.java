@@ -34,13 +34,15 @@ public class ArtifactRequirementImpl extends AbsDeploymentRequirement implements
 
     @Override
     protected IFilter computeFilter(IFilter filter) {
+        IFilter extensionFilter = null;
+        IFilter schemeFilter = null;
         if (pathExtension != null) {
-            return Filters.and(filter, Filters.equal(ArtifactNamespace.CAPABILITY_PATHEXTENSION_ATTRIBUTE, pathExtension));
+            extensionFilter = Filters.equal(ArtifactNamespace.CAPABILITY_PATHEXTENSION_ATTRIBUTE, pathExtension);
         }
         if (scheme != null) {
-            return Filters.and(filter, Filters.equal(ArtifactNamespace.CAPABILITY_SCHEME_ATTRIBUTE, scheme));
+            schemeFilter = Filters.equal(ArtifactNamespace.CAPABILITY_SCHEME_ATTRIBUTE, scheme);
         }
-        return filter;
+        return Filters.and(filter, extensionFilter, schemeFilter);
     }
 
     @Override
