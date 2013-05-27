@@ -42,7 +42,6 @@ import com.peergreen.deployment.internal.facet.archive.JarArchiveImpl;
 import com.peergreen.deployment.internal.facet.archive.adapter.ArchiveFacetAdapter;
 import com.peergreen.deployment.internal.facet.content.FileContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
-import com.peergreen.deployment.internal.processor.uriresolver.FileURIProcessor;
 
 public class TestFileURIProcessor {
 

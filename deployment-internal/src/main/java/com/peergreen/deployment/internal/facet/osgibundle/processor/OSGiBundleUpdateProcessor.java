@@ -15,21 +15,26 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Update the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-public class OSGiBundleUpdateProcessor implements Processor<Bundle> {
+@Component
+@Instantiate
+@Processor
+@Phase("UPDATE")
+public class OSGiBundleUpdateProcessor {
 
-
-    @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
 
         // Update the bundle

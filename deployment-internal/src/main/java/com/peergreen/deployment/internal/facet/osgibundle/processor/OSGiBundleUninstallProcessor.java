@@ -15,21 +15,26 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Uninstall the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-public class OSGiBundleUninstallProcessor implements Processor<Bundle> {
+@Component
+@Instantiate
+@Processor
+@Phase("UNINSTALL")
+public class OSGiBundleUninstallProcessor {
 
-
-    @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
 
         // uninstall bundle

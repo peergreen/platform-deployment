@@ -51,6 +51,7 @@ public class TaskInternalProcessor implements InternalProcessor {
         this.currentPhase = currentPhase;
 
         // Gets real processor name
+        // TODO With @Processor handler, name is not right
         if (handlerProcessor instanceof DelegateHandlerProcessor) {
             this.name = ((DelegateHandlerProcessor<?>) handlerProcessor).getWrappedProcessor().getClass().getName();
         } else {

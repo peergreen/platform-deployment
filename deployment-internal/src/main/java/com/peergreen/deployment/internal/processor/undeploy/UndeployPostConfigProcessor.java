@@ -15,17 +15,25 @@
  */
 package com.peergreen.deployment.internal.processor.undeploy;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+
 import com.peergreen.deployment.DeploymentContext;
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Undeploy post config processor
  * @author Florent Benoit
  */
-public class UndeployPostConfigProcessor implements Processor<DeploymentContext> {
+@Component
+@Instantiate
+@Processor
+@Phase("UNDEPLOY_POSTCONFIG")
+public class UndeployPostConfigProcessor implements com.peergreen.deployment.Processor<DeploymentContext> {
 
     /**
      * Remove any added facets.

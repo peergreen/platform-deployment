@@ -15,21 +15,28 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
 import com.peergreen.deployment.internal.facet.osgibundle.builder.BundleFacetBuilder;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Install the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-public class OSGiBundleInstallProcessor implements Processor<OSGiBundle> {
+@Component
+@Instantiate
+@Processor
+@Phase("INSTALL")
+public class OSGiBundleInstallProcessor {
 
     private final BundleContext bundleContext;
 
@@ -37,8 +44,6 @@ public class OSGiBundleInstallProcessor implements Processor<OSGiBundle> {
         this.bundleContext = bundleContext;
     }
 
-
-    @Override
     public void handle(OSGiBundle osgiBundle, ProcessorContext processorContext) throws ProcessorException {
 
         // install bundle

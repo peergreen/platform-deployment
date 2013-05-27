@@ -67,6 +67,13 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>com.peergreen.deployment</groupId>
+      <artifactId>processor-handler</artifactId>
+      <version>${project.version}</version>
+      <type>bundle</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>com.peergreen.tasks</groupId>
       <artifactId>peergreen-tasks</artifactId>
       <version>1.0.0</version>

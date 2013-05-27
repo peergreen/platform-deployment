@@ -15,24 +15,30 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Stop the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-public class OSGiBundleStopProcessor implements Processor<Bundle> {
+@Component
+@Instantiate
+@Processor
+@Phase("STOP")
+public class OSGiBundleStopProcessor {
 
     private static final Log LOGGER = LogFactory.getLog(OSGiBundleStopProcessor.class);
 
-    @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
 
         LOGGER.debug("Stopping bundle ''{0}''", bundle.getLocation());

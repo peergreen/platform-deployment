@@ -15,22 +15,36 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
-import com.peergreen.deployment.Processor;
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+
+import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.archive.Archive;
 import com.peergreen.deployment.facet.archive.ArchiveException;
 import com.peergreen.deployment.facet.archive.OSGiBundle;
 import com.peergreen.deployment.internal.facet.osgibundle.OSGiBundleImpl;
+import com.peergreen.deployment.processor.Attribute;
+import com.peergreen.deployment.processor.Discovery;
+import com.peergreen.deployment.processor.Manifest;
+import com.peergreen.deployment.processor.Uri;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
- * XML Content processor : Parse XML files to dectect the namespace and provides a facet
+ * XML Content processor : Parse XML files to detect the namespace and provides a facet
  * @author Florent Benoit
  */
-public class OSGiBundleArchiveProcessor implements Processor<Archive> {
+@Component
+@Instantiate
+@Processor
+@Discovery(DiscoveryPhasesLifecycle.FACET_SCANNER)
+@Uri(extension = "jar")
+@Manifest(
+        @Attribute(name = "Bundle-SymbolicName")
+)
+public class OSGiBundleArchiveProcessor {
 
-
-    @Override
     public void handle(Archive archive, ProcessorContext processorContext) throws ProcessorException {
         // Add facet
         try {

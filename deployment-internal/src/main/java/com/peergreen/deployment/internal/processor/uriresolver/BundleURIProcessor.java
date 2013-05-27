@@ -15,9 +15,12 @@
  */
 package com.peergreen.deployment.internal.processor.uriresolver;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+
 import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.FacetCapabilityAdapter;
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.archive.Archive;
@@ -27,12 +30,20 @@ import com.peergreen.deployment.internal.facet.archive.URIArchiveImpl;
 import com.peergreen.deployment.internal.facet.archive.adapter.ArchiveFacetAdapter;
 import com.peergreen.deployment.internal.facet.content.URIContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
+import com.peergreen.deployment.processor.Discovery;
+import com.peergreen.deployment.processor.Uri;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * bundle:// URI processor
  * @author Florent Benoit
  */
-public class BundleURIProcessor implements Processor<Artifact> {
+@Component
+@Instantiate
+@Processor
+@Uri("bundle")
+@Discovery(DiscoveryPhasesLifecycle.URI_RESOLVER)
+public class BundleURIProcessor {
 
     private final FacetCapabilityAdapter<Archive> archiveFacetAdapter;
     private final FacetCapabilityAdapter<Content> contentFacetAdapter;
@@ -45,7 +56,6 @@ public class BundleURIProcessor implements Processor<Artifact> {
     /**
      *
      */
-    @Override
     public void handle(Artifact artifact, ProcessorContext processorContext) throws ProcessorException {
 
         // Now check if it's a zip or not

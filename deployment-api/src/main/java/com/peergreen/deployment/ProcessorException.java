@@ -18,7 +18,7 @@ package com.peergreen.deployment;
 
 public class ProcessorException extends Exception {
 
-    public ProcessorException(String message, Exception e) {
+    public ProcessorException(String message, Throwable e) {
         super(message, e);
     }
 

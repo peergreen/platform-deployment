@@ -15,26 +15,30 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.model.ArtifactModel;
 import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 
 /**
  * Start the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-public class OSGiBundleStartProcessor implements Processor<Bundle> {
+@Component
+@Instantiate
+@Processor
+@Phase("START")
+public class OSGiBundleStartProcessor {
 
-
-    @Override
     public void handle(Bundle bundle, ProcessorContext processorContext) throws ProcessorException {
-
 
         // Persistent mode ?
         ArtifactModel artifactModel = processorContext.getArtifactModel();
