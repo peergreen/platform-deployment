@@ -90,6 +90,13 @@
       <url>https://forge.peergreen.com/nexus/content/repositories/releases/</url>
       <layout>default</layout>
     </repository>
+
+    <!-- TODO remove when annotations module will be released -->
+    <repository>
+      <id>apache.snapshots</id>
+      <releases><enabled>false</enabled></releases>
+      <url>https://repository.apache.org/content/groups/snapshots/</url>
+    </repository>
   </repositories>
 
 </project>
