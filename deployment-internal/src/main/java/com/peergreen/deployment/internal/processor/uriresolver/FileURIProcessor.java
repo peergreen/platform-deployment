@@ -17,9 +17,6 @@ package com.peergreen.deployment.internal.processor.uriresolver;
 
 import java.io.File;
 
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
-
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.FacetCapabilityAdapter;
@@ -33,14 +30,12 @@ import com.peergreen.deployment.internal.facet.content.FileContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Uri;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * file:// URI processor
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Uri("file")
 @Discovery(DiscoveryPhasesLifecycle.URI_RESOLVER)

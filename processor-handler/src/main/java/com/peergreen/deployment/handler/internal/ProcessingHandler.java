@@ -43,7 +43,7 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
  * Time: 17:13
  */
 @Handler(name = "processor",
-         namespace = "com.peergreen.deployment.processor.handler")
+         namespace = "com.peergreen.deployment")
 @Provides(specifications = HandlerProcessor.class)
 public class ProcessingHandler extends PrimitiveHandler implements HandlerProcessor {
 

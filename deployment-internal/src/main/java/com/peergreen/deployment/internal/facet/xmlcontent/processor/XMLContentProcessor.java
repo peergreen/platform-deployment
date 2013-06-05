@@ -22,9 +22,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
-
 import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.FacetCapabilityAdapter;
 import com.peergreen.deployment.ProcessorContext;
@@ -36,15 +33,13 @@ import com.peergreen.deployment.internal.facet.xmlcontent.XMLContentImpl;
 import com.peergreen.deployment.internal.facet.xmlcontent.adapter.XMLContentFacetAdapter;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Uri;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * XML Content processor : Parse XML files to dectect the namespace and provides
  * a facet
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Uri(extension = "xml")
 @Discovery(DiscoveryPhasesLifecycle.FACET_SCANNER)

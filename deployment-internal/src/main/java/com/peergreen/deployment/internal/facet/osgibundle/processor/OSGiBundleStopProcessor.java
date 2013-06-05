@@ -25,14 +25,12 @@ import org.ow2.util.log.LogFactory;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.processor.Phase;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * Stop the OSGi bundles on the gateway.
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Phase("STOP")
 public class OSGiBundleStopProcessor {

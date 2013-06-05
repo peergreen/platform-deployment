@@ -23,14 +23,12 @@ import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.processor.Phase;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * Undeploy post config processor
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Phase("UNDEPLOY_POSTCONFIG")
 public class UndeployPostConfigProcessor implements com.peergreen.deployment.Processor<DeploymentContext> {

@@ -32,14 +32,12 @@ import com.peergreen.deployment.internal.facet.content.URIContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Uri;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * bundle:// URI processor
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Uri("bundle")
 @Discovery(DiscoveryPhasesLifecycle.URI_RESOLVER)

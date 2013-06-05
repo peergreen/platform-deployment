@@ -35,6 +35,7 @@
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.annotations</artifactId>
       <version>1.8.6</version>
+      <scope>provided</scope>
     </dependency>
 
     <dependency>

@@ -29,14 +29,12 @@ import com.peergreen.deployment.processor.Attribute;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Manifest;
 import com.peergreen.deployment.processor.Uri;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 
 /**
  * XML Content processor : Parse XML files to detect the namespace and provides a facet
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Discovery(DiscoveryPhasesLifecycle.FACET_SCANNER)
 @Uri(extension = "jar")
