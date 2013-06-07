@@ -19,7 +19,6 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
 import com.peergreen.deployment.Artifact;
-import com.peergreen.deployment.DelegateHandlerProcessor;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.HandlerProcessor;
 import com.peergreen.deployment.Processor;
@@ -27,6 +26,7 @@ import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.content.Content;
 import com.peergreen.deployment.internal.handler.internal.desc.DescriptiveRequirementBuilder;
 import com.peergreen.deployment.internal.handler.internal.utils.Types;
+import com.peergreen.deployment.internal.processor.NamedProcessor;
 import com.peergreen.deployment.processor.Attribute;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Manifest;
@@ -45,11 +45,11 @@ import com.peergreen.deployment.resource.builder.RequirementBuilder;
 @Handler(name = "processor",
          namespace = "com.peergreen.deployment")
 @Provides(specifications = HandlerProcessor.class)
-public class ProcessingHandler extends PrimitiveHandler implements HandlerProcessor {
+public class ProcessingHandler extends PrimitiveHandler implements HandlerProcessor, NamedProcessor {
 
     private Class<?> processorType;
     private Class<?> parameterType;
-    private OwnDelegateHandlerProcessor<?> delegate;
+    private DelegateHandlerProcessor delegate;
 
     private DescriptiveRequirementBuilder builder;
     private ProcessorFactory factory = new InstanceManagerFactory();
@@ -101,7 +101,7 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
     }
 
     private void buildProcessorDelegate() {
-        delegate = new OwnDelegateHandlerProcessor(facade, parameterType);
+        delegate = new DelegateHandlerProcessor(facade, parameterType);
         delegate.bindRequirementBuilder(builder);
     }
 
@@ -224,19 +224,9 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
         };
     }
 
-    private class OwnDelegateHandlerProcessor<T> extends DelegateHandlerProcessor<T> {
-        public OwnDelegateHandlerProcessor(Processor<T> processor, Class<T> type) {
-            super(processor, type);
-        }
-
-        /**
-         * Just need to augment method visibility
-         * @param requirementBuilder
-         */
-        @Override
-        public void bindRequirementBuilder(RequirementBuilder requirementBuilder) {
-            super.bindRequirementBuilder(requirementBuilder);
-        }
+    @Override
+    public String getName() {
+        return getFactory().getClassName();
     }
 
     public static interface ProcessorFactory {

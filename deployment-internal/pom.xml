@@ -54,27 +54,37 @@
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.ipojo</artifactId>
-      <version>1.8.6</version>
+      <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+      <version>1.10.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.ipojo.annotations</artifactId>
-      <version>1.10.1-SNAPSHOT</version>
-      <type>bundle</type>
+      <artifactId>org.apache.felix.ipojo</artifactId>
+      <version>1.8.6</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>org.osgi.core</artifactId>
+          <groupId>org.osgi</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>org.apache.felix.ipojo.metadata</artifactId>
+          <groupId>org.apache.felix</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>org.apache.felix.ipojo.manipulator</artifactId>
+          <groupId>org.apache.felix</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>org.osgi.compendium</artifactId>
+          <groupId>org.osgi</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.peergreen.deployment</groupId>
       <artifactId>deployment-api</artifactId>
-      <version>${project.version}</version>
-      <type>bundle</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.peergreen.deployment</groupId>
-      <artifactId>processor-handler</artifactId>
       <version>${project.version}</version>
       <type>bundle</type>
       <scope>provided</scope>

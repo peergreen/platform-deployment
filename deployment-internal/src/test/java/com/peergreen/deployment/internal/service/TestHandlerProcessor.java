@@ -15,7 +15,7 @@
  */
 package com.peergreen.deployment.internal.service;
 
-import com.peergreen.deployment.DelegateHandlerProcessor;
+import com.peergreen.deployment.internal.handler.internal.DelegateHandlerProcessor;
 import com.peergreen.deployment.Processor;
 
 

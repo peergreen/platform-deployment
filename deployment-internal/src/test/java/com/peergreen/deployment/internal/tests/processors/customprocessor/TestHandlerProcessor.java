@@ -15,7 +15,7 @@
  */
 package com.peergreen.deployment.internal.tests.processors.customprocessor;
 
-import com.peergreen.deployment.DelegateHandlerProcessor;
+import com.peergreen.deployment.internal.handler.internal.DelegateHandlerProcessor;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 

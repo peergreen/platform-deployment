@@ -111,7 +111,8 @@ public class DefaultProcessorManager implements ProcessorManager {
     }
 
 
-    @Bind(aggregate=true,optional=true)
+    // Make sure that we're using the real HandlerProcessor instance so that we can test it using instanceof
+    @Bind(aggregate = true, optional = true, proxy = false)
     public void bindProcessor(HandlerProcessor processor) {
         if (validated) {
             add(new TaskInternalProcessor(processor, currentProcessor, currentPhase));

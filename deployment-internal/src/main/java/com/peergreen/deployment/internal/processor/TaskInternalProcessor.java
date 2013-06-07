@@ -21,7 +21,7 @@ import java.util.List;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
-import com.peergreen.deployment.DelegateHandlerProcessor;
+import com.peergreen.deployment.internal.handler.internal.DelegateHandlerProcessor;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.HandlerProcessor;
 import com.peergreen.deployment.ProcessorException;
@@ -51,9 +51,8 @@ public class TaskInternalProcessor implements InternalProcessor {
         this.currentPhase = currentPhase;
 
         // Gets real processor name
-        // TODO With @Processor handler, name is not right
-        if (handlerProcessor instanceof DelegateHandlerProcessor) {
-            this.name = ((DelegateHandlerProcessor<?>) handlerProcessor).getWrappedProcessor().getClass().getName();
+        if (handlerProcessor instanceof NamedProcessor) {
+            this.name = ((NamedProcessor) handlerProcessor).getName();
         } else {
             this.name = handlerProcessor.getClass().getName();
         }

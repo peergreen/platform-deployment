@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.deployment;
+package com.peergreen.deployment.internal.handler.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +23,16 @@ import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
 
+import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.DeploymentContext;
+import com.peergreen.deployment.HandlerProcessor;
+import com.peergreen.deployment.Processor;
+import com.peergreen.deployment.ProcessorContext;
+import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.internal.processor.NamedProcessor;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 
-public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
+public class DelegateHandlerProcessor<T> implements HandlerProcessor, NamedProcessor, Resource {
 
     private RequirementBuilder requirementBuilder;
 
@@ -122,4 +129,8 @@ public class DelegateHandlerProcessor<T> implements HandlerProcessor, Resource {
     }
 
 
+    @Override
+    public String getName() {
+        return wrappedProcessor.getClass().getName();
+    }
 }
