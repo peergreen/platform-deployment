@@ -1,4 +1,4 @@
-package com.peergreen.deployment.handler.internal;
+package com.peergreen.deployment.internal.handler.internal;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

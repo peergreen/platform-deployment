@@ -1,4 +1,4 @@
-package com.peergreen.deployment.handler.internal;
+package com.peergreen.deployment.internal.handler.internal;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;

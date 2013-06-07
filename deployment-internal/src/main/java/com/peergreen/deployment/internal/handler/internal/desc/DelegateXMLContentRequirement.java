@@ -1,4 +1,4 @@
-package com.peergreen.deployment.handler.internal.desc;
+package com.peergreen.deployment.internal.handler.internal.desc;
 
 import java.util.Map;
 

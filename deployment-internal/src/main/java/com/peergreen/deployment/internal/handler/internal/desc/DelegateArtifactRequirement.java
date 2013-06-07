@@ -1,31 +1,31 @@
-package com.peergreen.deployment.handler.internal.desc;
+package com.peergreen.deployment.internal.handler.internal.desc;
 
 import java.util.Map;
 
 import org.osgi.resource.Resource;
 
-import com.peergreen.deployment.resource.artifact.archive.ArchiveRequirement;
+import com.peergreen.deployment.resource.artifact.ArtifactRequirement;
 
 /**
  * User: guillaume
  * Date: 28/05/13
- * Time: 11:00
+ * Time: 11:07
  */
-public class DelegateArchiveRequirement implements ArchiveRequirement {
-    private final ArchiveRequirement delegate;
+public class DelegateArtifactRequirement implements ArtifactRequirement {
+    private final ArtifactRequirement delegate;
 
-    public DelegateArchiveRequirement(final ArchiveRequirement delegate) {
+    public DelegateArtifactRequirement(final ArtifactRequirement delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ArchiveRequirement addRequiredAttribute(final String attributeName) {
-        return delegate.addRequiredAttribute(attributeName);
+    public <T extends ArtifactRequirement> T setPathExtension(final String pathExtension) {
+        return delegate.setPathExtension(pathExtension);
     }
 
     @Override
-    public ArchiveRequirement addRequiredAttribute(final String attributeName, final String expectedValue) {
-        return delegate.addRequiredAttribute(attributeName, expectedValue);
+    public <T extends ArtifactRequirement> T setURIScheme(final String scheme) {
+        return delegate.setURIScheme(scheme);
     }
 
     @Override

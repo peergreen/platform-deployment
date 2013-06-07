@@ -1,6 +1,6 @@
-package com.peergreen.deployment.handler.internal;
+package com.peergreen.deployment.internal.handler.internal;
 
-import static com.peergreen.deployment.handler.internal.utils.ElementBuilder.element;
+import static com.peergreen.deployment.internal.handler.internal.utils.ElementBuilder.element;
 
 import java.lang.reflect.Method;
 import java.util.Dictionary;
@@ -25,8 +25,8 @@ import com.peergreen.deployment.HandlerProcessor;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.facet.content.Content;
-import com.peergreen.deployment.handler.internal.desc.DescriptiveRequirementBuilder;
-import com.peergreen.deployment.handler.internal.utils.Types;
+import com.peergreen.deployment.internal.handler.internal.desc.DescriptiveRequirementBuilder;
+import com.peergreen.deployment.internal.handler.internal.utils.Types;
 import com.peergreen.deployment.processor.Attribute;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Manifest;
