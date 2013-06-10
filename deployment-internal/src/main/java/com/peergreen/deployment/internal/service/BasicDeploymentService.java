@@ -21,6 +21,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,6 +38,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
@@ -56,6 +58,7 @@ import com.peergreen.deployment.model.flag.Created;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.ArtifactStatusReportException;
 import com.peergreen.deployment.report.DeploymentStatusReport;
+import com.peergreen.deployment.tracker.DeploymentServiceTracker;
 import com.peergreen.tasks.execution.helper.ExecutorServiceBuilderManager;
 import com.peergreen.tasks.execution.helper.TaskExecutorService;
 import com.peergreen.tasks.execution.tracker.TrackerManager;
@@ -104,6 +107,15 @@ public class BasicDeploymentService implements DeploymentService {
     private ThreadGroup threadGroup;
 
     /**
+     * Deployment tracker.
+     */
+    private final List<DeploymentServiceTracker> deploymentServiceTrackers;
+
+    public BasicDeploymentService() {
+        this.deploymentServiceTrackers = new CopyOnWriteArrayList<>();
+    }
+
+    /**
      * Start the service.
      */
     @Validate
@@ -145,6 +157,13 @@ public class BasicDeploymentService implements DeploymentService {
 
         if (artifactProcessRequests != null) {
             for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
+                Artifact artifact = artifactProcessRequest.getArtifact();
+                DeploymentMode deploymentMode = artifactProcessRequest.getDeploymentMode();
+                for (DeploymentServiceTracker deploymentServiceTracker : deploymentServiceTrackers) {
+                    deploymentServiceTracker.onChange(artifact, deploymentMode);
+                }
+
+
                 if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.DEPLOY) {
                     deployRequests.add(artifactProcessRequest);
                 } else if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.UPDATE) {
@@ -330,4 +349,17 @@ public class BasicDeploymentService implements DeploymentService {
     public void bindThreadGroup(ThreadGroup threadGroup) {
         this.threadGroup = threadGroup;
     }
+
+
+    @Bind(aggregate=true, optional=true)
+    protected void bindDeploymentServiceTracker(DeploymentServiceTracker deploymentServiceTracker) {
+        this.deploymentServiceTrackers.add(deploymentServiceTracker);
+    }
+
+    @Unbind(aggregate=true, optional=true)
+    protected void unbindDeploymentServiceTracker(DeploymentServiceTracker deploymentServiceTracker) {
+        this.deploymentServiceTrackers.remove(deploymentServiceTracker);
+    }
+
+
 }
