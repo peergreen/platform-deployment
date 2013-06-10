@@ -177,6 +177,7 @@ public class DeploymentServiceMonitor implements Runnable {
                         ArtifactProcessRequest artifactProcessRequest = new ArtifactProcessRequest(immutableArtifact);
                         artifactProcessRequest.setDeploymentMode(DeploymentMode.UNDEPLOY);
                         artifactProcessRequests.add(artifactProcessRequest);
+                        continue;
                     }
                 } catch (URITrackerException e) {
                     // Unable to check if the artifact still exists
