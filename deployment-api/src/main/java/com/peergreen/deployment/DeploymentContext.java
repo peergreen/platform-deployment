@@ -47,6 +47,13 @@ public interface DeploymentContext {
         <Facet> void addFacet(Class<Facet> facetClass, Facet facet, FacetCapabilityAdapter<Facet> facetAdapter);
         <F> void addFacet(Class<F> facetClass, F facet, FacetCapabilityAdapter<F> facetAdapter, String facetBuilderId);
 
+        /**
+         * Returns the facet of the given type if available in the deployment context's artifact.
+         * @param facetClass expected facet's type
+         * @return the facet instance or {@literal null} if not found
+         */
+        <F> F getFacet(Class<F> facetClass);
+
 
         List<Capability> getCapabilities(String namespace);
 

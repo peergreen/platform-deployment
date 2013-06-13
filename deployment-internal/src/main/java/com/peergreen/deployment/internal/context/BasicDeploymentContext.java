@@ -144,6 +144,11 @@ public class BasicDeploymentContext extends ProviderResource implements Deployme
     }
 
     @Override
+    public <F> F getFacet(final Class<F> facetClass) {
+        return facetClass.cast(currentArtifact.getFacets().get(facetClass));
+    }
+
+    @Override
     public ArtifactBuilder getArtifactBuilder() {
         return artifactBuilder;
     }
