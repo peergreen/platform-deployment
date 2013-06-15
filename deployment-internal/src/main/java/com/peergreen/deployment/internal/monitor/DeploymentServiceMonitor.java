@@ -36,9 +36,12 @@ import com.peergreen.deployment.ArtifactProcessRequest;
 import com.peergreen.deployment.DeploymentMode;
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.internal.model.ArtifactModelFilter;
 import com.peergreen.deployment.internal.model.InternalArtifactModel;
 import com.peergreen.deployment.internal.model.InternalArtifactModelManager;
 import com.peergreen.deployment.internal.model.view.InternalArtifactModelChangesView;
+import com.peergreen.deployment.model.view.ArtifactModelDeploymentView;
+import com.peergreen.deployment.model.view.ArtifactModelPersistenceView;
 import com.peergreen.deployment.monitor.URITrackerException;
 import com.peergreen.deployment.monitor.URITrackerManager;
 
@@ -134,7 +137,7 @@ public class DeploymentServiceMonitor implements Runnable {
 
             // Manager ?
             if (artifactModelManager != null) {
-                trackedArtifactModels = artifactModelManager.getDeployedRootArtifacts();
+                trackedArtifactModels = artifactModelManager.getArtifacts(new DeployedRootAndNonPersistentFilter());
             } else {
                 trackedArtifactModels = Collections.emptySet();
             }
@@ -381,4 +384,15 @@ public class DeploymentServiceMonitor implements Runnable {
         this.threadGroup = threadGroup;
     }
 
+    private static class DeployedRootAndNonPersistentFilter implements ArtifactModelFilter {
+
+        @Override
+        public boolean accept(final InternalArtifactModel model) {
+            ArtifactModelDeploymentView deploymentView = model.as(ArtifactModelDeploymentView.class);
+            ArtifactModelPersistenceView persistenceView = model.as(ArtifactModelPersistenceView.class);
+            return deploymentView.isDeploymentRoot()
+                    && deploymentView.isDeployed()
+                    && !persistenceView.isPersistent();
+        }
+    }
 }

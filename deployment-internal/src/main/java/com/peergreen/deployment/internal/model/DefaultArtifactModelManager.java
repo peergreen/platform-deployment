@@ -223,6 +223,23 @@ public class DefaultArtifactModelManager implements ArtifactModelManager, Intern
     }
 
     @Override
+    public Collection<InternalArtifactModel> getArtifacts(final ArtifactModelFilter filter) {
+        List<InternalArtifactModel> selected = new ArrayList<>();
+
+        // Iterate
+        Iterator<InternalArtifactModel> artifactModelsIterator = artifactsByURI.values().iterator();
+        while(artifactModelsIterator.hasNext()) {
+            InternalArtifactModel artifactModel = artifactModelsIterator.next();
+            // Only include accepted artifacts
+            if (filter.accept(artifactModel)) {
+                selected.add(artifactModel);
+            }
+        }
+
+        return selected;
+    }
+
+    @Override
     public void updateLengthLastModified(InternalArtifactModel artifactModel) {
         InternalArtifactModelChangesView artifactChanges = artifactModel.as(InternalArtifactModelChangesView.class);
         URI uri = artifactModel.getFacetArtifact().uri();

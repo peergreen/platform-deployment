@@ -32,6 +32,8 @@ public interface InternalArtifactModelManager extends ArtifactModelManager {
 
     Collection<InternalArtifactModel> getDeployedRootArtifacts();
 
+    Collection<InternalArtifactModel> getArtifacts(ArtifactModelFilter filter);
+
     void updateLengthLastModified(InternalArtifactModel artifactModel);
 
     void save();
