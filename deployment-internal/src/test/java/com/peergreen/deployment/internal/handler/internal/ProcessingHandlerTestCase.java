@@ -40,7 +40,7 @@ import com.peergreen.deployment.resource.facet.FacetRequirement;
 public class ProcessingHandlerTestCase {
 
     @Mock
-    private ProcessingHandler.ProcessorFactory factory;
+    private ProcessingHandler.ProcessorInstance factory;
 
     @Mock
     private DeploymentContext deploymentContext;
@@ -70,10 +70,10 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testPhaseRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new InstallPhaseContentProcessor());
+        when(factory.get()).thenReturn(new InstallPhaseContentProcessor());
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -86,10 +86,10 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testPhaseRequirementWithDiscovery() throws Exception {
 
-        when(factory.create()).thenReturn(new FacetScannerDiscoveryPhaseContentProcessor());
+        when(factory.get()).thenReturn(new FacetScannerDiscoveryPhaseContentProcessor());
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -102,11 +102,11 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testSchemeURIRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new TotoSchemeURIProcessor());
+        when(factory.get()).thenReturn(new TotoSchemeURIProcessor());
         when(builder.buildArtifactRequirement(any(Resource.class))).thenReturn(artifactReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -120,11 +120,11 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testExtensionURIRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new JarExtensionURIProcessor());
+        when(factory.get()).thenReturn(new JarExtensionURIProcessor());
         when(builder.buildArtifactRequirement(any(Resource.class))).thenReturn(artifactReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -138,11 +138,11 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testSchemeAndExtensionURIRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new TotoSchemeJarExtensionURIProcessor());
+        when(factory.get()).thenReturn(new TotoSchemeJarExtensionURIProcessor());
         when(builder.buildArtifactRequirement(any(Resource.class))).thenReturn(artifactReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -156,11 +156,11 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testXmlNamespaceRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new XmlNamespaceProcessor());
+        when(factory.get()).thenReturn(new XmlNamespaceProcessor());
         when(builder.buildXMLContentRequirement(any(Resource.class))).thenReturn(xmlReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -173,11 +173,11 @@ public class ProcessingHandlerTestCase {
     @Test
     public void testArchiveRequirement() throws Exception {
 
-        when(factory.create()).thenReturn(new ArchiveArtifactProcessor());
+        when(factory.get()).thenReturn(new ArchiveArtifactProcessor());
         when(builder.buildArchiveRequirement(any(Resource.class))).thenReturn(archiveReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -191,10 +191,10 @@ public class ProcessingHandlerTestCase {
     public void testDeploymentContextProcessorInvocation() throws Exception {
 
         DeploymentContextProcessor processor = new DeploymentContextProcessor();
-        when(factory.create()).thenReturn(processor);
+        when(factory.get()).thenReturn(processor);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -209,12 +209,12 @@ public class ProcessingHandlerTestCase {
     public void testContentProcessorInvocation() throws Exception {
 
         InstallPhaseContentProcessor processor = new InstallPhaseContentProcessor();
-        when(factory.create()).thenReturn(processor);
+        when(factory.get()).thenReturn(processor);
         when(deploymentContext.getArtifact()).thenReturn(artifact);
         when(artifact.as(Content.class)).thenReturn(content);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();
@@ -230,12 +230,12 @@ public class ProcessingHandlerTestCase {
     public void testArtifactProcessorInvocation() throws Exception {
 
         ArchiveArtifactProcessor processor = new ArchiveArtifactProcessor();
-        when(factory.create()).thenReturn(processor);
+        when(factory.get()).thenReturn(processor);
         when(deploymentContext.getArtifact()).thenReturn(artifact);
         when(builder.buildArchiveRequirement(any(Resource.class))).thenReturn(archiveReq);
 
         ProcessingHandler handler = new ProcessingHandler();
-        handler.setFactory(factory);
+        handler.setInstance(factory);
         handler.bindRequirementBuilder(builder);
         handler.configure(null, null);
         handler.start();

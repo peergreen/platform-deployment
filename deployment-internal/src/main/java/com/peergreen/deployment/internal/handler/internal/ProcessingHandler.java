@@ -52,11 +52,11 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
     private DelegateHandlerProcessor delegate;
 
     private DescriptiveRequirementBuilder builder;
-    private ProcessorFactory factory = new InstanceManagerFactory();
+    private ProcessorInstance instance = new InstanceManagerInstance();
     private Processor<?> facade;
 
-    public void setFactory(ProcessorFactory factory) {
-        this.factory = factory;
+    public void setInstance(ProcessorInstance factory) {
+        this.instance = factory;
     }
 
     @Override
@@ -66,8 +66,8 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
 
     @Override
     public void start() {
-        // Create the processor instance
-        Object processor = factory.create();
+        // Retrieve the processor instance
+        Object processor = instance.get();
         processorType = processor.getClass();
 
         // If the component is already a Processor, directly use it (avoid reflection, more efficient)
@@ -85,8 +85,9 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
 
     @Override
     public void stop() {
-        // Release the POJO object
-        factory.release(delegate.getWrappedProcessor());
+        processorType = null;
+        facade = null;
+        parameterType = null;
     }
 
     @Validate
@@ -229,21 +230,16 @@ public class ProcessingHandler extends PrimitiveHandler implements HandlerProces
         return getFactory().getClassName();
     }
 
-    public static interface ProcessorFactory {
-        Object create();
-        void release(Object processor);
+    public static interface ProcessorInstance {
+        Object get();
     }
 
-    public class InstanceManagerFactory implements ProcessorFactory {
+    public class InstanceManagerInstance implements ProcessorInstance {
 
         @Override
-        public Object create() {
+        public Object get() {
             return ProcessingHandler.this.getInstanceManager().getPojoObject();
         }
 
-        @Override
-        public void release(final Object processor) {
-            ProcessingHandler.this.getInstanceManager().deletePojoObject(processor);
-        }
     }
 }
