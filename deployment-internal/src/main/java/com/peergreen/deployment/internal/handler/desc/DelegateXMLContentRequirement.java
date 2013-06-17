@@ -1,31 +1,26 @@
-package com.peergreen.deployment.internal.handler.internal.desc;
+package com.peergreen.deployment.internal.handler.desc;
 
 import java.util.Map;
 
 import org.osgi.resource.Resource;
 
-import com.peergreen.deployment.resource.artifact.archive.ArchiveRequirement;
+import com.peergreen.deployment.resource.artifact.content.XMLContentRequirement;
 
 /**
  * User: guillaume
  * Date: 28/05/13
- * Time: 11:00
+ * Time: 11:04
  */
-public class DelegateArchiveRequirement implements ArchiveRequirement {
-    private final ArchiveRequirement delegate;
+public class DelegateXMLContentRequirement implements XMLContentRequirement {
+    private final XMLContentRequirement delegate;
 
-    public DelegateArchiveRequirement(final ArchiveRequirement delegate) {
+    public DelegateXMLContentRequirement(final XMLContentRequirement delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public ArchiveRequirement addRequiredAttribute(final String attributeName) {
-        return delegate.addRequiredAttribute(attributeName);
-    }
-
-    @Override
-    public ArchiveRequirement addRequiredAttribute(final String attributeName, final String expectedValue) {
-        return delegate.addRequiredAttribute(attributeName, expectedValue);
+    public XMLContentRequirement setNamespace(final String namespace) {
+        return delegate.setNamespace(namespace);
     }
 
     @Override

@@ -1,6 +1,6 @@
-package com.peergreen.deployment.internal.handler.internal.desc;
+package com.peergreen.deployment.internal.handler.desc;
 
-import static com.peergreen.deployment.internal.handler.internal.utils.ElementBuilder.element;
+import static com.peergreen.deployment.internal.handler.utils.ElementBuilder.element;
 
 import org.apache.felix.ipojo.metadata.Attribute;
 import org.apache.felix.ipojo.metadata.Element;

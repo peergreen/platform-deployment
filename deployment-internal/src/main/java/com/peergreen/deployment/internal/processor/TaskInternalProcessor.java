@@ -21,7 +21,6 @@ import java.util.List;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
-import com.peergreen.deployment.internal.handler.internal.DelegateHandlerProcessor;
 import com.peergreen.deployment.DeploymentContext;
 import com.peergreen.deployment.HandlerProcessor;
 import com.peergreen.deployment.ProcessorException;

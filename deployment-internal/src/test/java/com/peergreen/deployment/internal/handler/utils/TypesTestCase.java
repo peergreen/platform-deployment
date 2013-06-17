@@ -1,4 +1,4 @@
-package com.peergreen.deployment.internal.handler.internal.utils;
+package com.peergreen.deployment.internal.handler.utils;
 
 import static org.testng.Assert.assertEquals;
 

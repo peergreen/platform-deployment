@@ -1,4 +1,4 @@
-package com.peergreen.deployment.internal.handler.internal.utils;
+package com.peergreen.deployment.internal.handler.utils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
