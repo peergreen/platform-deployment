@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -245,6 +246,8 @@ public class JarArchiveImpl implements Archive {
         // Read manifest
         if (manifest != null) {
             this.manifestEntries = ManifestParser.readManifest(manifest);
+        } else {
+            this.manifestEntries = new HashMap<>();
         }
 
     }
