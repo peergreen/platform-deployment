@@ -1,11 +1,5 @@
 /**
- * Copyright 2012-2013 Peergreen S.A.S.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright 2013 Peergreen S.A.S. All rights reserved.
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,11 +9,14 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
+import static org.osgi.framework.Bundle.START_TRANSIENT;
+import static org.osgi.framework.Constants.FRAGMENT_HOST;
+
+import java.util.Collections;
+
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+import org.osgi.framework.wiring.FrameworkWiring;
 
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
@@ -52,13 +49,17 @@ public class OSGiBundleStartProcessor {
         if (!isFragment(bundle)) {
             try {
                 if (isTransient) {
-                    bundle.start(Bundle.START_TRANSIENT);
+                    bundle.start(START_TRANSIENT);
                 } else {
                     bundle.start();
                 }
             } catch (BundleException e) {
                 throw new ProcessorException("Unable to start the bundle", e);
             }
+        } else {
+            // Resolve the bundle
+            FrameworkWiring frameworkWiring = bundle.getBundleContext().getBundle(0).adapt(FrameworkWiring.class);
+            frameworkWiring.resolveBundles(Collections.singleton(bundle));
         }
     }
 
@@ -68,7 +69,7 @@ public class OSGiBundleStartProcessor {
      * @return true if the bundle is a fragment.
      */
     protected boolean isFragment(final Bundle bundle) {
-        return bundle.getHeaders().get(Constants.FRAGMENT_HOST) != null;
+        return bundle.getHeaders().get(FRAGMENT_HOST) != null;
     }
 
 }
