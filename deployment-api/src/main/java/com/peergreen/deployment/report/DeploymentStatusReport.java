@@ -15,12 +15,14 @@
  */
 package com.peergreen.deployment.report;
 
-import java.util.Collection;
+import java.util.List;
+
+
 
 public interface DeploymentStatusReport {
 
-    Collection<ArtifactStatusReport> getArtifactStatusReports();
-    boolean hasFailed();
+    List<ArtifactStatusReport> getArtifactStatusReports();
+    boolean isFailed();
 
     String shortReport();
 }

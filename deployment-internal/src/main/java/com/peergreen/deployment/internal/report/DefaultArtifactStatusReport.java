@@ -16,13 +16,14 @@
 package com.peergreen.deployment.internal.report;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
+import com.peergreen.deployment.report.ArtifactError;
+import com.peergreen.deployment.report.ArtifactErrorDetail;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 
 public class DefaultArtifactStatusReport implements ArtifactStatusReport {
@@ -40,25 +41,25 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
 
     private final String name;
     private final URI uri;
-    private final Collection<FacetInfo> facetInfos;
-    private final List<Throwable> exceptions;
-    private final Collection<ProcessorInfo> processors;
-    private final Collection<ArtifactStatusReport> artifactsReport;
+    private final List<FacetInfo> facetInfos;
+    private final List<ArtifactError> exceptions;
+    private final List<ProcessorInfo> processors;
+    private final List<ArtifactStatusReport> artifactsReport;
     private final long totalTime;
 
     @Override
-    public List<Throwable> getExceptions() {
+    public List<ArtifactError> getExceptions() {
         return exceptions;
     }
 
     @Override
-    public Collection<ArtifactStatusReport> children() {
+    public List<ArtifactStatusReport> children() {
         return artifactsReport;
     }
 
 
     @Override
-    public Collection<ProcessorInfo> getProcessors() {
+    public List<ProcessorInfo> getProcessors() {
         return processors;
     }
 
@@ -73,7 +74,7 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
     }
 
     @Override
-    public Collection<FacetInfo> getFacets() {
+    public List<FacetInfo> getFacets() {
         return facetInfos;
     }
 
@@ -81,10 +82,17 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
         this.name = facetArtifact.name();
         this.uri = facetArtifact.uri();
         this.facetInfos = facetArtifact.getFacetInfos();
-        this.artifactsReport = new HashSet<>();
+        this.artifactsReport = new ArrayList<>();
         this.processors = facetArtifact.getProcessors();
         this.totalTime = facetArtifact.getTotalTime();
-        this.exceptions = facetArtifact.getExceptions();
+
+        // convert exception
+        this.exceptions = new ArrayList<>();
+        List<Throwable> throwables = facetArtifact.getExceptions();
+        for (Throwable throwable : throwables) {
+            ArtifactError artifactError = new DefaultArtifactError(throwable);
+            exceptions.add(artifactError);
+        }
     }
 
     public void addChild(DefaultArtifactStatusReport artifactStatusReport) {
@@ -139,17 +147,18 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
             sb.append("' ms");
             sb.append("]");
         }
-        for (Throwable exception : exceptions) {
+        for (ArtifactError artifactError : exceptions) {
             sb.append("\n");
             sb.append(indent);
             sb.append("  |-");
-            sb.append("Exception[message=");
-            sb.append(exception.getMessage());
-            if (exception.getCause() != null) {
-                sb.append(", cause=");
-                sb.append(exception.getCause().getMessage());
+            sb.append("Exception[");
+            String stackIndent = indent;
+            for (ArtifactErrorDetail artifactErrorDetail : artifactError.getDetails()) {
+                sb.append("message=");
+                sb.append(artifactErrorDetail.getMessage());
+                printStackTrace(artifactErrorDetail.getStackTrace(), sb, stackIndent);
+                stackIndent = stackIndent.concat("  ");
             }
-            printStackTrace(exception, sb, indent);
             sb.append("]");
 
         }
@@ -164,32 +173,27 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
 
     }
 
-    protected void printStackTrace(Throwable exception, StringBuilder sb, String indent) {
-        StackTraceElement[] stackTrace = exception.getStackTrace();
+    protected void printStackTrace(StackTraceElement[] stackTrace, StringBuilder sb, String indent) {
         if (stackTrace.length > 0) {
-            sb.append("\n");
-            sb.append(indent);
-            sb.append("  ");
-            sb.append(exception.getClass().getName());
-            sb.append("/");
-            sb.append(exception.getMessage());
             for (StackTraceElement stackTraceElement : stackTrace) {
-                sb.append("\n");
+                sb.append(System.lineSeparator());
                 sb.append(indent);
                 sb.append("  ");
                 sb.append("  |-");
                 sb.append(stackTraceElement.getClassName());
-                sb.append("/");
+                sb.append(".");
                 sb.append(stackTraceElement.getMethodName());
-                sb.append(":");
-                sb.append(stackTraceElement.getLineNumber());
-                sb.append("(fileName=");
-                sb.append(stackTraceElement.getFileName());
+                sb.append("(");
+                if (!stackTraceElement.isNativeMethod()) {
+                    sb.append(stackTraceElement.getFileName());
+                    sb.append(":");
+                    sb.append(stackTraceElement.getLineNumber());
+                } else {
+                    sb.append("Native Method");
+                }
                 sb.append(")");
             }
-            if (exception.getCause() != null) {
-                printStackTrace(exception.getCause(), sb, indent.concat("  "));
-            }
+            sb.append(System.lineSeparator());
         }
     }
 

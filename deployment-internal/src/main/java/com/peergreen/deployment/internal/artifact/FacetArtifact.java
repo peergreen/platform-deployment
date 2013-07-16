@@ -17,7 +17,6 @@
 package com.peergreen.deployment.internal.artifact;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +93,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
     @Override
     public <Facet> Facet removeFacet(Class<Facet> facetClass) {
-        getCurrentData().getFacetInfosMap().remove(facetClass);
+        getCurrentData().removeFacetInfo(facetClass);
         return facetClass.cast(facets.remove(facetClass));
     }
 
@@ -103,11 +102,12 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
 
         DefaultFacetInfo facetInfo = new DefaultFacetInfo();
+        facetInfo.setFacetClass(facetClass);
         facetInfo.setName(facetClass.getName());
         if (processor != null) {
             facetInfo.setProcessor(processor.getName());
         }
-        getCurrentData().getFacetInfosMap().put(facetClass, facetInfo);
+        getCurrentData().getFacetInfos().add(facetInfo);
 
         //LOGGER.info("Facet ''{0}'' added by processor ''{1}''", facet, processor.getName());
         facets.put(facetClass, facet);
@@ -123,9 +123,10 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
         DefaultFacetInfo facetInfo = new DefaultFacetInfo();
         facetInfo.setName(facetClass.getName());
+        facetInfo.setFacetClass(facetClass);
         if (processor != null) {
             facetInfo.setProcessor(processor.getName());
-            getCurrentData().getFacetInfosMap().put(facetClass, facetInfo);
+            getCurrentData().getFacetInfos().add(facetInfo);
         }
 
         // add current interface
@@ -154,12 +155,12 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
 
 
     @Override
-    public Collection<FacetInfo> getFacetInfos() {
+    public List<FacetInfo> getFacetInfos() {
         return getCurrentData().getFacetInfos();
     }
 
     @Override
-    public Collection<ProcessorInfo> getProcessors() {
+    public List<ProcessorInfo> getProcessors() {
         return getCurrentData().getProcessors();
     }
 

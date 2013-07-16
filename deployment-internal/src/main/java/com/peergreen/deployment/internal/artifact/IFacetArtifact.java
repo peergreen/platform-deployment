@@ -15,7 +15,6 @@
  */
 package com.peergreen.deployment.internal.artifact;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -61,8 +60,8 @@ public interface IFacetArtifact extends Artifact, Resource {
     List<Throwable> getExceptions();
 
     Map<Class<?>, Object> getFacets();
-    Collection<FacetInfo> getFacetInfos();
-    Collection<ProcessorInfo> getProcessors();
+    List<FacetInfo> getFacetInfos();
+    List<ProcessorInfo> getProcessors();
     List<InternalFacetBuilderInfo> getFacetBuilders();
 
 

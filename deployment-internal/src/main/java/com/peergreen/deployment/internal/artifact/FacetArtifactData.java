@@ -16,12 +16,8 @@
 package com.peergreen.deployment.internal.artifact;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
@@ -33,28 +29,34 @@ import com.peergreen.deployment.facet.FacetInfo;
 public class FacetArtifactData {
 
     private final List<Throwable> exceptions;
-    private final Map<Class<?>, FacetInfo> facetInfos;
-    private final Set<ProcessorInfo> processorInfos;
+    private final List<FacetInfo> facetInfos;
+    private final List<ProcessorInfo> processorInfos;
     private final List<InternalFacetBuilderInfo> facetBuildersInfo;
     private long totalTime = 0;
 
 
     public FacetArtifactData() {
-        this.facetInfos = new HashMap<>();
-        this.processorInfos = new HashSet<>();
+        this.facetInfos = new ArrayList<>();
+        this.processorInfos = new ArrayList<>();
         this.facetBuildersInfo = new ArrayList<>();
         this.exceptions = new ArrayList<>();
     }
 
-    protected Map<Class<?>, FacetInfo> getFacetInfosMap() {
+    protected List<FacetInfo> getFacetInfos() {
         return facetInfos;
     }
 
-    protected Collection<FacetInfo> getFacetInfos() {
-        return facetInfos.values();
+    protected void removeFacetInfo(Class<?> facetClass) {
+        Iterator<FacetInfo> iterator = facetInfos.iterator();
+        while (iterator.hasNext()) {
+            FacetInfo facetInfo = iterator.next();
+            if (facetInfo.getName().equals(facetClass.getName())) {
+                iterator.remove();
+            }
+        }
     }
 
-    protected Collection<ProcessorInfo> getProcessors() {
+    protected List<ProcessorInfo> getProcessors() {
         return processorInfos;
     }
 

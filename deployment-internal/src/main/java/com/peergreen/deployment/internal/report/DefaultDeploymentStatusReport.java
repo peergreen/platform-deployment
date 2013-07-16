@@ -18,9 +18,10 @@ package com.peergreen.deployment.internal.report;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 
+import com.peergreen.deployment.report.ArtifactError;
+import com.peergreen.deployment.report.ArtifactErrorDetail;
 import com.peergreen.deployment.report.ArtifactStatusReport;
 import com.peergreen.deployment.report.DeploymentStatusReport;
 
@@ -36,13 +37,13 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
     private long elapsedTime;
 
-    private final Collection<ArtifactStatusReport> artifactsReport;
+    private final List<ArtifactStatusReport> artifactsReport;
 
     private boolean failure = false;
 
 
     public DefaultDeploymentStatusReport() {
-        this.artifactsReport = new HashSet<>();
+        this.artifactsReport = new ArrayList<>();
     }
 
     public long getElapsedTime() {
@@ -59,7 +60,7 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
     }
 
     @Override
-    public boolean hasFailed() {
+    public boolean isFailed() {
         return failure;
     }
 
@@ -70,8 +71,8 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
 
 
     @Override
-    public Collection<ArtifactStatusReport> getArtifactStatusReports() {
-        return Collections.unmodifiableCollection(artifactsReport);
+    public List<ArtifactStatusReport> getArtifactStatusReports() {
+        return Collections.unmodifiableList(artifactsReport);
     }
 
 
@@ -137,22 +138,16 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
         return hasExceptions;
     }
 
-    protected String formatException(Collection<Throwable> exceptions) {
+    protected String formatException(Collection<ArtifactError> artifactErrors) {
         StringBuilder sb = new StringBuilder();
-        for (Throwable exception : exceptions) {
-            sb.append(exception.getMessage());
-            Throwable cause = exception.getCause();
-            String indent = "    ";
-            while(cause != null) {
-                if (cause.getMessage() != null && cause.getMessage().length() > 0) {
-                    sb.append("\n").append(indent).append("cause: ").append(cause.getMessage());
-                }
-                cause = cause.getCause();
+        for (ArtifactError artifactError : artifactErrors) {
+            String indent = "  ";
+            for (ArtifactErrorDetail artifactErrorDetail : artifactError.getDetails()) {
+                sb.append("\n").append(indent);
+                sb.append(artifactErrorDetail.getMessage());
                 indent = indent.concat("  ");
             }
         }
-
-
         return sb.toString();
     }
 

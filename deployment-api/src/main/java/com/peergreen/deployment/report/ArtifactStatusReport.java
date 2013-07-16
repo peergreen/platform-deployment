@@ -16,22 +16,21 @@
 package com.peergreen.deployment.report;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.List;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
 
 public interface ArtifactStatusReport {
 
-
-    Collection<Throwable> getExceptions();
-    Collection<ProcessorInfo> getProcessors();
+    List<ArtifactError> getExceptions();
+    List<ProcessorInfo> getProcessors();
     String name();
     URI uri();
 
-    Collection<ArtifactStatusReport> children();
+    List<ArtifactStatusReport> children();
 
-    Collection<FacetInfo> getFacets();
+    List<FacetInfo> getFacets();
 
     String toString(String indent);
 }

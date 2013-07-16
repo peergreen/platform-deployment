@@ -23,6 +23,8 @@ public class DefaultFacetInfo implements FacetInfo {
 
     private String processor;
 
+    private Class<?> facetClass;
+
     @Override
     public String getName() {
         return name;
@@ -39,6 +41,14 @@ public class DefaultFacetInfo implements FacetInfo {
 
     public void setProcessor(String processor) {
         this.processor = processor;
+    }
+
+    public Class<?> getFacetClass() {
+        return facetClass;
+    }
+
+    public void setFacetClass(Class<?> facetClass) {
+        this.facetClass = facetClass;
     }
 
 }
