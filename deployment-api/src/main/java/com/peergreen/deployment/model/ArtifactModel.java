@@ -15,6 +15,8 @@
  */
 package com.peergreen.deployment.model;
 
+import com.peergreen.deployment.Artifact;
+
 /**
  * Model of the artifacts managed by the deployment system.
  * The model is based on ArtifactModel and wires between these artifact models
@@ -36,5 +38,11 @@ public interface ArtifactModel extends Attributes {
      * @return instance of the view or null if not found
      */
     <T> T as(Class<T> clazz);
+
+    /**
+     * @return the artifact of this model.
+     */
+    Artifact getArtifact();
+
 
 }

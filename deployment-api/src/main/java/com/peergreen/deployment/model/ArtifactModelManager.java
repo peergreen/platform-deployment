@@ -25,4 +25,11 @@ public interface ArtifactModelManager {
      */
     Collection<URI> getDeployedRootURIs();
 
+    /**
+     * Gets the artifact model from the given URI.
+     * @param uri the given URI.
+     * @return the found artifact model
+     */
+    ArtifactModel getArtifactModel(URI uri);
+
 }

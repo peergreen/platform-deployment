@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.internal.model.view.DefaultArtifactModelChangesView;
 import com.peergreen.deployment.internal.model.view.DefaultArtifactModelDeploymentView;
@@ -123,12 +124,15 @@ public class DefaultArtifactModel extends AbsInternalAttributes implements Inter
 
     }
 
-
     @Override
     public IFacetArtifact getFacetArtifact() {
         return facetArtifact;
     }
 
+    @Override
+    public Artifact getArtifact() {
+        return facetArtifact;
+    }
 
     /**
      * Gets the wires using the given scope.
