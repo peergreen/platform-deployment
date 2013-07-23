@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.peergreen.deployment.facet.endpoint.Endpoint;
 import com.peergreen.deployment.report.ArtifactError;
 import com.peergreen.deployment.report.ArtifactErrorDetail;
 import com.peergreen.deployment.report.ArtifactStatusReport;
@@ -111,7 +112,11 @@ public class DefaultDeploymentStatusReport implements DeploymentStatusReport {
             } else {
                 sb.append(artifactStatusReport.uri().toString()).append(":\t").append("OK");
             }
-
+        }
+        // Add endpoints
+        List<Endpoint> endpoints = artifactStatusReport.getEndpoints();
+        for (Endpoint endpoint : endpoints) {
+            sb.append("\t").append(endpoint.getURI()).append("\t").append(endpoint.getCategories());
         }
 
 

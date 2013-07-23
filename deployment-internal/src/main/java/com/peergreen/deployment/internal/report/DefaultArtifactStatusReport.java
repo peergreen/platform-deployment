@@ -17,10 +17,13 @@ package com.peergreen.deployment.internal.report;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
+import com.peergreen.deployment.facet.endpoint.Endpoint;
+import com.peergreen.deployment.facet.endpoint.Endpoints;
 import com.peergreen.deployment.internal.artifact.IFacetArtifact;
 import com.peergreen.deployment.report.ArtifactError;
 import com.peergreen.deployment.report.ArtifactErrorDetail;
@@ -78,6 +81,9 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
         return facetInfos;
     }
 
+    private final List<Endpoint> endpoints;
+
+
     public DefaultArtifactStatusReport(IFacetArtifact facetArtifact) {
         this.name = facetArtifact.name();
         this.uri = facetArtifact.uri();
@@ -85,6 +91,13 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
         this.artifactsReport = new ArrayList<>();
         this.processors = facetArtifact.getProcessors();
         this.totalTime = facetArtifact.getTotalTime();
+
+        Endpoints endpointService = facetArtifact.as(Endpoints.class);
+        if (endpointService != null) {
+            this.endpoints = endpointService.list();
+        } else {
+            this.endpoints = Collections.emptyList();
+        }
 
         // convert exception
         this.exceptions = new ArrayList<>();
@@ -132,6 +145,16 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
             sb.append(facetInfo.getName());
             sb.append(", addedBy=");
             sb.append(facetInfo.getProcessor());
+            sb.append("]");
+        }
+        for (Endpoint endpoint : endpoints) {
+            sb.append("\n");
+            sb.append(indent);
+            sb.append("  |-");
+            sb.append("Endpoint[uri=");
+            sb.append(endpoint.getURI());
+            sb.append(" ");
+            sb.append(endpoint.getCategories());
             sb.append("]");
         }
         for (ProcessorInfo processorInfo : processors) {
@@ -195,6 +218,11 @@ public class DefaultArtifactStatusReport implements ArtifactStatusReport {
             }
             sb.append(System.lineSeparator());
         }
+    }
+
+    @Override
+    public List<Endpoint> getEndpoints() {
+        return endpoints;
     }
 
 

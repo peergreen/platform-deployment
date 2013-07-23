@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
+import com.peergreen.deployment.facet.endpoint.Endpoint;
 
 public interface ArtifactStatusReport {
 
@@ -33,4 +34,7 @@ public interface ArtifactStatusReport {
     List<FacetInfo> getFacets();
 
     String toString(String indent);
+
+    List<Endpoint> getEndpoints();
+
 }

@@ -28,6 +28,8 @@ import org.ow2.util.log.LogFactory;
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.ProcessorInfo;
 import com.peergreen.deployment.facet.FacetInfo;
+import com.peergreen.deployment.facet.endpoint.Endpoints;
+import com.peergreen.deployment.internal.facet.endpoint.DefaultEndpoints;
 import com.peergreen.deployment.internal.processor.DefaultProcessorInfo;
 import com.peergreen.deployment.internal.processor.NamedProcessor;
 import com.peergreen.deployment.internal.resource.ProviderResource;
@@ -66,6 +68,7 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         this.uri = wrappedArtifact.uri();
         this.dataPerDeployment = new Stack<>();
         this.facets = new HashMap<>();
+        facets.put(Endpoints.class, new DefaultEndpoints());
         // be ready
         newDeploymentMode();
     }
