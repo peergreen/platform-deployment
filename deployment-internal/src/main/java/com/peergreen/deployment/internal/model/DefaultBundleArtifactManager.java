@@ -11,6 +11,9 @@ package com.peergreen.deployment.internal.model;
 
 import java.util.Collection;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.osgi.framework.Bundle;
 
@@ -21,6 +24,9 @@ import com.peergreen.deployment.model.BundleArtifactManager;
  * Adds operations that are specific to the bundles
  * @author Florent Benoit
  */
+@Component
+@Provides
+@Instantiate
 public class DefaultBundleArtifactManager implements BundleArtifactManager {
 
     private final InternalArtifactModelManager internalArtifactModelManager;
