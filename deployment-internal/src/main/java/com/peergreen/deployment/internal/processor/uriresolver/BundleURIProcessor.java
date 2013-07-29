@@ -15,9 +15,6 @@
  */
 package com.peergreen.deployment.internal.processor.uriresolver;
 
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
-
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.FacetCapabilityAdapter;
@@ -31,8 +28,8 @@ import com.peergreen.deployment.internal.facet.archive.adapter.ArchiveFacetAdapt
 import com.peergreen.deployment.internal.facet.content.URIContentImpl;
 import com.peergreen.deployment.internal.facet.content.adapter.ContentFacetAdapter;
 import com.peergreen.deployment.processor.Discovery;
-import com.peergreen.deployment.processor.Uri;
 import com.peergreen.deployment.processor.Processor;
+import com.peergreen.deployment.processor.Uri;
 
 /**
  * bundle:// URI processor
