@@ -15,12 +15,12 @@ import com.peergreen.deployment.processor.Processor;
 import com.peergreen.deployment.processor.Uri;
 
 /**
- * bundle:// URI processor
+ * bundleresource:// URI processor
  * @author Florent Benoit
  */
 @Processor
-@Uri("bundle")
+@Uri("bundleresource")
 @Discovery(DiscoveryPhasesLifecycle.URI_RESOLVER)
-public class BundleURIProcessor extends AbstractURIProcessor {
+public class BundleResourceURIProcessor extends AbstractURIProcessor {
 
 }
