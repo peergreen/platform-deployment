@@ -15,9 +15,6 @@
  */
 package com.peergreen.deployment.internal.facet.osgibundle.processor;
 
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
-
 import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
@@ -28,8 +25,8 @@ import com.peergreen.deployment.internal.facet.osgibundle.OSGiBundleImpl;
 import com.peergreen.deployment.processor.Attribute;
 import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Manifest;
-import com.peergreen.deployment.processor.Uri;
 import com.peergreen.deployment.processor.Processor;
+import com.peergreen.deployment.processor.Uri;
 
 /**
  * XML Content processor : Parse XML files to detect the namespace and provides a facet
