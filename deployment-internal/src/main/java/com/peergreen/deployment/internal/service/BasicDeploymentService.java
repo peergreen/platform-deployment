@@ -159,10 +159,11 @@ public class BasicDeploymentService implements DeploymentService {
             for (ArtifactProcessRequest artifactProcessRequest : artifactProcessRequests) {
                 Artifact artifact = artifactProcessRequest.getArtifact();
                 DeploymentMode deploymentMode = artifactProcessRequest.getDeploymentMode();
-                for (DeploymentServiceTracker deploymentServiceTracker : deploymentServiceTrackers) {
-                    deploymentServiceTracker.onChange(artifact, deploymentMode);
-                }
 
+                // Notify trackers
+                for (DeploymentServiceTracker deploymentServiceTracker : deploymentServiceTrackers) {
+                    deploymentServiceTracker.beforeProcessing(artifact, deploymentMode);
+                }
 
                 if (artifactProcessRequest.getDeploymentMode() == DeploymentMode.DEPLOY) {
                     deployRequests.add(artifactProcessRequest);
@@ -200,6 +201,13 @@ public class BasicDeploymentService implements DeploymentService {
                 }
                 // add children that have been created by our node
                 addCreatedNode(deploymentStatusReport, artifactStatusReport, artifactModel);
+
+                // Notify trackers
+                for (DeploymentServiceTracker deploymentServiceTracker : deploymentServiceTrackers) {
+                    deploymentServiceTracker.afterProcessing(artifactModel, artifactProcessRequest.getDeploymentMode(), artifactStatusReport);
+                }
+
+
             }
         }
 

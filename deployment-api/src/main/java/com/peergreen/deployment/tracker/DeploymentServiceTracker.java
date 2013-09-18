@@ -17,6 +17,8 @@ package com.peergreen.deployment.tracker;
 
 import com.peergreen.deployment.Artifact;
 import com.peergreen.deployment.DeploymentMode;
+import com.peergreen.deployment.model.ArtifactModel;
+import com.peergreen.deployment.report.ArtifactStatusReport;
 
 /**
  * Notification by the deployment service that an artifact is being handled or untracked.
@@ -24,5 +26,19 @@ import com.peergreen.deployment.DeploymentMode;
  */
 public interface DeploymentServiceTracker {
 
-    void onChange(Artifact artifact, DeploymentMode deploymentMode);
+    /**
+     * Notify the tracker that a new artifact will be processed
+     * @param artifact the artifact that will be processed
+     * @param deploymentMode the deployment mode
+     */
+    void beforeProcessing(Artifact artifact, DeploymentMode deploymentMode);
+
+    /**
+     * Notify the tracker that a new artifact has been processed
+     * @param artifactModel the artifact model corresponding to the artifact that has been processed
+     * @param deploymentMode the deployment mode
+     * @param artifactStatusReport the report for the given artifact
+     */
+    void afterProcessing(ArtifactModel artifactModel, DeploymentMode deploymentMode, ArtifactStatusReport artifactStatusReport);
+
 }
