@@ -68,7 +68,6 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
         this.uri = wrappedArtifact.uri();
         this.dataPerDeployment = new Stack<>();
         this.facets = new HashMap<>();
-        facets.put(Endpoints.class, new DefaultEndpoints());
         // be ready
         newDeploymentMode();
     }
@@ -197,6 +196,8 @@ public class FacetArtifact extends ProviderResource implements IFacetArtifact {
      */
     @Override
     public void newDeploymentMode() {
+        // Init endpoints
+        facets.put(Endpoints.class, new DefaultEndpoints());
         dataPerDeployment.push(new FacetArtifactData());
     }
 
