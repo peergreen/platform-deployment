@@ -379,7 +379,7 @@ public class DeploymentServiceMonitor implements Runnable {
     }
 
 
-    @Bind(filter = "(group.name=peergreen)")
+    @Bind(proxy=false, filter = "(group.name=peergreen)")
     public void bindThreadGroup(ThreadGroup threadGroup) {
         this.threadGroup = threadGroup;
     }

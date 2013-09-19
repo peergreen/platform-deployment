@@ -353,7 +353,7 @@ public class BasicDeploymentService implements DeploymentService {
         this.artifactModelManager = null;
     }
 
-    @Bind(filter = "(group.name=peergreen)")
+    @Bind(proxy=false, filter = "(group.name=peergreen)")
     public void bindThreadGroup(ThreadGroup threadGroup) {
         this.threadGroup = threadGroup;
     }
